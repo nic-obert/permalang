@@ -4,10 +4,12 @@
 
 #include "token.cpp"
 #include "priorities.hh"
+#include "operators/operators.hh"
 
 
 #define isDigit(x) (47 < x && x < 58)
 #define toDigit(x) (x - 48)
+#define AddToken tokens->add(token); token = nullptr; type = NONE;
 
 
 TokenList* tokenize(std::string script) 
@@ -18,7 +20,6 @@ TokenList* tokenize(std::string script)
     TokenType type = NONE;
 
     char c;
-    uint i = 0;
     for (uint i = 0; (c = script[i]) != 0; i++)
     {
 
@@ -44,9 +45,7 @@ TokenList* tokenize(std::string script)
                 }
                 
                 // char is not a digit
-                tokens->add(token);
-                token = nullptr;
-                type = NONE;                
+                AddToken;               
 
                 break;
             
@@ -61,9 +60,7 @@ TokenList* tokenize(std::string script)
                 // terminate string
                 if (c == '"')
                 {
-                    type = NONE;
-                    tokens->add(token);
-                    token = nullptr;
+                    AddToken;
                     continue;
                 }
 
@@ -72,14 +69,83 @@ TokenList* tokenize(std::string script)
                 continue;
             
 
-            case ARITHMETIC_OPERATOR:
+            case ARITHMETIC_OP:
+
+                switch (token->value)
+                {
+                case ArithmeticalOperators::SUM:
+                    if (c == '=')
+                    {
+                        token = new Token(ASSIGNMENT_OP, ASSIGNMENT_P, AssignmentOperators::ADD);
+                        AddToken;
+                        continue;
+                    } else if (c == '+')
+                    {
+                        token = new Token(ARITHMETIC_OP, INCREMEN_P, ArithmeticalOperators::INCREMENT);
+                        AddToken;
+                        continue;
+                    }
+                    break;
+                
+                case ArithmeticalOperators::SUBTRACTION:
+                    if (c == '=')
+                    {
+                        token = new Token(ASSIGNMENT_OP, ASSIGNMENT_P, AssignmentOperators::SUBTRACT);
+                        AddToken;
+                        continue;
+                    } else if (c == '-')
+                    {
+                        token = new Token(ARITHMETIC_OP, DECREMENT_P, ArithmeticalOperators::DECREMENT);
+                        AddToken;
+                        continue;
+                    }
+                    break;
+                
+                case ArithmeticalOperators::MULTIPLICATION:
+                    if (c == '=')
+                    {
+                        token = new Token(ASSIGNMENT_OP, ASSIGNMENT_P, AssignmentOperators::MULTIPLY);
+                        AddToken;
+                        continue;
+                    }
+                    break;
+
+                case ArithmeticalOperators::DIVISION:
+                    if (c == '=')
+                    {
+                        token = new Token(ASSIGNMENT_OP, ASSIGNMENT_P, AssignmentOperators::DIVIDE);
+                        AddToken;
+                        continue;
+                    }
+                    break;
+
+                case ArithmeticalOperators::POWER:
+                    if (c == '=')
+                    {
+                        token = new Token(ASSIGNMENT_OP, ASSIGNMENT_P, AssignmentOperators::ELEVATE);
+                        AddToken;
+                        continue;
+                    }
+                    break;
+                
+                }
 
                 // no compound operator
 
-                tokens->add(token);
-                token = nullptr;
-                type = NONE;
+                AddToken;
+                break;
+            
 
+            case ASSIGNMENT_OP:
+
+                if (c == '=')
+                {
+                    token = new Token(LOGICAL_OP, EQUALITY_P, LogicalOperators::EQUALITY);
+                    AddToken;
+                    continue;
+                }
+                
+                AddToken;
                 break;
 
         }
@@ -103,26 +169,40 @@ TokenList* tokenize(std::string script)
 
         if (c == '+')
         {
-            type = ARITHMETIC_OPERATOR;
-            token = new Token(ARITHMETIC_OPERATOR, SUM_P, '+');
+            type = ARITHMETIC_OP;
+            token = new Token(ARITHMETIC_OP, SUM_P, ArithmeticalOperators::SUM);
             continue;
         }
         if (c == '-')
         {
-            type = ARITHMETIC_OPERATOR;
-            token = new Token(ARITHMETIC_OPERATOR, SUBTRACTION_P, '-');
+            type = ARITHMETIC_OP;
+            token = new Token(ARITHMETIC_OP, SUBTRACTION_P, ArithmeticalOperators::SUBTRACTION);
             continue;
         }
         if (c == '*')
         {
-            type = ARITHMETIC_OPERATOR;
-            token = new Token(ARITHMETIC_OPERATOR, MULTIPLICATION_P, '*');
+            type = ARITHMETIC_OP;
+            token = new Token(ARITHMETIC_OP, MULTIPLICATION_P, ArithmeticalOperators::MULTIPLICATION);
             continue;
         }
         if (c == '/')
         {
-            type = ARITHMETIC_OPERATOR;
-            token = new Token(ARITHMETIC_OPERATOR, DIVISION_P, '/');
+            type = ARITHMETIC_OP;
+            token = new Token(ARITHMETIC_OP, DIVISION_P, ArithmeticalOperators::DIVISION);
+            continue;
+        }
+        if (c == '^')
+        {
+            type = ARITHMETIC_OP;
+            token = new Token(ARITHMETIC_OP, DIVISION_P, ArithmeticalOperators::POWER);
+            continue;
+        }
+
+
+        if (c == '=')
+        {
+            type = ASSIGNMENT_OP;
+            token = new Token(ASSIGNMENT_OP, ASSIGNMENT_P, AssignmentOperators::ASSIGNMENT);
             continue;
         }
 

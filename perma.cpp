@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 #include "tokenizer.cpp"
 #include "token.cpp"
@@ -16,12 +17,12 @@ std::string loadFile(const char* path)
         exit(EXIT_FAILURE);
     }
 
-    std::string buffer;
-    while (getline(file, buffer))
+    std::stringstream buffer;
+    buffer << file.rdbuf();
 
     file.close();
 
-    return buffer;
+    return buffer.str();
 }
 
 

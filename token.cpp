@@ -2,13 +2,18 @@
 
 #include <iostream>
 
+#include "operators/operators.hh"
+
 
 typedef enum TokenType {
     NONE,
     TEXT,
     NUMBER,
     STRING,
-    ARITHMETIC_OPERATOR
+    ARITHMETIC_OP,
+    ASSIGNMENT_OP,
+    LOGICAL_OP
+
 } TokenType;
 
 
@@ -28,8 +33,14 @@ const char* tokenTypeName(TokenType type)
     case STRING:
         return "STRING";
     
-    case ARITHMETIC_OPERATOR:
+    case ARITHMETIC_OP:
         return "ARITHMETIC OPERATOR";
+    
+    case ASSIGNMENT_OP:
+        return "ASSIGNMENT OPERATOR";
+
+    case LOGICAL_OP:
+        return "LOGICAL OPERATOR";
     
     default:
         return "UNDEFINED TYPE";
@@ -59,15 +70,23 @@ public:
         switch (type)
         {
         case STRING:
-            std::cout << "<" << tokenTypeName(type) << ": " << *(std::string*)value << "(" << priority << ")\n";
+            std::cout << "<" << tokenTypeName(type) << ": " << *(std::string*)value << " (" << priority << ")>\n";
             break;
         
-        case ARITHMETIC_OPERATOR:
-            std::cout << "<" << tokenTypeName(type) << ": " << (char)value << "(" << priority << ")\n";
+        case ARITHMETIC_OP:
+            std::cout << "<" << tokenTypeName(type) << ": " << arithmeticalOperatorName((ArithmeticalOperators) value) << " (" << priority << ")>\n";
+            break;
+        
+        case ASSIGNMENT_OP:
+            std::cout << "<" << tokenTypeName(type) << ": " << assignmentOperatorName((AssignmentOperators) value) << " (" << priority << ")>\n";
+            break;
+
+        case LOGICAL_OP:
+            std::cout << "<" << tokenTypeName(type) << ": " << logicalOperatorName((LogicalOperators) value) << " (" << priority << ")>\n";
             break;
 
         default:
-            std::cout << "<" << tokenTypeName(type) << ": " << value << "(" << priority << ")\n";
+            std::cout << "<" << tokenTypeName(type) << ": " << value << " (" << priority << ")>\n";
             break;
         }
     }
@@ -113,7 +132,7 @@ public:
     void print() const
     {
         if (first == nullptr)
-            std::cout << "Empty token line";
+            std::cout << "Empty token line" << std::endl;
 
         for (Token* token = first; token != nullptr; token = token->next)
         {
