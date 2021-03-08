@@ -1,6 +1,16 @@
 #pragma once
 
 #define LITERAL_P 0
+#define GOTO_P 1
+#define GOBACK_P 1
+#define RETURN_P 1
+#define BREAK_P 1
+#define CONTINUE_P 1
+#define IF_P 9
+#define ELSE_P 9
+#define WHILE_P 10
+#define FOR_P 10
+#define DECLARATION_P 1
 #define ASSIGNMENT_P 1
 #define AND_P 1
 #define OR_P 1

@@ -5,11 +5,19 @@
 #include "token.cpp"
 #include "priorities.hh"
 #include "operators/operators.hh"
+#include "keywords.cpp"
 
 
 #define isDigit(x) (47 < x && x < 58)
 #define toDigit(x) (x - 48)
 #define AddToken tokens->add(token); token = nullptr; type = NONE;
+#define isText(x) ((64 < x && x < 91) || (x == '_') || (96 < x && x < 123))
+
+
+using namespace Tokens;
+using namespace operators::arithmetical;
+using namespace operators::logical;
+using namespace operators::assignment;
 
 
 TokenList* tokenize(std::string script) 
@@ -25,7 +33,7 @@ TokenList* tokenize(std::string script)
 
         switch (type)
         {
-            case NUMBER:
+            case NUMBER: {
                 if (isDigit(c))
                 {
                     if (token == nullptr)
@@ -48,14 +56,36 @@ TokenList* tokenize(std::string script)
                 AddToken;               
 
                 break;
+            }
             
 
-            case TEXT:
+            case TEXT: {
+
+                if (isText(c) || isDigit(c))
+                {
+                    // add character to string
+                    *((std::string*) token->value) += c;
+                    continue;
+                }
+
+                // end of text token
+                // check if text is a keyword
+                using namespace Keywords;
+                Keywords::Keywords word = isKeyword(*(std::string*) token->value);
+                if (word == __NOKEY)
+                {
+                    AddToken;
+                } else {
+                    // if word is a keyword instead
+                    token = new Token(KEYWORD, keywordPriority(word), word);
+                    AddToken;
+                }
 
                 break;
+            }
 
 
-            case STRING:
+            case STRING: {
                 
                 // terminate string
                 if (c == '"')
@@ -67,9 +97,10 @@ TokenList* tokenize(std::string script)
                 // add character to string
                 *((std::string*) token->value) += c;
                 continue;
-            
+            }
 
-            case ARITHMETIC_OP:
+
+            case ARITHMETIC_OP: {
 
                 switch (token->value)
                 {
@@ -134,10 +165,11 @@ TokenList* tokenize(std::string script)
 
                 AddToken;
                 break;
+            }
             
 
-            case ASSIGNMENT_OP:
-
+            case ASSIGNMENT_OP: {
+                
                 if (c == '=')
                 {
                     token = new Token(LOGICAL_OP, EQUALITY_P, LogicalOperators::EQUALITY);
@@ -147,6 +179,7 @@ TokenList* tokenize(std::string script)
                 
                 AddToken;
                 break;
+            }
 
         }
 
@@ -162,8 +195,8 @@ TokenList* tokenize(std::string script)
 
         if (c == '"')
         {
-            type = STRING;
-            token = new Token(STRING, LITERAL_P, (unsigned long) (new std::string("")));
+            type = TokenType::STRING;
+            token = new Token(TokenType::STRING, LITERAL_P, (ulong) (new std::string("")));
             continue;
         }
 
@@ -203,6 +236,14 @@ TokenList* tokenize(std::string script)
         {
             type = ASSIGNMENT_OP;
             token = new Token(ASSIGNMENT_OP, ASSIGNMENT_P, AssignmentOperators::ASSIGNMENT);
+            continue;
+        }
+
+
+        if (isText(c))
+        {
+            type = TEXT;
+            token = new Token(TEXT, LITERAL_P, (ulong) (new std::string {c}));
             continue;
         }
 

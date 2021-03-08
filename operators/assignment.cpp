@@ -1,37 +1,45 @@
 #pragma once
 
-typedef enum AssignmentOperators
+namespace operators
 {
-    ASSIGNMENT,
-    ADD,
-    SUBTRACT,
-    MULTIPLY,
-    DIVIDE,
-    ELEVATE
-} AssignmentOperators;
-
-
-const char* assignmentOperatorName(AssignmentOperators op)
-{
-    switch (op)
+    namespace assignment
     {
-    case ASSIGNMENT:
-        return "=";
-    
-    case ADD:
-        return "+=";
+        typedef enum AssignmentOperators
+        {
+            ASSIGNMENT,
+            ADD,
+            SUBTRACT,
+            MULTIPLY,
+            DIVIDE,
+            ELEVATE
+        } AssignmentOperators;
 
-    case SUBTRACT:
-        return "-=";
 
-    case MULTIPLY:
-        return "*=";
+        const char* assignmentOperatorName(AssignmentOperators op)
+        {
+            switch (op)
+            {
+            case ASSIGNMENT:
+                return "=";
+            
+            case ADD:
+                return "+=";
 
-    case DIVIDE:
-        return "/=";
-    
-    case ELEVATE:
-        return "^=";
-    
-    }
-}
+            case SUBTRACT:
+                return "-=";
+
+            case MULTIPLY:
+                return "*=";
+
+            case DIVIDE:
+                return "/=";
+            
+            case ELEVATE:
+                return "^=";
+            
+            }
+        }
+
+    };
+};
+

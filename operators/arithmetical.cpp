@@ -1,41 +1,48 @@
 #pragma once
 
-typedef enum ArithmeticalOperators
+namespace operators 
 {
-    SUM,
-    SUBTRACTION,
-    MULTIPLICATION,
-    DIVISION,
-    POWER,
-    INCREMENT,
-    DECREMENT
-} ArithmeticalOperators;
-
-
-const char* arithmeticalOperatorName(ArithmeticalOperators op)
-{
-    switch (op)
+    namespace arithmetical
     {
-    case SUM:
-        return "+";
+        typedef enum ArithmeticalOperators
+        {
+            SUM,
+            SUBTRACTION,
+            MULTIPLICATION,
+            DIVISION,
+            POWER,
+            INCREMENT,
+            DECREMENT
+        } ArithmeticalOperators;
 
-    case SUBTRACTION:
-        return "-";
-    
-    case MULTIPLICATION:
-        return "*";
 
-    case DIVISION:
-        return "/";
+        const char* arithmeticalOperatorName(ArithmeticalOperators op)
+        {
+            switch (op)
+            {
+            case SUM:
+                return "+";
 
-    case POWER:
-        return "^";
-    
-    case INCREMENT:
-        return "++";
+            case SUBTRACTION:
+                return "-";
+            
+            case MULTIPLICATION:
+                return "*";
 
-    case DECREMENT:
-        return "--";
-    
-    }
-}
+            case DIVISION:
+                return "/";
+
+            case POWER:
+                return "^";
+            
+            case INCREMENT:
+                return "++";
+
+            case DECREMENT:
+                return "--";
+            
+            }
+        }
+
+    };
+};
