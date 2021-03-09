@@ -7,15 +7,16 @@
 
 namespace Tokens
 {
-    typedef enum TokenType {
-    NONE,
-    TEXT,
-    NUMBER,
-    STRING,
-    ARITHMETIC_OP,
-    ASSIGNMENT_OP,
-    LOGICAL_OP,
-    KEYWORD
+    typedef enum TokenType 
+    {
+        NONE,
+        TEXT,
+        NUMBER,
+        STRING,
+        ARITHMETIC_OP,
+        ASSIGNMENT_OP,
+        LOGICAL_OP,
+        KEYWORD
 
     } TokenType;
 
@@ -144,6 +145,24 @@ namespace Tokens
             token->next->prev = token->prev;
 
             delete token;
+        }
+
+
+        Token* getHighestPriority() const 
+        {
+            if (first == nullptr)
+                return nullptr;
+
+            Token* highest = first;
+            for (Token* token = first; token != nullptr; token = token->next)
+            {
+                if (token->priority > highest->priority)
+                {
+                    highest = token;
+                }
+            }
+
+            return highest;
         }
 
 
