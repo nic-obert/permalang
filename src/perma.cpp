@@ -3,8 +3,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "tokenizer.cpp"
-#include "token.cpp"
+#include "token.hh"
 
 
 std::string loadFile(const char* path)
@@ -28,6 +27,7 @@ std::string loadFile(const char* path)
 
 int main(int argc, const char** argv) 
 {
+    using namespace Tokens;
 
     if (argc < 2) {
         std::cerr << "No file specified" << std::endl;

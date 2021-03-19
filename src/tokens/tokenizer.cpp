@@ -1,27 +1,19 @@
-#pragma once
 
-#include <string>
-
-#include "token.cpp"
-#include "priorities.hh"
-#include "operators/operators.hh"
-#include "keywords.cpp"
+#include "token.hh"
+#include "operators.hh"
+#include "keywords.hh"
 
 
-#define isDigit(x) (47 < x && x < 58)
-#define toDigit(x) (x - 48)
 #define AddToken tokens->add(token); token = nullptr; type = NONE;
-#define isText(x) ((64 < x && x < 91) || (x == '_') || (96 < x && x < 123))
 
 
-using namespace Tokens;
-using namespace operators::arithmetical;
-using namespace operators::logical;
-using namespace operators::assignment;
-
-
-TokenList* tokenize(std::string script) 
+Tokens::TokenList* Tokens::tokenize(std::string script) 
 {
+    using namespace Tokens;
+    using namespace operators::arithmetical;
+    using namespace operators::logical;
+    using namespace operators::assignment;
+
     TokenList* tokens = new TokenList();
 
     Token* token;
