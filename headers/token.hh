@@ -22,8 +22,8 @@ namespace Tokens
         ARITHMETIC_OP,
         ASSIGNMENT_OP,
         LOGICAL_OP,
-        KEYWORD
-
+        KEYWORD,
+        BOOL
     } TokenType;
 
 

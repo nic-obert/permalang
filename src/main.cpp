@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "token.hh"
+#include "syntax_tree.hh"
 
 
 std::string loadFile(const char* path)
@@ -28,6 +29,7 @@ std::string loadFile(const char* path)
 int main(int argc, const char** argv) 
 {
     using namespace Tokens;
+    using namespace syntax_tree;
 
     if (argc < 2) {
         std::cerr << "No file specified" << std::endl;
@@ -40,6 +42,11 @@ int main(int argc, const char** argv)
     TokenList* tokens = tokenize(file);
 
     tokens->print();
+
+    SyntaxTree syntaxTree = SyntaxTree(tokens);
+    syntaxTree.parse();
+
+    syntaxTree.print();
 
 }
 

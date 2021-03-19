@@ -20,36 +20,6 @@ SyntaxNode::SyntaxNode(Tokens::Token* token)
 }
 
 
-void SyntaxNode::satisfy()
-{
-    using namespace Tokens;
-
-    switch (token->type)
-    {
-    case ARITHMETIC_OP: {
-
-        using namespace operators::arithmetical;
-
-        switch (token->value)
-        {
-        case SUM:
-            
-            
-
-            break;
-        
-        default:
-            break;
-        }
-        break;
-    }
-        
-
-    }
-
-}
-
-
 void binarySatisfy(SyntaxNode* node, Tokens::TokenType leftType, Tokens::TokenType rightType)
 {
     using namespace Tokens;
@@ -109,8 +79,89 @@ void unarySatisfy(SyntaxNode* node, Tokens::TokenType type, char side)
 }
 
 
+void SyntaxNode::satisfy()
+{
+    using namespace Tokens;
+
+    switch (token->type)
+    {
+    case ARITHMETIC_OP: {
+
+        using namespace operators::arithmetical;
+
+        switch (token->value)
+        {
+        case POWER:
+        case DIVISION:
+        case MULTIPLICATION:
+        case SUBTRACTION:
+        case SUM:
+            binarySatisfy(this, NUMBER, NUMBER);
+            break;
+        
+        case INCREMENT:
+        case DECREMENT:
+            unarySatisfy(this, NUMBER, LEFT);
+            break;
+        
+        }
+        break;
+    }
+    
+    case LOGICAL_OP: {
+
+        using namespace operators::logical;
+
+        switch (token->value)
+        {
+        case EQUALITY:
+        case INEQUALITY:
+        case AND:
+        case OR:
+        case GREATER_THAN:
+        case GREATER_EQUAL:
+        case LESS_THAN:
+        case LESS_EQUAL:
+            binarySatisfy(this, BOOL, BOOL);
+            break;
+
+        case NOT:
+            unarySatisfy(this, BOOL, RIGHT);
+            break;
+        }
+
+        break;
+    }
+
+    case ASSIGNMENT_OP: {
+
+        using namespace operators::assignment;
+
+        switch (token->value)
+        {
+        case ASSIGNMENT:
+        case ADD:
+        case SUBTRACT:
+        case DIVIDE:
+        case ELEVATE:
+        case MULTIPLY:
+            binarySatisfy(this, TEXT, NUMBER);
+            break;
+        
+        default:
+            break;
+        }
+
+        break;
+    }
+
+    }
+
+}
+
+
 void SyntaxNode::print() const
 {
-
+    token->print();
 }
 

@@ -46,6 +46,9 @@ namespace syntax_tree
 
         void parse();
 
+
+        void print() const;
+
     };
 
 

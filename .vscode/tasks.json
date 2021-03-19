@@ -4,12 +4,9 @@
         {
             "type": "cppbuild",
             "label": "Build",
-            "command": "/usr/bin/g++",
+            "command": "/usr/bin/make",
             "args": [
-                "-g",
-                "${workspaceFolder}/perma.cpp",
-                "-o",
-                "${workspaceFolder}/perma"
+               "builddb" 
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

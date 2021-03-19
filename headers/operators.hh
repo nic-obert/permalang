@@ -40,7 +40,8 @@ namespace operators::logical
         GREATER_THAN,
         LESS_THAN,
         GREATER_EQUAL,
-        LESS_EQUAL
+        LESS_EQUAL,
+        NOT
     } LogicalOperator;
 
 

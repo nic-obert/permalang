@@ -2,6 +2,8 @@
 #include "token.hh"
 #include "syntax_tree.hh"
 
+#include <iostream>
+
 
 using namespace syntax_tree;
 
@@ -76,5 +78,16 @@ void SyntaxTree::parse()
         root->satisfy();
         
     }
+}
+
+
+
+void SyntaxTree::print() const
+{
+    for (SyntaxNode* node = root; node != nullptr; node = node->next)
+    {
+        node->print();
+    }
+
 }
 
