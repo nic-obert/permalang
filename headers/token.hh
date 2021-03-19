@@ -2,6 +2,8 @@
 
 #include <string>
 
+#include "utils.hh"
+
 
 #define isDigit(x) (47 < x && x < 58)
 #define toDigit(x) (x - 48)
@@ -31,17 +33,15 @@ namespace Tokens
 
         TokenType type;
         int priority;
-        unsigned long value;
+        Value value;
 
         Token* prev = nullptr;
         Token* next = nullptr;
 
-        Token(TokenType type, int priority, unsigned long value);
+        Token(TokenType type, int priority, Value value);
 
         void print() const;
 
-
-        void satisfy();
 
     };
 
@@ -63,9 +63,6 @@ namespace Tokens
 
 
         void remove(Token* token);
-
-
-        Token* getHighestPriority() const;
 
 
         void print() const;

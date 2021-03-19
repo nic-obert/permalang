@@ -1,13 +1,8 @@
 
 #include "token.hh"
 #include "operators.hh"
+#include "syntax_tree.hh"
 
-
-
-void operators::arithmetical::satisfy(Tokens::Token* token)
-{
-
-}
 
 
 const char* operators::arithmetical::arithmeticalOperatorName(ArithmeticalOperators op)

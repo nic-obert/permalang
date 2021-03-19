@@ -83,21 +83,6 @@ void Tokens::Token::print() const
 }
 
 
-void Tokens::Token::satisfy()
-{
-    using namespace operators;
-
-    switch (type)
-    {
-        case ARITHMETIC_OP:
-            arithmetical::satisfy(this);
-        
-        
-    }
-}
-
-
-
 
 
 Tokens::TokenList::TokenList() {};
@@ -123,24 +108,6 @@ void Tokens::TokenList::remove(Token* token)
     token->next->prev = token->prev;
 
     delete token;
-}
-
-
-Tokens::Token* Tokens::TokenList::getHighestPriority() const 
-{
-    if (first == nullptr)
-        return nullptr;
-
-    Token* highest = first;
-    for (Token* token = first; token != nullptr; token = token->next)
-    {
-        if (token->priority > highest->priority)
-        {
-            highest = token;
-        }
-    }
-
-    return highest;
 }
 
 

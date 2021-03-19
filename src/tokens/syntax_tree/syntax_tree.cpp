@@ -3,25 +3,78 @@
 #include "syntax_tree.hh"
 
 
-syntax_tree::SyntaxTree::SyntaxTree(Tokens::TokenList* tokens)
-: tokens(tokens)
+using namespace syntax_tree;
+
+
+SyntaxTree::SyntaxTree(Tokens::TokenList* tokens)
 {
+    using namespace Tokens;
+
+    if (tokens->first == nullptr)
+    {
+        // TODO implement errors
+        return;
+    }
+
+    root = new SyntaxNode(tokens->first);
+    SyntaxNode* node = root;
+
+    for (Token* tok = tokens->first->next; tok != nullptr; tok = tok->next)
+    {
+        node->next = new SyntaxNode(tok);
+        node = node->next;   
+    }
 
 }
 
 
-void syntax_tree::SyntaxTree::parse()
+SyntaxNode* SyntaxTree::getHighestPriority() 
 {
-    while (true)
+    using namespace Tokens;
+
+    if (root == nullptr)
     {
-        Tokens::Token* token = tokens->getHighestPriority();
-        if (token->priority == 0)
+        return nullptr;
+    }
+
+    SyntaxNode* highest = root;
+    for (SyntaxNode* node = root; node != nullptr; node = node->next)
+    {
+        if (node->token->priority > highest->token->priority)
+        {
+            highest = node;
+        }
+    }
+
+    return highest;
+}
+
+
+void SyntaxTree::parse()
+{
+
+    if (root != nullptr)
+    {
+        // TODO throw error
+        return;
+    }
+
+    while (true)
+    {   
+        
+        while (root->prev != nullptr)
+        {
+            root = root->prev;
+        }
+
+        if (root->next == nullptr)
         {
             break;
         }
 
-        token->satisfy();
-
+        root = getHighestPriority();
+        root->satisfy();
+        
     }
 }
 

@@ -4,12 +4,6 @@
 
 
 
-void operators::logical::satisfy(Tokens::Token* token)
-{
-
-}
-
-
 const char* operators::logical::logicalOperatorName(LogicalOperators op)
 {
     switch (op)

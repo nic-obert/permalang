@@ -1,6 +1,7 @@
 #pragma once
 
 #include "token.hh"
+#include "syntax_tree.hh"
 
 
 namespace operators{};
@@ -8,6 +9,7 @@ namespace operators{};
 
 namespace operators::arithmetical
 {
+
 
     typedef enum ArithmeticalOperators
     {
@@ -19,9 +21,6 @@ namespace operators::arithmetical
         INCREMENT,
         DECREMENT
     } ArithmeticalOperators;
-
-
-    void satisfy(Tokens::Token* token);
 
 
     const char* arithmeticalOperatorName(ArithmeticalOperators op);
@@ -45,9 +44,6 @@ namespace operators::logical
     } LogicalOperator;
 
 
-    void satisfy(Tokens::Token* token);
-
-
     const char* logicalOperatorName(LogicalOperators op);
     
 };
@@ -65,9 +61,6 @@ namespace operators::assignment
         DIVIDE,
         ELEVATE
     } AssignmentOperators;
-
-
-    void satisfy(Tokens::Token* token);
 
 
     const char* assignmentOperatorName(AssignmentOperators op);

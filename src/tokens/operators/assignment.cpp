@@ -4,12 +4,6 @@
 
 
 
-void operators::assignment::satisfy(Tokens::Token* token)
-{
-
-}
-
-
 const char* operators::assignment::assignmentOperatorName(AssignmentOperators op)
 {
     switch (op)
