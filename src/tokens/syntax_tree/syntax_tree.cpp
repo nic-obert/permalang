@@ -8,6 +8,7 @@
 using namespace syntax_tree;
 
 
+
 SyntaxTree::SyntaxTree(Tokens::TokenList* tokens)
 {
     using namespace Tokens;
@@ -15,25 +16,54 @@ SyntaxTree::SyntaxTree(Tokens::TokenList* tokens)
     if (tokens->first == nullptr)
     {
         // TODO implement errors
+
         return;
     }
 
-    root = new SyntaxNode(tokens->first);
-    SyntaxNode* node = root;
+    // start of script
+
+    SyntaxNode* statement = new SyntaxNode(tokens->first);
+    SyntaxNode* node = statement; // current (last) node in statement linked list
+
+    statements = Statements();
 
     for (Token* tok = tokens->first->next; tok != nullptr; tok = tok->next)
     {
-        node->next = new SyntaxNode(tok);
+
+        // end of statement --> add statement to list of statements
+        if (tok->type == ENDS)
+        {
+            // don't add empty statements
+            if (statement != nullptr)
+            {
+                statements.add(statement);
+                statement = nullptr;
+                node = nullptr;
+            }
+            continue;
+        }
+
+        // first token of statement
+        if (statement == nullptr)
+        {
+            statement = new SyntaxNode(tok);
+            node = statement;
+            continue;
+        }
+
+        // if token is not the first of statement
+        node->next = new SyntaxNode(tok, node);
         node = node->next;   
     }
 
 }
 
 
-SyntaxNode* SyntaxTree::getHighestPriority() 
+SyntaxNode* SyntaxTree::getHighestPriority(SyntaxNode* root) 
 {
     using namespace Tokens;
 
+    // check if first token of statement is null (empty statement)
     if (root == nullptr)
     {
         return nullptr;
@@ -55,39 +85,53 @@ SyntaxNode* SyntaxTree::getHighestPriority()
 void SyntaxTree::parse()
 {
 
-    if (root != nullptr)
+    // loop through every statement --> for every statement, parse it and build a tree out of it
+    for (Statement* statement = statements.start; statement != nullptr; statement = statement->next)
     {
-        // TODO throw error
-        return;
-    }
+        SyntaxNode* root = statement->root;
 
-    while (true)
-    {   
-        
-        while (root->prev != nullptr)
+        if (root != nullptr)
         {
-            root = root->prev;
+            // TODO throw error
+            return;
         }
 
-        if (root->next == nullptr)
-        {
-            break;
+        // parse statement
+        while (true)
+        {   
+            
+            while (root->prev != nullptr)
+            {
+                root = root->prev;
+            }
+
+            if (root->next == nullptr)
+            {
+                break;
+            }
+
+            root = getHighestPriority(root);
+            root->satisfy();
+            
         }
 
-        root = getHighestPriority();
-        root->satisfy();
-        
     }
+
 }
 
 
 
 void SyntaxTree::print() const
-{
-    for (SyntaxNode* node = root; node != nullptr; node = node->next)
-    {
-        node->print();
-    }
+{   
 
+    for (Statement* statement = statements.start; statement != nullptr; statement = statement->next)
+    {
+        for (SyntaxNode* node = statement->root; node != nullptr; node = node->next)
+        {
+            node->print();
+        }
+        std::cout << std::endl;
+    }
+    
 }
 

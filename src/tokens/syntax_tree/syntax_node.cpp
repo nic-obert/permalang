@@ -20,6 +20,13 @@ SyntaxNode::SyntaxNode(Tokens::Token* token)
 }
 
 
+SyntaxNode::SyntaxNode(Tokens::Token* token, SyntaxNode* prev)
+: token(token), prev(prev)
+{
+    value = token->value;
+}
+
+
 void binarySatisfy(SyntaxNode* node, Tokens::TokenType leftType, Tokens::TokenType rightType)
 {
     using namespace Tokens;
@@ -162,6 +169,9 @@ void SyntaxNode::satisfy()
 
 void SyntaxNode::print() const
 {
-    token->print();
+    if (token != nullptr)
+    {
+        token->print();
+    }
 }
 

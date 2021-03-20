@@ -1,12 +1,20 @@
 
 CC=g++
+STD=c++17
 
 sources=$(shell find src -name "*.cpp")
 
 all: build
 
 build: $(sources)
-	$(CC) -std=c++11 -I headers $(sources) -o perma
+	$(CC) -std=$(STD) -I headers $(sources) -o perma
 
 builddb: $(sources)
-	$(CC) -std=c++11 -g -I headers $(sources) -o perma
+	$(CC) -std=$(STD) -g -I headers $(sources) -o perma
+
+clang: $(sources)
+	clang++ -std=$(STD) -I headers $(sources) -o perma
+
+clangdb: $(sources)
+	clang++ -std=$(STD) -g -I headers $(sources) -o perma
+

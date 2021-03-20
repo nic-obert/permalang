@@ -4,6 +4,7 @@
 #include "utils.hh"
 
 
+
 namespace syntax_tree
 {   
 
@@ -21,6 +22,7 @@ namespace syntax_tree
 
 
         SyntaxNode(Tokens::Token* token);
+        SyntaxNode(Tokens::Token* token, SyntaxNode* prev);
 
 
         void satisfy();
@@ -31,17 +33,57 @@ namespace syntax_tree
     };
 
 
-    class SyntaxTree
+    class Statement
     {
     public:
 
+        Statement* next;
         SyntaxNode* root;
+
+        Statement(SyntaxNode* root, Statement* next);
+        Statement(SyntaxNode* root);
+
+    };
+
+
+    class Statements
+    {
+    public:
+
+        Statement* start;
+        Statement* end;
+
+
+        Statements(SyntaxNode* item);
+        Statements();
+
+
+        void add(SyntaxNode* item);
+
+
+        SyntaxNode* get(unsigned int index) const;
+
+
+        SyntaxNode* getFirst() const;
+
+
+        SyntaxNode* getLast() const;
+    
+    
+    };
+
+
+    class SyntaxTree
+    {
+    public:
+        
+        Statements statements;
 
 
         SyntaxTree(Tokens::TokenList* tokens);
        
 
-        SyntaxNode* getHighestPriority();
+        SyntaxNode* getHighestPriority(SyntaxNode* root);
 
 
         void parse();
@@ -53,3 +95,4 @@ namespace syntax_tree
 
 
 };
+

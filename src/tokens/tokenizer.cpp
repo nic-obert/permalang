@@ -62,14 +62,13 @@ Tokens::TokenList* Tokens::tokenize(std::string script)
 
                 // end of text token
                 // check if text is a keyword
-                using namespace Keywords;
-                Keywords::Keywords word = isKeyword(*(std::string*) token->value);
-                if (word == __NOKEY)
+                Keywords::Keywords word = Keywords::isKeyword(*(std::string*) token->value);
+                if (word == Keywords::Keywords::__NOKEY)
                 {
                     AddToken;
                 } else {
                     // if word is a keyword instead
-                    token = new Token(KEYWORD, keywordPriority(word), word);
+                    token = new Token(KEYWORD, Keywords::keywordPriority(word), word);
                     AddToken;
                 }
 
@@ -236,6 +235,15 @@ Tokens::TokenList* Tokens::tokenize(std::string script)
         {
             type = TEXT;
             token = new Token(TEXT, LITERAL_P, (ulong) (new std::string {c}));
+            continue;
+        }
+
+
+        if (c == ';')
+        {
+            type = NONE;
+            token = new Token(ENDS, 0, 0);
+            AddToken;
             continue;
         }
 

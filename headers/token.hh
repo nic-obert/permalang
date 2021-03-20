@@ -23,7 +23,8 @@ namespace Tokens
         ASSIGNMENT_OP,
         LOGICAL_OP,
         KEYWORD,
-        BOOL
+        BOOL,
+        ENDS // end of statement
     } TokenType;
 
 
