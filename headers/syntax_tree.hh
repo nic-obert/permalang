@@ -14,8 +14,8 @@ namespace syntax_tree
 
         Tokens::Token* token;
 
-        SyntaxNode* prev;
-        SyntaxNode* next;
+        SyntaxNode* prev = nullptr;
+        SyntaxNode* next = nullptr;
         SyntaxNode* parent = nullptr;
 
         Value value;
@@ -37,8 +37,8 @@ namespace syntax_tree
     {
     public:
 
-        Statement* next;
-        SyntaxNode* root;
+        Statement* next = nullptr;
+        SyntaxNode* root = nullptr;
 
         Statement(SyntaxNode* root, Statement* next);
         Statement(SyntaxNode* root);
@@ -50,8 +50,8 @@ namespace syntax_tree
     {
     public:
 
-        Statement* start;
-        Statement* end;
+        Statement* start = nullptr;
+        Statement* end = nullptr;
 
 
         Statements(SyntaxNode* item);
@@ -77,7 +77,7 @@ namespace syntax_tree
     {
     public:
         
-        Statements statements;
+        Statements statements = nullptr;
 
 
         SyntaxTree(Tokens::TokenList* tokens);

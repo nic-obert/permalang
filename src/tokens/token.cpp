@@ -34,6 +34,9 @@ const char* Tokens::tokenTypeName(TokenType type)
     case KEYWORD:
         return "KEYWORD";
     
+    case ENDS:
+        return "END OF STATEMENT";
+    
     default:
         return "UNDEFINED TYPE";
     
