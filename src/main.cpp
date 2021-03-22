@@ -46,7 +46,6 @@ int main(int argc, const char** argv)
     SyntaxTree syntaxTree = SyntaxTree(tokens);
     syntaxTree.parse();
 
-    syntaxTree.print();
 
 }
 

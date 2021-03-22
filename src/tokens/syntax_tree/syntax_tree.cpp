@@ -22,7 +22,7 @@ SyntaxTree::SyntaxTree(Tokens::TokenList* tokens)
 
     // start of script
 
-    SyntaxNode* statement = new SyntaxNode(tokens->first);
+    SyntaxNode* statement = new SyntaxNode(tokens->first); // first node in the statement (linked list)
     SyntaxNode* node = statement; // current (last) node in statement linked list
 
     statements = Statements();
@@ -90,7 +90,7 @@ void SyntaxTree::parse()
     {
         SyntaxNode* root = statement->root;
 
-        if (root != nullptr)
+        if (root == nullptr)
         {
             // TODO throw error
             return;
@@ -111,27 +111,17 @@ void SyntaxTree::parse()
             }
 
             root = getHighestPriority(root);
+
+            if (root->token->priority < 1) // 0 or less
+            {
+                break;
+            }
+
             root->satisfy();
             
         }
 
     }
 
-}
-
-
-
-void SyntaxTree::print() const
-{   
-
-    for (Statement* statement = statements.start; statement != nullptr; statement = statement->next)
-    {
-        for (SyntaxNode* node = statement->root; node != nullptr; node = node->next)
-        {
-            node->print();
-        }
-        std::cout << std::endl;
-    }
-    
 }
 

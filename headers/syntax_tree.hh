@@ -8,6 +8,16 @@
 namespace syntax_tree
 {   
 
+
+    typedef enum SyntaxType
+    {
+        REFERENCE,
+        LITERAL,
+        OPERATOR_BINARY,
+        OPERATOR_UNARY
+    } SyntaxType;
+
+
     class SyntaxNode
     {
     public:
@@ -20,6 +30,8 @@ namespace syntax_tree
 
         Value value;
 
+        SyntaxType type;
+
 
         SyntaxNode(Tokens::Token* token);
         SyntaxNode(Tokens::Token* token, SyntaxNode* prev);
@@ -27,8 +39,6 @@ namespace syntax_tree
 
         void satisfy();
 
-
-        void print() const;
 
     };
 
@@ -42,6 +52,7 @@ namespace syntax_tree
 
         Statement(SyntaxNode* root, Statement* next);
         Statement(SyntaxNode* root);
+
 
     };
 
@@ -67,8 +78,7 @@ namespace syntax_tree
         SyntaxNode* getFirst() const;
 
 
-        SyntaxNode* getLast() const;
-    
+        SyntaxNode* getLast() const;    
     
     };
 
@@ -88,8 +98,6 @@ namespace syntax_tree
 
         void parse();
 
-
-        void print() const;
 
     };
 

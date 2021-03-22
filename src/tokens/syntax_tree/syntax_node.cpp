@@ -5,6 +5,7 @@
 #include "token.hh"
 #include "operators.hh"
 #include "utils.hh"
+#include "keywords.hh"
 
 
 #define RIGHT 0
@@ -13,10 +14,94 @@
 using namespace syntax_tree;
 
 
+SyntaxType syntaxTypeOfToken(Tokens::Token* token)
+{
+    switch (token->type)
+    {
+    // operators
+    case Tokens::KEYWORD: 
+    {
+        switch ((Keywords::Keywords) token->value)
+        {
+        case Keywords::Keywords::BOOL:
+        case Keywords::Keywords::FLOAT:
+        case Keywords::Keywords::INT:
+        case Keywords::Keywords::STRING:
+        case Keywords::Keywords::IF:
+            return OPERATOR_BINARY;
+
+        case Keywords::Keywords::ELSE:
+            return OPERATOR_UNARY;
+        }
+        break;
+    }
+
+    case Tokens::ARITHMETIC_OP: 
+    {
+        using namespace operators::arithmetical;
+
+        switch ((ArithmeticalOperators) token->value)
+        {
+        case ArithmeticalOperators::SUM:
+        case ArithmeticalOperators::DIVISION:
+        case ArithmeticalOperators::MULTIPLICATION:
+        case ArithmeticalOperators::SUBTRACTION:
+        case ArithmeticalOperators::POWER:
+            return OPERATOR_UNARY;
+        
+        case ArithmeticalOperators::INCREMENT:
+        case ArithmeticalOperators::DECREMENT:
+            return OPERATOR_UNARY;
+        }
+        break;
+    }
+
+    case Tokens::LOGICAL_OP: 
+    {
+        using namespace operators::logical;
+
+        switch ((LogicalOperators) token->value)
+        {
+        case LogicalOperators::AND:
+        case LogicalOperators::OR:
+        case LogicalOperators::EQUALITY:
+        case LogicalOperators::GREATER_EQUAL:
+        case LogicalOperators::INEQUALITY:
+        case LogicalOperators::LESS_EQUAL:
+        case LogicalOperators::GREATER_THAN:
+        case LogicalOperators::LESS_THAN:
+            return OPERATOR_BINARY;
+        
+        case LogicalOperators::NOT:
+            return OPERATOR_UNARY;
+        }
+        break;
+    }
+
+    case Tokens::ASSIGNMENT_OP:
+    {
+        return OPERATOR_BINARY;
+    }
+    
+    // literals
+    case Tokens::BOOL:
+    case Tokens::NUMBER:
+    case Tokens::STRING:
+        return LITERAL;
+    
+    // references
+    case Tokens::TEXT:
+        return REFERENCE;
+        
+    }
+}
+
+
 SyntaxNode::SyntaxNode(Tokens::Token* token)
 : token(token)
 {
     value = token->value;
+    type = syntaxTypeOfToken(token);
 }
 
 
@@ -24,6 +109,7 @@ SyntaxNode::SyntaxNode(Tokens::Token* token, SyntaxNode* prev)
 : token(token), prev(prev)
 {
     value = token->value;
+    type = syntaxTypeOfToken(token);
 }
 
 
@@ -39,6 +125,17 @@ void binarySatisfy(SyntaxNode* node, Tokens::TokenType leftType, Tokens::TokenTy
     else if (node->next == nullptr)
     {
         std::cerr << "Missing token of type " << tokenTypeName(rightType) << " to the right of " << node << std::endl;
+        exit(1);
+    }
+
+    if (node->prev->token->type != leftType)
+    {
+        std::cerr << "Token " << node << " requires token of type " << tokenTypeName(leftType) << " to the left, but " << tokenTypeName(node->prev->token->type) << " was provided" << std::endl;
+            exit(1);
+    }
+    else if (node->next->token->type != rightType)
+    {
+        std::cerr << "Token " << node << " requires token of type " << tokenTypeName(rightType) << " to the right, but " << tokenTypeName(node->prev->token->type) << " was provided" << std::endl;
         exit(1);
     }
 
@@ -68,6 +165,10 @@ void unarySatisfy(SyntaxNode* node, Tokens::TokenType type, char side)
             std::cerr << "Token " << node << " requires token of type " << tokenTypeName(type) << " to the left, but " << tokenTypeName(node->prev->token->type) << " was provided" << std::endl;
             exit(1);
         }
+
+        node->prev->parent = node;
+        node->value = (Value) node->prev;
+
     } 
     else 
     {
@@ -81,6 +182,10 @@ void unarySatisfy(SyntaxNode* node, Tokens::TokenType type, char side)
             std::cerr << "Token " << node << " requires token of type " << tokenTypeName(type) << " to the left, but " << tokenTypeName(node->prev->token->type) << " was provided" << std::endl;
             exit(1);
         }
+
+        node->next->parent = node;
+        node->value = (Value) node->next;
+
     }
 
 }
@@ -89,6 +194,9 @@ void unarySatisfy(SyntaxNode* node, Tokens::TokenType type, char side)
 void SyntaxNode::satisfy()
 {
     using namespace Tokens;
+
+    // set SyntaxNode's priority to 0 right away so that it doesn't get evaluated multiple times
+    token->priority = 0;
 
     switch (token->type)
     {
@@ -166,12 +274,4 @@ void SyntaxNode::satisfy()
 
 }
 
-
-void SyntaxNode::print() const
-{
-    if (token != nullptr)
-    {
-        token->print();
-    }
-}
 

@@ -1,6 +1,8 @@
 
 #include "syntax_tree.hh"
 
+#include <iostream>
+
 
 using namespace syntax_tree;
 
