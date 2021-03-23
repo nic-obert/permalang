@@ -6,39 +6,42 @@
 #include "keywords.hh"
 
 
-const char* Tokens::tokenTypeName(TokenType type)
+std::ostream& operator<<(std::ostream& stream, Tokens::TokenType const& type)
 {
+
+    using namespace Tokens;
+
     switch (type)
     {
     case NONE:
-        return "NONE";
+        return stream << "NONE";
     
     case TEXT:
-        return "TEXT";
+        return stream << "TEXT";
 
     case NUMBER:
-        return "NUMBER";
+        return stream << "NUMBER";
         
     case STRING:
-        return "STRING";
+        return stream << "STRING";
     
     case ARITHMETIC_OP:
-        return "ARITHMETIC OPERATOR";
+        return stream << "ARITHMETIC OPERATOR";
     
     case ASSIGNMENT_OP:
-        return "ASSIGNMENT OPERATOR";
+        return stream << "ASSIGNMENT OPERATOR";
 
     case LOGICAL_OP:
-        return "LOGICAL OPERATOR";
+        return stream << "LOGICAL OPERATOR";
 
     case KEYWORD:
-        return "KEYWORD";
+        return stream << "KEYWORD";
     
     case ENDS:
-        return "END OF STATEMENT";
+        return stream << "END OF STATEMENT";
     
     default:
-        return "UNDEFINED TYPE";
+        return stream << "UNDEFINED TYPE";
     
     }
 }
@@ -50,39 +53,43 @@ Tokens::Token::Token(TokenType type, int priority, unsigned long value)
 
 }
 
-void Tokens::Token::print() const
+std::ostream& operator<<(std::ostream& stream, Tokens::Token const& token)
 {   
 
-    switch (type)
+    using namespace Tokens;
+
+    switch (token.type)
     {
     case TEXT:
     case STRING: {
-        std::cout << "<" << tokenTypeName(type) << ": " << *(std::string*)value << " (" << priority << ")>\n";
+        stream << "<" << token.type << ": " << *(std::string*)token.value << " (" << token.priority << ")>";
         break;
     }
     case KEYWORD: {
-        std::cout << "<" << tokenTypeName(type) << ": " << keywordName((Keywords::Keywords) value) << " (" << priority << ")>\n";
+        stream << "<" << token.type << ": " << keywordName((Keywords::Keywords) token.value) << " (" << token.priority << ")>";
         break;
     }
     case ARITHMETIC_OP: {
         using namespace operators::arithmetical;
-        std::cout << "<" << tokenTypeName(type) << ": " << arithmeticalOperatorName((operators::arithmetical::ArithmeticalOperators) value) << " (" << priority << ")>\n";
+        stream << "<" << token.type << ": " << arithmeticalOperatorName((operators::arithmetical::ArithmeticalOperators) token.value) << " (" << token.priority << ")>";
         break;
     }
     case ASSIGNMENT_OP: {
         using namespace operators::assignment;
-        std::cout << "<" << tokenTypeName(type) << ": " << assignmentOperatorName((AssignmentOperators) value) << " (" << priority << ")>\n";
+        stream << "<" << token.type << ": " << assignmentOperatorName((AssignmentOperators) token.value) << " (" << token.priority << ")>";
         break;
     }
     case LOGICAL_OP: {
         using namespace operators::logical;
-        std::cout << "<" << tokenTypeName(type) << ": " << logicalOperatorName((LogicalOperators) value) << " (" << priority << ")>\n";
+        stream << "<" << token.type << ": " << logicalOperatorName((LogicalOperators) token.value) << " (" << token.priority << ")>";
         break;
     }
     default:
-        std::cout << "<" << tokenTypeName(type) << ": " << value << " (" << priority << ")>\n";
+        stream << "<" << token.type << ": " << token.value << " (" << token.priority << ")>";
         break;
     }
+
+    return stream;
 }
 
 
@@ -114,15 +121,18 @@ void Tokens::TokenList::remove(Token* token)
 }
 
 
-void Tokens::TokenList::print() const
+std::ostream& operator<<(std::ostream& stream, Tokens::TokenList const& list)
 {
-    if (first == nullptr)
-        std::cout << "Empty token line" << std::endl;
+    stream << "{\n";
+    if (list.first == nullptr)
+        stream << "\tEmpty token line\n";
 
-    for (Token* token = first; token != nullptr; token = token->next)
+    for (Tokens::Token* token = list.first; token != nullptr; token = token->next)
     {
-        token->print();
+        stream << "\t" << *token << "\n";
     }
+
+    stream << "}\n";
 }
 
 

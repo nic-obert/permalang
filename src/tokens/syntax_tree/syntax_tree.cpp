@@ -125,3 +125,14 @@ void SyntaxTree::parse()
 
 }
 
+
+std::ostream& operator<<(std::ostream& stream, SyntaxTree const& tree)
+{
+    for (Statement* statement = tree.statements.start; statement != nullptr; statement = statement->next)
+    {
+        stream << *statement;
+    }
+
+    return stream;
+}
+

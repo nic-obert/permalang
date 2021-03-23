@@ -21,6 +21,19 @@ Statement::Statement(SyntaxNode* root, Statement* next)
 }
 
 
+std::ostream& operator<<(std::ostream& stream, syntax_tree::Statement const& statement)
+{
+
+    for (SyntaxNode* node = statement.root; node != nullptr; node = node->next)
+    {
+        stream << *node;
+    }
+
+    return stream;
+}
+
+
+
 Statements::Statements(SyntaxNode* root)
 {
     start = new Statement(root);

@@ -14,6 +14,28 @@
 using namespace syntax_tree;
 
 
+std::ostream& operator<<(std::ostream& stream, syntax_tree::SyntaxType const& type)
+{
+
+    switch (type)
+    {
+    case REFERENCE:
+        return stream << "REFERENCE";
+    
+    case LITERAL:
+        return stream << "LITERAL";
+
+    case OPERATOR_BINARY:
+        return stream << "OPERATOR_BINARY";
+    
+    case OPERATOR_UNARY:
+        return stream << "OPERATOR_UNARY";
+    }
+
+}
+
+
+
 SyntaxType syntaxTypeOfToken(Tokens::Token* token)
 {
     switch (token->type)
@@ -119,29 +141,34 @@ void binarySatisfy(SyntaxNode* node, Tokens::TokenType leftType, Tokens::TokenTy
 
     if (node->prev == nullptr)
     {
-        std::cerr << "Missing token of type " << tokenTypeName(leftType) << " to the left of " << node << std::endl;
+        std::cerr << "Missing token of type " << leftType << " to the left of " << *node << std::endl;
         exit(1);
     }    
     else if (node->next == nullptr)
     {
-        std::cerr << "Missing token of type " << tokenTypeName(rightType) << " to the right of " << node << std::endl;
+        std::cerr << "Missing token of type " << rightType << " to the right of " << *node << std::endl;
         exit(1);
     }
 
     if (node->prev->token->type != leftType)
     {
-        std::cerr << "Token " << node << " requires token of type " << tokenTypeName(leftType) << " to the left, but " << tokenTypeName(node->prev->token->type) << " was provided" << std::endl;
+        std::cerr << "Token " << *node << " requires token of type " << leftType << " to the left, but " << node->prev->token->type << " was provided" << std::endl;
             exit(1);
     }
     else if (node->next->token->type != rightType)
     {
-        std::cerr << "Token " << node << " requires token of type " << tokenTypeName(rightType) << " to the right, but " << tokenTypeName(node->prev->token->type) << " was provided" << std::endl;
+        std::cerr << "Token " << *node << " requires token of type " << rightType << " to the right, but " << node->prev->token->type << " was provided" << std::endl;
         exit(1);
     }
 
 
     node->prev->parent = node;
     node->next->parent = node;
+
+    node->prev->next = nullptr;
+    node->prev->prev = nullptr;
+    node->next->next = nullptr;
+    node->next->prev = nullptr;
 
     node->value = (Value) new SyntaxNode*[2] {node->prev, node->next};
 
@@ -157,16 +184,19 @@ void unarySatisfy(SyntaxNode* node, Tokens::TokenType type, char side)
     {
         if (node->prev == nullptr)
         {
-            std::cerr << "Missing token of type " << tokenTypeName(type) << " to the left of " << node << std::endl;
+            std::cerr << "Missing token of type " << type << " to the left of " << *node << std::endl;
             exit(1);
         }
         if (node->prev->token->type != type)
         {
-            std::cerr << "Token " << node << " requires token of type " << tokenTypeName(type) << " to the left, but " << tokenTypeName(node->prev->token->type) << " was provided" << std::endl;
+            std::cerr << "Token " << *node << " requires token of type " << type << " to the left, but " << node->prev->token->type << " was provided" << std::endl;
             exit(1);
         }
 
         node->prev->parent = node;
+        node->prev->next = nullptr;
+        node->prev->prev = nullptr;
+
         node->value = (Value) node->prev;
 
     } 
@@ -174,16 +204,19 @@ void unarySatisfy(SyntaxNode* node, Tokens::TokenType type, char side)
     {
         if (node->next == nullptr)
         {
-            std::cerr << "Missing token of type " << tokenTypeName(type) << " to the right of " << node << std::endl;
+            std::cerr << "Missing token of type " << type << " to the right of " << *node << std::endl;
             exit(1);
         }
         if (node->next->token->type != type)
         {
-            std::cerr << "Token " << node << " requires token of type " << tokenTypeName(type) << " to the left, but " << tokenTypeName(node->prev->token->type) << " was provided" << std::endl;
+            std::cerr << "Token " << *node << " requires token of type " << type << " to the left, but " << node->prev->token->type << " was provided" << std::endl;
             exit(1);
         }
 
         node->next->parent = node;
+        node->next->next = nullptr;
+        node->next->prev = nullptr;
+
         node->value = (Value) node->next;
 
     }
@@ -274,4 +307,9 @@ void SyntaxNode::satisfy()
 
 }
 
+
+std::ostream& operator<<(std::ostream& stream, SyntaxNode const& node)
+{
+    return stream << node;
+}
 

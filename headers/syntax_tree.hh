@@ -104,3 +104,14 @@ namespace syntax_tree
 
 };
 
+
+
+std::ostream& operator<<(std::ostream& stream, syntax_tree::SyntaxTree const& tree);
+
+std::ostream& operator<<(std::ostream& stream, syntax_tree::SyntaxNode const& node);
+
+std::ostream& operator<<(std::ostream& stream, syntax_tree::Statement const& statement);
+
+std::ostream& operator<<(std::ostream& stream, syntax_tree::SyntaxType const& type);
+
+

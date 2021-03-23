@@ -41,11 +41,11 @@ int main(int argc, const char** argv)
 
     TokenList* tokens = tokenize(file);
 
-    tokens->print();
+    std::cout << *tokens << std::endl;
 
     SyntaxTree syntaxTree = SyntaxTree(tokens);
     syntaxTree.parse();
 
-
+    std::cout << syntaxTree << std::endl;
 }
 

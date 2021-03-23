@@ -3,6 +3,7 @@
 #include <string>
 
 #include "utils.hh"
+#include "iostream"
 
 
 #define isDigit(x) (47 < x && x < 58)
@@ -41,13 +42,7 @@ namespace Tokens
 
         Token(TokenType type, int priority, Value value);
 
-        void print() const;
-
-
     };
-
-
-    const char* tokenTypeName(TokenType type);
 
 
     class TokenList
@@ -65,9 +60,6 @@ namespace Tokens
 
         void remove(Token* token);
 
-
-        void print() const;
-
     };
 
 
@@ -75,3 +67,12 @@ namespace Tokens
     
 
 };
+
+
+std::ostream& operator<<(std::ostream& stream, Tokens::Token const& token);
+
+std::ostream& operator<<(std::ostream& stream, Tokens::TokenList const& token);
+
+std::ostream& operator<<(std::ostream& stream, Tokens::TokenType const& token);
+
+
