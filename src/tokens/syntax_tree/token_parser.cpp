@@ -1,42 +1,15 @@
-
-#include <iostream>
-
-#include "syntax_tree.hh"
 #include "token.hh"
-#include "operators.hh"
-#include "utils.hh"
 #include "keywords.hh"
+#include "operators.hh"
 
 
 #define RIGHT 0
 #define LEFT 1
 
-using namespace syntax_tree;
+using namespace Tokens;
 
 
-std::ostream& operator<<(std::ostream& stream, syntax_tree::SyntaxType const& type)
-{
-
-    switch (type)
-    {
-    case REFERENCE:
-        return stream << "REFERENCE";
-    
-    case LITERAL:
-        return stream << "LITERAL";
-
-    case OPERATOR_BINARY:
-        return stream << "OPERATOR_BINARY";
-    
-    case OPERATOR_UNARY:
-        return stream << "OPERATOR_UNARY";
-    }
-
-}
-
-
-
-SyntaxType syntaxTypeOfToken(Tokens::Token* token)
+OperatorType syntaxTypeOfToken(Token* token)
 {
     switch (token->type)
     {
@@ -46,14 +19,14 @@ SyntaxType syntaxTypeOfToken(Tokens::Token* token)
         switch ((Keywords::Keywords) token->value)
         {
         case Keywords::Keywords::IF:
-            return OPERATOR_BINARY;
+            return OperatorType::BINARY;
 
         case Keywords::Keywords::ELSE:
         case Keywords::Keywords::BOOL:
         case Keywords::Keywords::FLOAT:
         case Keywords::Keywords::INT:
         case Keywords::Keywords::STRING:
-            return OPERATOR_UNARY;
+            return OperatorType::UNARY;
         }
     }
 
@@ -68,11 +41,11 @@ SyntaxType syntaxTypeOfToken(Tokens::Token* token)
         case ArithmeticalOperators::MULTIPLICATION:
         case ArithmeticalOperators::SUBTRACTION:
         case ArithmeticalOperators::POWER:
-            return OPERATOR_UNARY;
+            return OperatorType::UNARY;
         
         case ArithmeticalOperators::INCREMENT:
         case ArithmeticalOperators::DECREMENT:
-            return OPERATOR_UNARY;
+            return OperatorType::UNARY;
         }
     }
 
@@ -90,149 +63,134 @@ SyntaxType syntaxTypeOfToken(Tokens::Token* token)
         case LogicalOperators::LESS_EQUAL:
         case LogicalOperators::GREATER_THAN:
         case LogicalOperators::LESS_THAN:
-            return OPERATOR_BINARY;
+            return OperatorType::BINARY;
         
         case LogicalOperators::NOT:
-            return OPERATOR_UNARY;
+            return OperatorType::UNARY;
         }
     }
 
     case Tokens::ASSIGNMENT_OP:
     {
-        return OPERATOR_BINARY;
+        return OperatorType::BINARY;
     }
     
     // literals
     case Tokens::BOOL:
     case Tokens::NUMBER:
     case Tokens::STRING:
-        return LITERAL;
+        return OperatorType::LITERAL;
     
     // references
     case Tokens::TEXT:
-        return REFERENCE;
+        return OperatorType::REFERENCE;
         
     }
 }
 
 
-SyntaxNode::SyntaxNode(Tokens::Token* token)
-: token(token)
-{
-    value = token->value;
-    type = syntaxTypeOfToken(token);
-}
 
-
-SyntaxNode::SyntaxNode(Tokens::Token* token, SyntaxNode* prev)
-: token(token), prev(prev)
-{
-    value = token->value;
-    type = syntaxTypeOfToken(token);
-}
-
-
-void binarySatisfy(SyntaxNode* node, Tokens::TokenType leftType, Tokens::TokenType rightType)
+void binarySatisfy(Token* token, TokenType leftType, TokenType rightType)
 {
     using namespace Tokens;
 
-    if (node->prev == nullptr)
+    if (token->prev == nullptr)
     {
-        std::cerr << "Missing token of type " << leftType << " to the left of " << *node << std::endl;
+        std::cerr << "Missing token of type " << leftType << " to the left of " << *token << std::endl;
         exit(1);
     }    
-    else if (node->next == nullptr)
+    else if (token->next == nullptr)
     {
-        std::cerr << "Missing token of type " << rightType << " to the right of " << *node << std::endl;
+        std::cerr << "Missing token of type " << rightType << " to the right of " << *token << std::endl;
         exit(1);
     }
 
-    if (node->prev->token->type != leftType)
+    if (token->prev->type != leftType)
     {
-        std::cerr << "Token " << *node << " requires token of type " << leftType << " to the left, but " << node->prev->token->type << " was provided" << std::endl;
+        std::cerr << "Token " << *token << " requires token of type " << leftType << " to the left, but " << token->prev->type << " was provided" << std::endl;
             exit(1);
     }
-    else if (node->next->token->type != rightType)
+    else if (token->next->type != rightType)
     {
-        std::cerr << "Token " << *node << " requires token of type " << rightType << " to the right, but " << node->prev->token->type << " was provided" << std::endl;
+        std::cerr << "Token " << *token << " requires token of type " << rightType << " to the right, but " << token->prev->type << " was provided" << std::endl;
         exit(1);
     }
 
 
-    node->value = (Value) new SyntaxNode*[2] {node->prev, node->next};
+    token->value = (Value) new Token*[2] {token->prev, token->next};
 
-    node->prev->parent = node;
-    node->next->parent = node;
+    token->prev->parent = token;
+    token->next->parent = token;
 
     // remove nodes to the left and right if node
-    node->prev = node->prev->prev;
-    node->next = node->next->next;
+    token->prev = token->prev->prev;
+    token->next = token->next->next;
 
-    if (node->prev != nullptr)
+    if (token->prev != nullptr)
     {
-        node->prev->next = node;
+        token->prev->next = token;
     }
-    if (node->next != nullptr)
+    if (token->next != nullptr)
     {
-        node->next->prev = node;
+        token->next->prev = token;
     }
 
 
 }
 
 
-void unarySatisfy(SyntaxNode* node, Tokens::TokenType type, char side)
+void unarySatisfy(Token* token, TokenType type, char side)
 {
 
     using namespace Tokens;
 
     if (side == LEFT)
     {
-        if (node->prev == nullptr)
+        if (token->prev == nullptr)
         {
-            std::cerr << "Missing token of type " << type << " to the left of " << *node << std::endl;
+            std::cerr << "Missing token of type " << type << " to the left of " << *token << std::endl;
             exit(1);
         }
-        if (node->prev->token->type != type)
+        if (token->prev->type != type)
         {
-            std::cerr << "Token " << *node << " requires token of type " << type << " to the left, but " << node->prev->token->type << " was provided" << std::endl;
+            std::cerr << "Token " << *token << " requires token of type " << token << " to the left, but " << token->prev->type << " was provided" << std::endl;
             exit(1);
         }
 
-        node->value = (Value) node->prev;
+        token->value = (Value) token->prev;
 
-        node->prev->parent = node;
+        token->prev->parent = token;
 
-        node->prev = node->prev->prev;
+        token->prev = token->prev->prev;
         
-        if (node->prev != nullptr)
+        if (token->prev != nullptr)
         {
-            node->prev->next = node;
+            token->prev->next = token;
         }
 
     } 
     else 
     {
-        if (node->next == nullptr)
+        if (token->next == nullptr)
         {
-            std::cerr << "Missing token of type " << type << " to the right of " << *node << std::endl;
+            std::cerr << "Missing token of type " << type << " to the right of " << *token << std::endl;
             exit(1);
         }
-        if (node->next->token->type != type)
+        if (token->next->type != type)
         {
-            std::cerr << "Token " << *node << " requires token of type " << type << " to the left, but " << node->prev->token->type << " was provided" << std::endl;
+            std::cerr << "Token " << *token << " requires token of type " << type << " to the left, but " << token->prev->type << " was provided" << std::endl;
             exit(1);
         }
 
-        node->value = (Value) node->next;
+        token->value = (Value) token->next;
 
-        node->next->parent = node;
+        token->next->parent = token;
 
-        node->next = node->next->next;
+        token->next = token->next->next;
 
-        if (node->next != nullptr)
+        if (token->next != nullptr)
         {
-            node->next->prev = node;
+            token->next->prev = token;
         }
 
     }
@@ -240,20 +198,18 @@ void unarySatisfy(SyntaxNode* node, Tokens::TokenType type, char side)
 }
 
 
-void SyntaxNode::satisfy()
+void Token::satisfy()
 {
-    using namespace Tokens;
+    // set token's priority to 0 right away so that it doesn't get evaluated multiple times
+    priority = 0;
 
-    // set SyntaxNode's priority to 0 right away so that it doesn't get evaluated multiple times
-    token->priority = 0;
-
-    switch (token->type)
+    switch (type)
     {
     case ARITHMETIC_OP:
     {
         using namespace operators::arithmetical;
 
-        switch ((ArithmeticalOperators) token->value)
+        switch ((ArithmeticalOperators) value)
         {
         case POWER:
         case DIVISION:
@@ -276,7 +232,7 @@ void SyntaxNode::satisfy()
     {
         using namespace operators::logical;
 
-        switch ((LogicalOperators) token->value)
+        switch ((LogicalOperators) value)
         {
         case EQUALITY:
         case INEQUALITY:
@@ -301,7 +257,7 @@ void SyntaxNode::satisfy()
     {
         using namespace operators::assignment;
 
-        switch ((AssignmentOperators) token->value)
+        switch ((AssignmentOperators) value)
         {
         case ASSIGNMENT:
         case ADD:
@@ -320,7 +276,7 @@ void SyntaxNode::satisfy()
     {
         using namespace Keywords;
 
-        switch ((Keywords::Keywords) token->value)
+        switch ((Keywords::Keywords) value)
         {
         case Keywords::Keywords::INT:
         case Keywords::Keywords::STRING:
@@ -340,11 +296,5 @@ void SyntaxNode::satisfy()
 
     }
 
-}
-
-
-std::ostream& operator<<(std::ostream& stream, SyntaxNode const& node)
-{
-    return stream << *node.token;
 }
 

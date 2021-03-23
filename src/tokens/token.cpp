@@ -136,3 +136,26 @@ std::ostream& operator<<(std::ostream& stream, Tokens::TokenList const& list)
 }
 
 
+std::ostream& operator<<(std::ostream& stream, Tokens::OperatorType const& type)
+{
+
+    using namespace Tokens;
+
+    switch (type)
+    {
+    case REFERENCE:
+        return stream << "REFERENCE";
+    
+    case LITERAL:
+        return stream << "LITERAL";
+
+    case BINARY:
+        return stream << "OPERATOR_BINARY";
+    
+    case UNARY:
+        return stream << "OPERATOR_UNARY";
+    }
+
+}
+
+

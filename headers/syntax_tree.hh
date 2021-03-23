@@ -8,51 +8,16 @@
 namespace syntax_tree
 {   
 
-
-    typedef enum SyntaxType
-    {
-        REFERENCE,
-        LITERAL,
-        OPERATOR_BINARY,
-        OPERATOR_UNARY
-    } SyntaxType;
-
-
-    class SyntaxNode
-    {
-    public:
-
-        Tokens::Token* token;
-
-        SyntaxNode* prev = nullptr;
-        SyntaxNode* next = nullptr;
-        SyntaxNode* parent = nullptr;
-
-        Value value;
-
-        SyntaxType type;
-
-
-        SyntaxNode(Tokens::Token* token);
-        SyntaxNode(Tokens::Token* token, SyntaxNode* prev);
-
-
-        void satisfy();
-
-
-    };
-
-
     class Statement
     {
     public:
 
         Statement* next = nullptr;
-        SyntaxNode* root = nullptr;
+        Tokens::Token* root = nullptr;
 
-        Statement(SyntaxNode* root, Statement* next);
-        Statement(SyntaxNode* root);
-
+        Statement(Tokens::Token* root, Statement* next);
+        Statement(Tokens::Token* root);
+        Statement();
 
     };
 
@@ -65,20 +30,17 @@ namespace syntax_tree
         Statement* end = nullptr;
 
 
-        Statements(SyntaxNode* item);
+        Statements(Statement* statement);
         Statements();
 
 
-        void add(SyntaxNode* item);
+        void add(Statement* statement);
 
 
-        SyntaxNode* get(unsigned int index) const;
+        Tokens::Token* getFirst() const;
 
 
-        SyntaxNode* getFirst() const;
-
-
-        SyntaxNode* getLast() const;    
+        Tokens::Token* getLast() const;    
     
     };
 
@@ -93,7 +55,7 @@ namespace syntax_tree
         SyntaxTree(Tokens::TokenList* tokens);
        
 
-        SyntaxNode* getHighestPriority(SyntaxNode* root);
+        Tokens::Token* getHighestPriority(Tokens::Token* root);
 
 
         void parse();
@@ -108,10 +70,5 @@ namespace syntax_tree
 
 std::ostream& operator<<(std::ostream& stream, syntax_tree::SyntaxTree const& tree);
 
-std::ostream& operator<<(std::ostream& stream, syntax_tree::SyntaxNode const& node);
-
 std::ostream& operator<<(std::ostream& stream, syntax_tree::Statement const& statement);
-
-std::ostream& operator<<(std::ostream& stream, syntax_tree::SyntaxType const& type);
-
 

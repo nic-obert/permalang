@@ -21,24 +21,23 @@ SyntaxTree::SyntaxTree(Tokens::TokenList* tokens)
     }
 
     // start of script
-
-    SyntaxNode* statement = new SyntaxNode(tokens->first); // first node in the statement (linked list)
-    SyntaxNode* node = statement; // current (last) node in statement linked list
-
     statements = Statements();
+    Statement* statement = nullptr;
+    Token* token;
 
-    for (Token* tok = tokens->first->next; tok != nullptr; tok = tok->next)
+    for (Token* tok = tokens->first; tok != nullptr; tok = tok->next)
     {
 
         // end of statement --> add statement to list of statements
         if (tok->type == ENDS)
         {
             // don't add empty statements
-            if (statement != nullptr)
+            if (statement->root != nullptr)
             {
+                token->next = nullptr;
                 statements.add(statement);
                 statement = nullptr;
-                node = nullptr;
+                token = nullptr;
             }
             continue;
         }
@@ -46,20 +45,18 @@ SyntaxTree::SyntaxTree(Tokens::TokenList* tokens)
         // first token of statement
         if (statement == nullptr)
         {
-            statement = new SyntaxNode(tok);
-            node = statement;
-            continue;
+            tok->prev = nullptr;
+            statement = new Statement(tok);
         }
 
-        // if token is not the first of statement
-        node->next = new SyntaxNode(tok, node);
-        node = node->next;   
+        token = tok;
+
     }
 
 }
 
 
-SyntaxNode* SyntaxTree::getHighestPriority(SyntaxNode* root) 
+Tokens::Token* SyntaxTree::getHighestPriority(Tokens::Token* root) 
 {
     using namespace Tokens;
 
@@ -69,16 +66,15 @@ SyntaxNode* SyntaxTree::getHighestPriority(SyntaxNode* root)
         return nullptr;
     }
 
-    SyntaxNode* highest = root;
-    for (SyntaxNode* node = root; node != nullptr; node = node->next)
+    for (Tokens::Token* token = root; token != nullptr; token = token->next)
     {
-        if (node->token->priority > highest->token->priority)
+        if (token->priority > root->priority)
         {
-            highest = node;
+            root = token;
         }
     }
 
-    return highest;
+    return root;
 }
 
 
@@ -88,18 +84,13 @@ void SyntaxTree::parse()
     // loop through every statement --> for every statement, parse it and build a tree out of it
     for (Statement* statement = statements.start; statement != nullptr; statement = statement->next)
     {
-        SyntaxNode* root = statement->root;
-
-        if (root == nullptr)
-        {
-            // TODO throw error
-            return;
-        }
+        Tokens::Token* root = statement->root;
 
         // parse statement
         while (true)
         {   
             
+            // return to 
             while (root->prev != nullptr)
             {
                 root = root->prev;
@@ -112,7 +103,7 @@ void SyntaxTree::parse()
 
             root = getHighestPriority(root);
 
-            if (root->token->priority < 1) // 0 or less
+            if (root->priority < 1) // 0 or less
             {
                 break;
             }

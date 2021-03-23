@@ -1,9 +1,9 @@
 #pragma once
 
 #include <string>
+#include <iostream>
 
 #include "utils.hh"
-#include "iostream"
 
 
 #define isDigit(x) (47 < x && x < 58)
@@ -29,6 +29,15 @@ namespace Tokens
     } TokenType;
 
 
+    typedef enum OperatorType
+    {
+        LITERAL,
+        REFERENCE,
+        UNARY,
+        BINARY
+    } OperatorType;
+
+
     class Token
     {
     public:
@@ -37,10 +46,16 @@ namespace Tokens
         int priority;
         Value value;
 
+
+        Token* parent = nullptr;
+
         Token* prev = nullptr;
         Token* next = nullptr;
 
         Token(TokenType type, int priority, Value value);
+
+
+        void satisfy();
 
     };
 
@@ -75,4 +90,5 @@ std::ostream& operator<<(std::ostream& stream, Tokens::TokenList const& token);
 
 std::ostream& operator<<(std::ostream& stream, Tokens::TokenType const& token);
 
+std::ostream& operator<<(std::ostream& stream, Tokens::OperatorType const& type);
 

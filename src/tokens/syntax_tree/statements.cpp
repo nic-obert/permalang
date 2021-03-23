@@ -7,15 +7,14 @@
 using namespace syntax_tree;
 
 
-Statement::Statement(SyntaxNode* root)
+Statement::Statement(Tokens::Token* root)
 : root(root)
 {
 
 }
 
 
-Statement::Statement(SyntaxNode* root, Statement* next)
-: root(root), next(next)
+Statement::Statement()
 {
     
 }
@@ -24,9 +23,9 @@ Statement::Statement(SyntaxNode* root, Statement* next)
 std::ostream& operator<<(std::ostream& stream, syntax_tree::Statement const& statement)
 {
 
-    for (SyntaxNode* node = statement.root; node != nullptr; node = node->next)
+    for (Tokens::Token* token = statement.root; token != nullptr; token = token->next)
     {
-        stream << *node;
+        stream << *token;
     }
 
     return stream;
@@ -34,9 +33,9 @@ std::ostream& operator<<(std::ostream& stream, syntax_tree::Statement const& sta
 
 
 
-Statements::Statements(SyntaxNode* root)
+Statements::Statements(Statement* statement)
 {
-    start = new Statement(root);
+    start = statement;
     end = start;
 }
 
@@ -48,45 +47,18 @@ Statements::Statements()
 }
 
 
-void Statements::add(SyntaxNode* root)
+void Statements::add(Statement* statement)
 {
 
     if (end == nullptr)
     {
-        start = new Statement(root);
+        start = statement;
         end = start;
         return;
     }
 
-    end->next = new Statement(root);
+    end->next = statement;
     end = end->next;
-}
-
-
-SyntaxNode* Statements::get(unsigned int index) const
-{
-    unsigned int i = 0;
-    for (Statement* node = start; node != nullptr; node = node->next)
-    {
-        if (i == index)
-        {
-            return node->root;
-        }
-
-        i++;
-    }
-}
-
-
-SyntaxNode* Statements::getFirst() const
-{
-    return start->root;
-}
-
-
-SyntaxNode* Statements::getLast() const
-{
-    return end->root;
 }
 
 
