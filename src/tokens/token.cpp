@@ -6,10 +6,91 @@
 #include "keywords.hh"
 
 
-std::ostream& operator<<(std::ostream& stream, Tokens::TokenType const& type)
-{
+using namespace Tokens;
 
-    using namespace Tokens;
+
+OperatorType syntaxTypeOfToken(Token* token)
+{
+    switch (token->type)
+    {
+    // operators
+    case Tokens::KEYWORD: 
+    {
+        switch ((Keywords::Keywords) token->value)
+        {
+        case Keywords::Keywords::IF:
+            return OperatorType::BINARY;
+
+        case Keywords::Keywords::ELSE:
+        case Keywords::Keywords::BOOL:
+        case Keywords::Keywords::FLOAT:
+        case Keywords::Keywords::INT:
+        case Keywords::Keywords::STRING:
+            return OperatorType::UNARY;
+        }
+    }
+
+    case Tokens::ARITHMETIC_OP: 
+    {
+        using namespace operators::arithmetical;
+
+        switch ((ArithmeticalOperators) token->value)
+        {
+        case ArithmeticalOperators::SUM:
+        case ArithmeticalOperators::DIVISION:
+        case ArithmeticalOperators::MULTIPLICATION:
+        case ArithmeticalOperators::SUBTRACTION:
+        case ArithmeticalOperators::POWER:
+            return OperatorType::UNARY;
+        
+        case ArithmeticalOperators::INCREMENT:
+        case ArithmeticalOperators::DECREMENT:
+            return OperatorType::UNARY;
+        }
+    }
+
+    case Tokens::LOGICAL_OP: 
+    {
+        using namespace operators::logical;
+
+        switch ((LogicalOperators) token->value)
+        {
+        case LogicalOperators::AND:
+        case LogicalOperators::OR:
+        case LogicalOperators::EQUALITY:
+        case LogicalOperators::GREATER_EQUAL:
+        case LogicalOperators::INEQUALITY:
+        case LogicalOperators::LESS_EQUAL:
+        case LogicalOperators::GREATER_THAN:
+        case LogicalOperators::LESS_THAN:
+            return OperatorType::BINARY;
+        
+        case LogicalOperators::NOT:
+            return OperatorType::UNARY;
+        }
+    }
+
+    case Tokens::ASSIGNMENT_OP:
+    {
+        return OperatorType::BINARY;
+    }
+    
+    // literals
+    case Tokens::BOOL:
+    case Tokens::NUMBER:
+    case Tokens::STRING:
+        return OperatorType::LITERAL;
+    
+    // references
+    case Tokens::TEXT:
+        return OperatorType::REFERENCE;
+        
+    }
+}
+
+
+std::ostream& operator<<(std::ostream& stream, TokenType const& type)
+{
 
     switch (type)
     {
@@ -47,16 +128,14 @@ std::ostream& operator<<(std::ostream& stream, Tokens::TokenType const& type)
 }
 
 
-Tokens::Token::Token(TokenType type, int priority, unsigned long value) 
+Token::Token(TokenType type, int priority, unsigned long value) 
 : type(type), priority(priority), value(value)
 {
 
 }
 
-std::ostream& operator<<(std::ostream& stream, Tokens::Token const& token)
+std::ostream& operator<<(std::ostream& stream, Token const& token)
 {   
-
-    using namespace Tokens;
 
     switch (token.type)
     {
@@ -93,12 +172,10 @@ std::ostream& operator<<(std::ostream& stream, Tokens::Token const& token)
 }
 
 
+TokenList::TokenList() {};
 
 
-Tokens::TokenList::TokenList() {};
-
-
-void Tokens::TokenList::add(Token* token) 
+void TokenList::add(Token* token) 
 {   
     if (first == nullptr)
     {
@@ -112,7 +189,7 @@ void Tokens::TokenList::add(Token* token)
 }
 
 
-void Tokens::TokenList::remove(Token* token)
+void TokenList::remove(Token* token)
 {
     token->prev->next = token->next;
     token->next->prev = token->prev;
@@ -121,7 +198,7 @@ void Tokens::TokenList::remove(Token* token)
 }
 
 
-std::ostream& operator<<(std::ostream& stream, Tokens::TokenList const& list)
+std::ostream& operator<<(std::ostream& stream, TokenList const& list)
 {
     stream << "{\n";
     if (list.first == nullptr)
@@ -136,10 +213,8 @@ std::ostream& operator<<(std::ostream& stream, Tokens::TokenList const& list)
 }
 
 
-std::ostream& operator<<(std::ostream& stream, Tokens::OperatorType const& type)
+std::ostream& operator<<(std::ostream& stream, OperatorType const& type)
 {
-
-    using namespace Tokens;
 
     switch (type)
     {

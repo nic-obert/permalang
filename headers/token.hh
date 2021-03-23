@@ -46,6 +46,7 @@ namespace Tokens
         int priority;
         Value value;
 
+        OperatorType operatorType;
 
         Token* parent = nullptr;
 

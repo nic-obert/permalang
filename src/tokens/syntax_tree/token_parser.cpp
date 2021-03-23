@@ -9,86 +9,6 @@
 using namespace Tokens;
 
 
-OperatorType syntaxTypeOfToken(Token* token)
-{
-    switch (token->type)
-    {
-    // operators
-    case Tokens::KEYWORD: 
-    {
-        switch ((Keywords::Keywords) token->value)
-        {
-        case Keywords::Keywords::IF:
-            return OperatorType::BINARY;
-
-        case Keywords::Keywords::ELSE:
-        case Keywords::Keywords::BOOL:
-        case Keywords::Keywords::FLOAT:
-        case Keywords::Keywords::INT:
-        case Keywords::Keywords::STRING:
-            return OperatorType::UNARY;
-        }
-    }
-
-    case Tokens::ARITHMETIC_OP: 
-    {
-        using namespace operators::arithmetical;
-
-        switch ((ArithmeticalOperators) token->value)
-        {
-        case ArithmeticalOperators::SUM:
-        case ArithmeticalOperators::DIVISION:
-        case ArithmeticalOperators::MULTIPLICATION:
-        case ArithmeticalOperators::SUBTRACTION:
-        case ArithmeticalOperators::POWER:
-            return OperatorType::UNARY;
-        
-        case ArithmeticalOperators::INCREMENT:
-        case ArithmeticalOperators::DECREMENT:
-            return OperatorType::UNARY;
-        }
-    }
-
-    case Tokens::LOGICAL_OP: 
-    {
-        using namespace operators::logical;
-
-        switch ((LogicalOperators) token->value)
-        {
-        case LogicalOperators::AND:
-        case LogicalOperators::OR:
-        case LogicalOperators::EQUALITY:
-        case LogicalOperators::GREATER_EQUAL:
-        case LogicalOperators::INEQUALITY:
-        case LogicalOperators::LESS_EQUAL:
-        case LogicalOperators::GREATER_THAN:
-        case LogicalOperators::LESS_THAN:
-            return OperatorType::BINARY;
-        
-        case LogicalOperators::NOT:
-            return OperatorType::UNARY;
-        }
-    }
-
-    case Tokens::ASSIGNMENT_OP:
-    {
-        return OperatorType::BINARY;
-    }
-    
-    // literals
-    case Tokens::BOOL:
-    case Tokens::NUMBER:
-    case Tokens::STRING:
-        return OperatorType::LITERAL;
-    
-    // references
-    case Tokens::TEXT:
-        return OperatorType::REFERENCE;
-        
-    }
-}
-
-
 
 void binarySatisfy(Token* token, TokenType leftType, TokenType rightType)
 {
@@ -217,11 +137,13 @@ void Token::satisfy()
         case SUBTRACTION:
         case SUM:
             binarySatisfy(this, NUMBER, NUMBER);
+            operatorType = LITERAL;
             break;
         
         case INCREMENT:
         case DECREMENT:
             unarySatisfy(this, NUMBER, LEFT);
+            operatorType = REFERENCE;
             break;
         
         }
@@ -243,10 +165,12 @@ void Token::satisfy()
         case LESS_THAN:
         case LESS_EQUAL:
             binarySatisfy(this, BOOL, BOOL);
+            operatorType = LITERAL;
             break;
 
         case NOT:
             unarySatisfy(this, BOOL, RIGHT);
+            operatorType = LITERAL;
             break;
         }
 
@@ -266,6 +190,7 @@ void Token::satisfy()
         case ELEVATE:
         case MULTIPLY:
             binarySatisfy(this, TEXT, NUMBER);
+            operatorType = REFERENCE;
             break;
         }
 
@@ -282,6 +207,7 @@ void Token::satisfy()
         case Keywords::Keywords::STRING:
         case Keywords::Keywords::FLOAT:
             unarySatisfy(this, TEXT, RIGHT);
+            operatorType = REFERENCE;
             break;
         
         case Keywords::Keywords::IF:
