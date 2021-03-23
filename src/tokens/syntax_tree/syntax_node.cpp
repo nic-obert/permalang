@@ -45,17 +45,16 @@ SyntaxType syntaxTypeOfToken(Tokens::Token* token)
     {
         switch ((Keywords::Keywords) token->value)
         {
-        case Keywords::Keywords::BOOL:
-        case Keywords::Keywords::FLOAT:
-        case Keywords::Keywords::INT:
-        case Keywords::Keywords::STRING:
         case Keywords::Keywords::IF:
             return OPERATOR_BINARY;
 
         case Keywords::Keywords::ELSE:
+        case Keywords::Keywords::BOOL:
+        case Keywords::Keywords::FLOAT:
+        case Keywords::Keywords::INT:
+        case Keywords::Keywords::STRING:
             return OPERATOR_UNARY;
         }
-        break;
     }
 
     case Tokens::ARITHMETIC_OP: 
@@ -75,7 +74,6 @@ SyntaxType syntaxTypeOfToken(Tokens::Token* token)
         case ArithmeticalOperators::DECREMENT:
             return OPERATOR_UNARY;
         }
-        break;
     }
 
     case Tokens::LOGICAL_OP: 
@@ -97,7 +95,6 @@ SyntaxType syntaxTypeOfToken(Tokens::Token* token)
         case LogicalOperators::NOT:
             return OPERATOR_UNARY;
         }
-        break;
     }
 
     case Tokens::ASSIGNMENT_OP:
@@ -162,15 +159,24 @@ void binarySatisfy(SyntaxNode* node, Tokens::TokenType leftType, Tokens::TokenTy
     }
 
 
+    node->value = (Value) new SyntaxNode*[2] {node->prev, node->next};
+
     node->prev->parent = node;
     node->next->parent = node;
 
-    node->prev->next = nullptr;
-    node->prev->prev = nullptr;
-    node->next->next = nullptr;
-    node->next->prev = nullptr;
+    // remove nodes to the left and right if node
+    node->prev = node->prev->prev;
+    node->next = node->next->next;
 
-    node->value = (Value) new SyntaxNode*[2] {node->prev, node->next};
+    if (node->prev != nullptr)
+    {
+        node->prev->next = node;
+    }
+    if (node->next != nullptr)
+    {
+        node->next->prev = node;
+    }
+
 
 }
 
@@ -193,11 +199,16 @@ void unarySatisfy(SyntaxNode* node, Tokens::TokenType type, char side)
             exit(1);
         }
 
-        node->prev->parent = node;
-        node->prev->next = nullptr;
-        node->prev->prev = nullptr;
-
         node->value = (Value) node->prev;
+
+        node->prev->parent = node;
+
+        node->prev = node->prev->prev;
+        
+        if (node->prev != nullptr)
+        {
+            node->prev->next = node;
+        }
 
     } 
     else 
@@ -213,11 +224,16 @@ void unarySatisfy(SyntaxNode* node, Tokens::TokenType type, char side)
             exit(1);
         }
 
-        node->next->parent = node;
-        node->next->next = nullptr;
-        node->next->prev = nullptr;
-
         node->value = (Value) node->next;
+
+        node->next->parent = node;
+
+        node->next = node->next->next;
+
+        if (node->next != nullptr)
+        {
+            node->next->prev = node;
+        }
 
     }
 
@@ -233,11 +249,11 @@ void SyntaxNode::satisfy()
 
     switch (token->type)
     {
-    case ARITHMETIC_OP: {
-
+    case ARITHMETIC_OP:
+    {
         using namespace operators::arithmetical;
 
-        switch (token->value)
+        switch ((ArithmeticalOperators) token->value)
         {
         case POWER:
         case DIVISION:
@@ -256,11 +272,11 @@ void SyntaxNode::satisfy()
         break;
     }
     
-    case LOGICAL_OP: {
-
+    case LOGICAL_OP:
+    {
         using namespace operators::logical;
 
-        switch (token->value)
+        switch ((LogicalOperators) token->value)
         {
         case EQUALITY:
         case INEQUALITY:
@@ -281,11 +297,11 @@ void SyntaxNode::satisfy()
         break;
     }
 
-    case ASSIGNMENT_OP: {
-
+    case ASSIGNMENT_OP: 
+    {
         using namespace operators::assignment;
 
-        switch (token->value)
+        switch ((AssignmentOperators) token->value)
         {
         case ASSIGNMENT:
         case ADD:
@@ -295,8 +311,27 @@ void SyntaxNode::satisfy()
         case MULTIPLY:
             binarySatisfy(this, TEXT, NUMBER);
             break;
+        }
+
+        break;
+    }
+
+    case KEYWORD:
+    {
+        using namespace Keywords;
+
+        switch ((Keywords::Keywords) token->value)
+        {
+        case Keywords::Keywords::INT:
+        case Keywords::Keywords::STRING:
+        case Keywords::Keywords::FLOAT:
+            unarySatisfy(this, TEXT, RIGHT);
+            break;
         
-        default:
+        case Keywords::Keywords::IF:
+        case Keywords::Keywords::ELSE:
+            std::cerr << "not implemented" << std::endl;
+            exit(1);
             break;
         }
 
@@ -310,6 +345,6 @@ void SyntaxNode::satisfy()
 
 std::ostream& operator<<(std::ostream& stream, SyntaxNode const& node)
 {
-    return stream << node;
+    return stream << *node.token;
 }
 
