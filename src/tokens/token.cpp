@@ -9,7 +9,7 @@
 using namespace Tokens;
 
 
-OperatorType syntaxTypeOfToken(Token* token)
+OperatorType operatorTypeOfToken(Token* token)
 {
     switch (token->type)
     {
@@ -77,7 +77,8 @@ OperatorType syntaxTypeOfToken(Token* token)
     
     // literals
     case Tokens::BOOL:
-    case Tokens::NUMBER:
+    case Tokens::INT:
+    case Tokens::FLOAT:
     case Tokens::STRING:
         return OperatorType::LITERAL;
     
@@ -100,8 +101,11 @@ std::ostream& operator<<(std::ostream& stream, TokenType const& type)
     case TEXT:
         return stream << "TEXT";
 
-    case NUMBER:
-        return stream << "NUMBER";
+    case INT:
+        return stream << "INT";
+
+    case FLOAT:
+        return stream << "FLOAT";
         
     case STRING:
         return stream << "STRING";
@@ -131,42 +135,90 @@ std::ostream& operator<<(std::ostream& stream, TokenType const& type)
 Token::Token(TokenType type, int priority, unsigned long value) 
 : type(type), priority(priority), value(value)
 {
-
+    operatorType = operatorTypeOfToken(this);
 }
+
 
 std::ostream& operator<<(std::ostream& stream, Token const& token)
 {   
 
-    switch (token.type)
+    switch (token.operatorType)
     {
-    case TEXT:
-    case STRING: {
-        stream << "<" << token.type << ": " << *(std::string*)token.value << " (" << token.priority << ")>";
+    case LITERAL:
+    {
+        switch (token.type)
+        {
+        case TEXT:
+        case STRING: 
+        {
+            stream << "<" << token.type << ": " << *((std::string*) token.value) << " (" << token.priority << ")>";
+            return stream;
+        }
+        }
+
         break;
     }
-    case KEYWORD: {
-        stream << "<" << token.type << ": " << keywordName((Keywords::Keywords) token.value) << " (" << token.priority << ")>";
+    
+    case REFERENCE:
+    {
+
+        switch (token.type)
+        {
+        case INT:
+        case STRING:
+        case BOOL:
+        case FLOAT:
+            stream << "<" << token.type << "*: " << token.value << " (" << token.priority << ")>";
+            return stream;
+        
+        }
+
         break;
     }
-    case ARITHMETIC_OP: {
-        using namespace operators::arithmetical;
-        stream << "<" << token.type << ": " << arithmeticalOperatorName((operators::arithmetical::ArithmeticalOperators) token.value) << " (" << token.priority << ")>";
+        
+    case UNARY:
+    case BINARY:
+    {
+        
+        switch (token.type)
+        {
+        case KEYWORD: 
+        {
+            stream << "<" << token.type << ": " << keywordName((Keywords::Keywords) token.value) << " (" << token.priority << ")>";
+            return stream;
+        }
+
+        case ARITHMETIC_OP:
+        {
+            using namespace operators::arithmetical;
+            stream << "<" << token.type << ": " << arithmeticalOperatorName((operators::arithmetical::ArithmeticalOperators) token.value) << " (" << token.priority << ")>";
+            return stream;
+        }
+
+        case ASSIGNMENT_OP: 
+        {
+            using namespace operators::assignment;
+            stream << "<" << token.type << ": " << assignmentOperatorName((AssignmentOperators) token.value) << " (" << token.priority << ")>";
+            return stream;
+        }
+
+        case LOGICAL_OP: 
+        {
+            using namespace operators::logical;
+            stream << "<" << token.type << ": " << logicalOperatorName((LogicalOperators) token.value) << " (" << token.priority << ")>";
+            return stream;
+        }
+
+        }
+        
         break;
     }
-    case ASSIGNMENT_OP: {
-        using namespace operators::assignment;
-        stream << "<" << token.type << ": " << assignmentOperatorName((AssignmentOperators) token.value) << " (" << token.priority << ")>";
-        break;
+
     }
-    case LOGICAL_OP: {
-        using namespace operators::logical;
-        stream << "<" << token.type << ": " << logicalOperatorName((LogicalOperators) token.value) << " (" << token.priority << ")>";
-        break;
-    }
-    default:
-        stream << "<" << token.type << ": " << token.value << " (" << token.priority << ")>";
-        break;
-    }
+
+
+    // if not returned yet
+    stream << "<" << token.type << ": " << token.value << " (" << token.priority << ")>";
 
     return stream;
 }

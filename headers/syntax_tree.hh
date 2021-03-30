@@ -19,6 +19,12 @@ namespace syntax_tree
         Statement(Tokens::Token* root);
         Statement();
 
+
+        void satisfy(Tokens::Token* token);
+
+
+        void remove(Tokens::Token* token);
+
     };
 
 
@@ -59,7 +65,6 @@ namespace syntax_tree
 
 
         void parse();
-
 
     };
 

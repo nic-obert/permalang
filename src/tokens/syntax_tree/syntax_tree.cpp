@@ -108,7 +108,7 @@ void SyntaxTree::parse()
                 break;
             }
 
-            root->satisfy();
+            statement->satisfy(root);
             
         }
 
@@ -121,7 +121,7 @@ std::ostream& operator<<(std::ostream& stream, SyntaxTree const& tree)
 {
     for (Statement* statement = tree.statements.start; statement != nullptr; statement = statement->next)
     {
-        stream << *statement;
+        stream << *statement << "\n";
     }
 
     return stream;

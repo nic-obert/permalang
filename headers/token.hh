@@ -18,7 +18,8 @@ namespace Tokens
     {
         NONE,
         TEXT,
-        NUMBER,
+        INT,
+        FLOAT,
         STRING,
         ARITHMETIC_OP,
         ASSIGNMENT_OP,
@@ -54,9 +55,6 @@ namespace Tokens
         Token* next = nullptr;
 
         Token(TokenType type, int priority, Value value);
-
-
-        void satisfy();
 
     };
 

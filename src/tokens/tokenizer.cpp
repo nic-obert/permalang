@@ -25,12 +25,12 @@ Tokens::TokenList* Tokens::tokenize(std::string script)
 
         switch (type)
         {
-            case NUMBER: {
+            case INT: {
                 if (isDigit(c))
                 {
                     if (token == nullptr)
                     {
-                        token = new Token(NUMBER, LITERAL_P, toDigit(c));
+                        token = new Token(INT, LITERAL_P, toDigit(c));
                     } else {
                         token->value *= 10;
                         token->value += toDigit(c);
@@ -177,8 +177,8 @@ Tokens::TokenList* Tokens::tokenize(std::string script)
 
         if (isDigit(c))
         {
-            token = new Token(NUMBER, LITERAL_P, toDigit(c));
-            type = NUMBER;
+            token = new Token(INT, LITERAL_P, toDigit(c));
+            type = INT;
 
             continue;
         }

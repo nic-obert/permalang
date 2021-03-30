@@ -20,6 +20,27 @@ Statement::Statement()
 }
 
 
+void Statement::remove(Tokens::Token* token)
+{
+    // check first if token is root
+    if (token == root)
+    {
+        root = token->next;
+        return;
+    }
+
+    if (token->prev != nullptr)
+    {
+        token->prev->next = token->next;
+    }
+    if (token->next != nullptr)
+    {
+        token->next->prev = token->prev;
+    }
+    
+}
+
+
 std::ostream& operator<<(std::ostream& stream, syntax_tree::Statement const& statement)
 {
 
