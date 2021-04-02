@@ -5,6 +5,7 @@
 
 #include "token.hh"
 #include "syntax_tree.hh"
+#include "symbol_table.hh"
 
 
 std::string loadFile(const char* path)

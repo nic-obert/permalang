@@ -1,6 +1,7 @@
 #pragma once
 
 #include "token.hh"
+#include "symbol_table.hh"
 #include "utils.hh"
 
 
@@ -56,7 +57,7 @@ namespace syntax_tree
     public:
         
         Statements statements = nullptr;
-
+        
 
         SyntaxTree(Tokens::TokenList* tokens);
        

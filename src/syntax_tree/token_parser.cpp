@@ -2,6 +2,7 @@
 #include "keywords.hh"
 #include "operators.hh"
 #include "syntax_tree.hh"
+#include "symbol_table.hh"
 
 
 #define RIGHT 0
@@ -144,6 +145,8 @@ void declarationSatisfy(Token* token, TokenType type, syntax_tree::Statement* st
     }
 
     token->operatorType = REFERENCE;
+
+    symbol_table::SymbolTable::declare(token);
 
 }
 
