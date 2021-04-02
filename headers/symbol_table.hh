@@ -1,12 +1,23 @@
 #pragma once
 
 #include <unordered_map>
+#include <string>
 
 #include "token.hh"
 
 
 namespace symbol_table
 {
+
+    typedef struct Symbol
+    {
+        Value value;
+        Tokens::TokenType type;
+
+        Symbol(Value value, Tokens::TokenType type);
+
+    } Symbol;
+
 
     typedef struct Scope
     {
@@ -43,7 +54,7 @@ namespace symbol_table
     {
     private:
 
-        static std::unordered_map<Tokens::Token*, Value>* table;
+        static std::unordered_map<std::string, Symbol*>* table;
 
         static ScopeStack* scopes;
 
@@ -51,10 +62,10 @@ namespace symbol_table
 
     public:
 
-        static void assign(Tokens::Token* token, Value value);
+        static void assign(std::string* identifier, Symbol* symbol);
 
 
-        static void declare(Tokens::Token* token);
+        static void declare(std::string* identifier, Symbol* symbol);
 
 
         static void pushScope();
@@ -63,7 +74,7 @@ namespace symbol_table
         static void popScope();
 
 
-        static Value get(Tokens::Token* token);
+        static Symbol* get(std::string* identifier);
 
     };
 

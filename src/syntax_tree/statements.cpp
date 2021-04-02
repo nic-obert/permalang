@@ -20,11 +20,16 @@ Statement::Statement()
 }
 
 
-void Statement::remove(Tokens::Token* token)
+void Statement::remove(Tokens::Token* token, bool del)
 {
     // check first if token is root
     if (token == root)
     {
+        if (del)
+        {
+            delete root;
+        }
+        
         root = token->next;
         return;
     }
@@ -38,6 +43,11 @@ void Statement::remove(Tokens::Token* token)
         token->next->prev = token->prev;
     }
     
+    if (del)
+    {
+        delete token;
+    }
+
 }
 
 

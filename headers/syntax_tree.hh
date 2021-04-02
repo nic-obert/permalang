@@ -24,7 +24,7 @@ namespace syntax_tree
         void satisfy(Tokens::Token* token);
 
 
-        void remove(Tokens::Token* token);
+        void remove(Tokens::Token* token, bool del = false);
 
     };
 

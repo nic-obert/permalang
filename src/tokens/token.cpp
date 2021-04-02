@@ -168,9 +168,12 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         case STRING:
         case BOOL:
         case FLOAT:
-            stream << "<" << token.type << "*: " << token.value << " (" << token.priority << ")>";
+            stream << "<" << token.type << "*: " << *(std::string*) token.value << " (" << token.priority << ")>";
             return stream;
         
+        case TEXT:
+            stream << "<" << NONE << "*: " << *(std::string*) token.value << " (" << token.priority << ")>";
+            return stream;
         }
 
         break;

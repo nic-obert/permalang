@@ -7,6 +7,7 @@
 
 #define RIGHT 0
 #define LEFT 1
+#define DELETE true
 
 using namespace Tokens;
 
@@ -47,16 +48,6 @@ void binarySatisfy(Token* token, TokenType leftType, TokenType rightType, syntax
     statement->remove(token->prev);
     statement->remove(token->next);
 
-    if (token->prev != nullptr)
-    {
-        token->prev->next = token;
-    }
-    if (token->next != nullptr)
-    {
-        token->next->prev = token;
-    }
-
-
 }
 
 
@@ -81,11 +72,6 @@ void unarySatisfy(Token* token, TokenType type, char side, syntax_tree::Statemen
         token->prev->parent = token;
 
         statement->remove(token->prev);
-        
-        if (token->prev != nullptr)
-        {
-            token->prev->next = token;
-        }
 
     } 
     else 
@@ -107,11 +93,6 @@ void unarySatisfy(Token* token, TokenType type, char side, syntax_tree::Statemen
 
         statement->remove(token->next);
 
-        if (token->next != nullptr)
-        {
-            token->next->prev = token;
-        }
-
     }
 
 }
@@ -132,21 +113,17 @@ void declarationSatisfy(Token* token, TokenType type, syntax_tree::Statement* st
         exit(1);
     }
 
-    token->value = (Value) token->next;
+    token->value = token->next->value;
     token->type = type;
 
-    token->next->parent = token;
-
-    statement->remove(token->next);
-
-    if (token->next != nullptr)
-    {
-        token->next->prev = token;
-    }
+    statement->remove(token->next, DELETE);
 
     token->operatorType = REFERENCE;
 
-    symbol_table::SymbolTable::declare(token);
+    symbol_table::SymbolTable::declare(
+        (std::string*) token->value,
+        new symbol_table::Symbol(0, token->type)
+    );
 
 }
 
@@ -179,23 +156,18 @@ void assignSatisfy(Token* token, syntax_tree::Statement* statement)
     token->value = (Value) new Token*[2] {token->prev, token->next};
     token->type = token->prev->type;
 
-    token->prev->parent = token;
-    token->next->parent = token;
+    // update symbol table
+    symbol_table::SymbolTable::assign(
+        (std::string*) token->prev->value,
+        new symbol_table::Symbol(token->next->value, token->type)
+    );
 
     // remove tokens to the left and right
-    statement->remove(token->prev);
-    statement->remove(token->next);
+    statement->remove(token->prev, DELETE);
+    statement->remove(token->next, DELETE);
 
-    if (token->prev != nullptr)
-    {
-        token->prev->next = token;
-    }
-    if (token->next != nullptr)
-    {
-        token->next->prev = token;
-    }
-
-    token->operatorType = REFERENCE;
+    // remove operator token
+    statement->remove(token, DELETE);
 
 }
 
@@ -213,17 +185,10 @@ void incDecSatisfy(Token* token, syntax_tree::Statement* statement)
         exit(1);
     }
 
-    token->value = (Value) token->next;
-    token->type = token->next->type;
+    token->value = token->prev->value;
+    token->type = token->prev->type;
 
-    token->next->parent = token;
-
-    statement->remove(token->next);
-
-    if (token->next != nullptr)
-    {
-        token->next->prev = token;
-    }
+    statement->remove(token->prev, DELETE);
 
     token->operatorType = REFERENCE;
 }

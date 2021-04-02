@@ -10,50 +10,52 @@ using namespace symbol_table;
 
 
 // initialize Symbol Table
-std::unordered_map<Tokens::Token*, Value>* SymbolTable::table = 
-    new std::unordered_map<Tokens::Token*, Value>();
+std::unordered_map<std::string, Symbol*>* SymbolTable::table = 
+    new std::unordered_map<std::string, Symbol*>();
 
 ScopeStack* SymbolTable::scopes = new ScopeStack();
 
 
-void SymbolTable::assign(Tokens::Token* token, Value value)
+void SymbolTable::assign(std::string* identifier, Symbol* symbol)
 {
     // check if token was not declared
-    if (table->find(token) == table->end())
+    if (table->find(*identifier) == table->end())
     {
         // TODO implement error handling
-        std::cerr << *token << " was not declared" << std::endl;
+        std::cerr << *identifier << " was not declared" << std::endl;
         exit(1);
     }
 
+    // TODO implement type checking
+
     // dereference table since it's allocated on the heap
-    (*table)[token] = value;
+    (*table)[*identifier] = symbol;
 }
 
 
-void SymbolTable::declare(Tokens::Token* token)
+void SymbolTable::declare(std::string* identifier, Symbol* symbol)
 {
     // check if token was already declared
-    if (table->find(token) != table->end())
+    if (table->find(*identifier) != table->end())
     {
         // TODO implement error handling
         // TODO implement scope specific checking
-        std::cerr << *token << " was already declared" << std::endl;
+        std::cerr << *identifier << " was already declared" << std::endl;
         exit(1);
     }
 
-    (*table)[token] = 0;
+    (*table)[*identifier] = symbol;
 }
 
 
-Value SymbolTable::get(Tokens::Token* token)
+Symbol* SymbolTable::get(std::string* identifier)
 {
-    std::unordered_map<Tokens::Token*, Value>::iterator iterator;
-    iterator = table->find(token);
+    std::unordered_map<std::string, Symbol*>::iterator iterator;
+    iterator = table->find(*identifier);
 
     if (iterator == table->end())
     {
-        std::cerr << token << " was not declared" << std::endl;
+        std::cerr << *identifier << " was not declared" << std::endl;
         exit(1);
     }
 

@@ -90,7 +90,7 @@ void SyntaxTree::parse()
         while (true)
         {   
             
-            // return to 
+            // return to the beginning of the statement
             while (root->prev != nullptr)
             {
                 root = root->prev;
