@@ -22,7 +22,7 @@ void SymbolTable::assign(std::string* identifier, Symbol* symbol)
     if (table->find(*identifier) == table->end())
     {
         // TODO implement error handling
-        std::cerr << *identifier << " was not declared" << std::endl;
+        std::cerr << "\"" << *identifier << "\" was not declared" << std::endl;
         exit(1);
     }
 
@@ -40,7 +40,7 @@ void SymbolTable::declare(std::string* identifier, Symbol* symbol)
     {
         // TODO implement error handling
         // TODO implement scope specific checking
-        std::cerr << *identifier << " was already declared" << std::endl;
+        std::cerr << "\"" << *identifier << "\" was already declared" << std::endl;
         exit(1);
     }
 
@@ -55,7 +55,7 @@ Symbol* SymbolTable::get(std::string* identifier)
 
     if (iterator == table->end())
     {
-        std::cerr << *identifier << " was not declared" << std::endl;
+        std::cerr << "\"" << *identifier << "\" was not declared" << std::endl;
         exit(1);
     }
 

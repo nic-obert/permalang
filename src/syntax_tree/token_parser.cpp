@@ -130,6 +130,7 @@ void declarationSatisfy(Token* token, TokenType type, syntax_tree::Statement* st
 
 void assignSatisfy(Token* token, syntax_tree::Statement* statement)
 {
+
     if (token->prev == nullptr)
     {
         std::cerr << "Missing token of operator type " << REFERENCE << " to the left of " << *token << std::endl;
@@ -154,20 +155,16 @@ void assignSatisfy(Token* token, syntax_tree::Statement* statement)
 
 
     token->value = (Value) new Token*[2] {token->prev, token->next};
-    token->type = token->prev->type;
 
     // update symbol table
     symbol_table::SymbolTable::assign(
         (std::string*) token->prev->value,
-        new symbol_table::Symbol(token->next->value, token->type)
+        new symbol_table::Symbol(token->next->value, token->prev->type)
     );
 
     // remove tokens to the left and right
-    statement->remove(token->prev, DELETE);
-    statement->remove(token->next, DELETE);
-
-    // remove operator token
-    statement->remove(token, DELETE);
+    statement->remove(token->prev);
+    statement->remove(token->next);
 
 }
 
