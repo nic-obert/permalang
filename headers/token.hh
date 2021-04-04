@@ -4,6 +4,7 @@
 #include <iostream>
 
 #include "utils.hh"
+#include "op_codes.hh"
 
 
 #define isDigit(x) (47 < x && x < 58)
@@ -20,23 +21,14 @@ namespace Tokens
         TEXT,
         INT,
         FLOAT,
-        STRING,
         ARITHMETIC_OP,
-        ASSIGNMENT_OP,
         LOGICAL_OP,
+        ASSIGNMENT_OP,
+        STRING,
         KEYWORD,
         BOOL,
         ENDS // end of statement
     } TokenType;
-
-
-    typedef enum OperatorType
-    {
-        LITERAL,
-        REFERENCE,
-        UNARY,
-        BINARY
-    } OperatorType;
 
 
     class Token
@@ -47,14 +39,15 @@ namespace Tokens
         int priority;
         Value value;
 
-        OperatorType operatorType;
+        OpCodes opCode;
 
         Token* parent = nullptr;
 
         Token* prev = nullptr;
         Token* next = nullptr;
 
-        Token(TokenType type, int priority, Value value);
+        Token(TokenType type, int priority, OpCodes opCode, Value value);
+        Token(TokenType type, int priority, OpCodes opCode);
 
     };
 
@@ -88,6 +81,4 @@ std::ostream& operator<<(std::ostream& stream, Tokens::Token const& token);
 std::ostream& operator<<(std::ostream& stream, Tokens::TokenList const& token);
 
 std::ostream& operator<<(std::ostream& stream, Tokens::TokenType const& token);
-
-std::ostream& operator<<(std::ostream& stream, Tokens::OperatorType const& type);
 

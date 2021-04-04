@@ -1,8 +1,17 @@
 #pragma once
 
+#define isLogicalOp(x) (OpCodes::LOGICAL_ < x && x < OpCodes::ARITHMETICAL_)
+#define isArithmeticalOp(x) (OpCodes::ARITHMETICAL_ < x && x < OpCodes::ASSIGNMENT_)
+#define isAssignmentOp(x) (OpCodes::ASSIGNMENT_ < x && x < OpCodes::DECLARATION_)
+#define isDeclarationOp(x) (OpCodes::DECLARATION_ < x && x < OpCodes::LITERAL_)
+#define isFlowOp(x) (OpCodes::FLOW_ < x && x < OpCodes::NO_OP)
+
+
 
 typedef enum OpCodes
 {
+    LOGICAL_,
+
     LOGICAL_AND,
     LOGICAL_OR,
     LOGICAL_EQ,
@@ -13,12 +22,18 @@ typedef enum OpCodes
     LOGICAL_GREATER_EQ,
     LOGICAL_NOT,
 
+    ARITHMETICAL_,
+
     ARITHMETICAL_SUM,
     ARITHMETICAL_SUB,
     ARITHMETICAL_MUL,
     ARITHMETICAL_DIV,
     ARITHMETICAL_POW,
     ARITHMETICAL_MOD,
+    ARITHMETICAL_INC,
+    ARITHMETICAL_DEC,
+
+    ASSIGNMENT_,
 
     ASSIGNMENT_ASSIGN,
     ASSIGNMENT_ADD,
@@ -27,11 +42,25 @@ typedef enum OpCodes
     ASSIGNMENT_DIV,
     ASSIGNMENT_POW,
 
-    DECLARATION,
+    DECLARATION_,
+
+    DECLARATION_INT,
+    DECLARATION_FLOAT,
+    DECLARATION_STRING,
+    DECLARATION_BOOL,
 
     LITERAL,
 
-    REFERENCE
+    REFERENCE,
+
+    FLOW_,
+
+    FLOW_IF,
+    FLOW_ELSE,
+    FLOW_FOR,
+    FLOW_WHILE,
+
+    NO_OP
 
 } OpCodes;
 

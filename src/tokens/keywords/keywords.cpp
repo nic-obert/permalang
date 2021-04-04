@@ -3,66 +3,73 @@
 
 #include "priorities.hh"
 #include "keywords.hh"
+#include "op_codes.hh"
 
 
 
-const char* Keywords::keywordName(Keywords keyword)
+const char* Keywords::keywordName(OpCodes keyword)
 {
     switch (keyword)
     {
-    case IF:
+    case FLOW_IF:
         return "if";
     
-    case ELSE:
+    case FLOW_ELSE:
         return "else";
             
-    case INT:
+    case DECLARATION_INT:
         return "int";
     
-    case BOOL:
+    case DECLARATION_BOOL:
         return "bool";
     
-    case FLOAT:
+    case DECLARATION_FLOAT:
         return "float";
             
-    case STRING:
+    case DECLARATION_STRING:
         return "string";
 
     }
+
+    return "UNDEFINED KEYWORD";
 }
 
 
-Keywords::Keywords Keywords::isKeyword(std::string word)
+OpCodes Keywords::isKeyword(std::string word)
 {
     auto keyword = keywordsMap.find(word);
     if (keyword == keywordsMap.end())
-        return __NOKEY;
+    {
+        return OpCodes::NO_OP;
+    }
     return keyword->second;
 }
 
 
-int Keywords::keywordPriority(Keywords keyword)
+int Keywords::keywordPriority(OpCodes keyword)
 {
     switch (keyword)
     {
-    case IF:
+    case FLOW_IF:
         return IF_P;
     
-    case ELSE:
+    case FLOW_ELSE:
         return ELSE_P;
     
-    case INT:
+    case DECLARATION_INT:
         return DECLARATION_P;
     
-    case BOOL:
+    case DECLARATION_BOOL:
         return DECLARATION_P;
 
-    case FLOAT:
+    case DECLARATION_FLOAT:
         return DECLARATION_P;
     
-    case STRING:
+    case DECLARATION_STRING:
         return DECLARATION_P;
     
     }
+
+    return 0;
 }
 

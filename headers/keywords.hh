@@ -1,43 +1,32 @@
 #pragma once
 
 #include <unordered_map>
+#include <string>
 
 #include "priorities.hh"
+#include "op_codes.hh"
 
 
 namespace Keywords
 {
 
-    typedef enum Keywords
-    {
-        __NOKEY,
-        IF,
-        ELSE,
-        INT,
-        BOOL,
-        FLOAT,
-        STRING
-    } Keywords;
+    const char* keywordName(OpCodes keyword);
 
 
-    const char* keywordName(Keywords keyword);
+    const std::unordered_map<std::string, OpCodes> keywordsMap ({
+            {"if", OpCodes::FLOW_IF},
+            {"else", OpCodes::FLOW_ELSE},
+            {"int", DECLARATION_INT},
+            {"bool", DECLARATION_BOOL},
+            {"float", DECLARATION_FLOAT},
+            {"string", DECLARATION_STRING}
+    });
 
 
-    const std::unordered_map<std::string, Keywords> keywordsMap = 
-    {
-        {"if", IF},
-        {"else", ELSE},
-        {"int", INT},
-        {"bool", BOOL},
-        {"float", FLOAT},
-        {"string", STRING}
-    };
+    int keywordPriority(OpCodes keyword);
 
 
-    int keywordPriority(Keywords keyword);
-
-
-    Keywords isKeyword(std::string word);
+    OpCodes isKeyword(std::string word);
 
 };
 

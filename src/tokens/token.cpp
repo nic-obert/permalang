@@ -4,95 +4,18 @@
 #include "token.hh"
 #include "operators.hh"
 #include "keywords.hh"
+#include "utils.hh"
+#include "op_codes.hh"
 
 
 using namespace Tokens;
 
 
-OperatorType operatorTypeOfToken(Token* token)
-{
-    switch (token->type)
-    {
-    // operators
-    case Tokens::KEYWORD: 
-    {
-        switch ((Keywords::Keywords) token->value)
-        {
-        case Keywords::Keywords::IF:
-            return OperatorType::BINARY;
 
-        case Keywords::Keywords::ELSE:
-        case Keywords::Keywords::BOOL:
-        case Keywords::Keywords::FLOAT:
-        case Keywords::Keywords::INT:
-        case Keywords::Keywords::STRING:
-            return OperatorType::UNARY;
-        }
-    }
-
-    case Tokens::ARITHMETIC_OP: 
-    {
-        using namespace operators::arithmetical;
-
-        switch ((ArithmeticalOperators) token->value)
-        {
-        case ArithmeticalOperators::SUM:
-        case ArithmeticalOperators::DIVISION:
-        case ArithmeticalOperators::MULTIPLICATION:
-        case ArithmeticalOperators::SUBTRACTION:
-        case ArithmeticalOperators::POWER:
-            return OperatorType::UNARY;
-        
-        case ArithmeticalOperators::INCREMENT:
-        case ArithmeticalOperators::DECREMENT:
-            return OperatorType::UNARY;
-        }
-    }
-
-    case Tokens::LOGICAL_OP: 
-    {
-        using namespace operators::logical;
-
-        switch ((LogicalOperators) token->value)
-        {
-        case LogicalOperators::AND:
-        case LogicalOperators::OR:
-        case LogicalOperators::EQUALITY:
-        case LogicalOperators::GREATER_EQUAL:
-        case LogicalOperators::INEQUALITY:
-        case LogicalOperators::LESS_EQUAL:
-        case LogicalOperators::GREATER_THAN:
-        case LogicalOperators::LESS_THAN:
-            return OperatorType::BINARY;
-        
-        case LogicalOperators::NOT:
-            return OperatorType::UNARY;
-        }
-    }
-
-    case Tokens::ASSIGNMENT_OP:
-    {
-        return OperatorType::BINARY;
-    }
-    
-    // literals
-    case Tokens::BOOL:
-    case Tokens::INT:
-    case Tokens::FLOAT:
-    case Tokens::STRING:
-        return OperatorType::LITERAL;
-    
-    // references
-    case Tokens::TEXT:
-        return OperatorType::REFERENCE;
-        
-    }
-}
 
 
 std::ostream& operator<<(std::ostream& stream, TokenType const& type)
 {
-
     switch (type)
     {
     case NONE:
@@ -132,17 +55,24 @@ std::ostream& operator<<(std::ostream& stream, TokenType const& type)
 }
 
 
-Token::Token(TokenType type, int priority, unsigned long value) 
-: type(type), priority(priority), value(value)
+Token::Token(TokenType type, int priority, OpCodes opCode, Value value) 
+: type(type), priority(priority), value(value), opCode(opCode)
 {
-    operatorType = operatorTypeOfToken(this);
+    
+}
+
+
+Token::Token(TokenType type, int priority, OpCodes opCode) 
+: type(type), priority(priority), value(0), opCode(opCode)
+{
+    
 }
 
 
 std::ostream& operator<<(std::ostream& stream, Token const& token)
 {   
 
-    switch (token.operatorType)
+    switch (token.opCode)
     {
     case LITERAL:
     {
@@ -179,45 +109,40 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         break;
     }
         
-    case UNARY:
-    case BINARY:
+    default:
     {
         
-        switch (token.type)
+        if (token.type == KEYWORD) 
         {
-        case KEYWORD: 
-        {
-            stream << "<" << token.type << ": " << keywordName((Keywords::Keywords) token.value) << " (" << token.priority << ")>";
+            stream << "<" << token.type << ": " << Keywords::keywordName(token.opCode) << " (" << token.priority << ")>";
             return stream;
         }
 
-        case ARITHMETIC_OP:
+        if (isArithmeticalOp(token.type))
         {
             using namespace operators::arithmetical;
             stream << "<" << token.type << ": " << arithmeticalOperatorName((operators::arithmetical::ArithmeticalOperators) token.value) << " (" << token.priority << ")>";
             return stream;
         }
 
-        case ASSIGNMENT_OP: 
+        if (isAssignmentOp(token.type))
         {
             using namespace operators::assignment;
             stream << "<" << token.type << ": " << assignmentOperatorName((AssignmentOperators) token.value) << " (" << token.priority << ")>";
             return stream;
         }
 
-        case LOGICAL_OP: 
+        if (isLogicalOp(token.type))
         {
             using namespace operators::logical;
             stream << "<" << token.type << ": " << logicalOperatorName((LogicalOperators) token.value) << " (" << token.priority << ")>";
             return stream;
         }
-
-        }
         
         break;
-    }
+    } // default
 
-    }
+    } // switch (token.opCode)
 
 
     // if not returned yet
@@ -266,26 +191,4 @@ std::ostream& operator<<(std::ostream& stream, TokenList const& list)
 
     stream << "}\n";
 }
-
-
-std::ostream& operator<<(std::ostream& stream, OperatorType const& type)
-{
-
-    switch (type)
-    {
-    case REFERENCE:
-        return stream << "REFERENCE";
-    
-    case LITERAL:
-        return stream << "LITERAL";
-
-    case BINARY:
-        return stream << "OPERATOR_BINARY";
-    
-    case UNARY:
-        return stream << "OPERATOR_UNARY";
-    }
-
-}
-
 
