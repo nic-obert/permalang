@@ -1,6 +1,5 @@
 #include "op_codes.hh"
 #include "token.hh"
-#include "operators.hh"
 #include "keywords.hh"
 #include "utils.hh"
 
@@ -8,23 +7,23 @@
 #define AddToken tokens->add(token); token = nullptr;
 
 
-Tokens::TokenList* Tokens::tokenize(std::string script) 
+Tokens::TokenList* Tokens::tokenize(std::string& script) 
 {
     using namespace Tokens;
-    using namespace operators::arithmetical;
-    using namespace operators::logical;
-    using namespace operators::assignment;
 
     TokenList* tokens = new TokenList();
 
-    Token* token;
+    Token* token = nullptr;
+
 
     char c;
     for (uint i = 0; (c = script[i]) != 0; i++)
     {
 
-        switch (token->opCode)
+        if (token != nullptr)
         {
+            switch (token->opCode)
+            {
             case OpCodes::LITERAL:
             {
                 switch (token->type)
@@ -198,7 +197,9 @@ Tokens::TokenList* Tokens::tokenize(std::string script)
                 break;
             }
 
-        } // switch (token->opCodes)
+            } // switch (token->opCodes)
+
+        } // if (token != nullptr)
 
 
         if (isDigit(c))
@@ -250,7 +251,7 @@ Tokens::TokenList* Tokens::tokenize(std::string script)
 
         if (isText(c))
         {
-            token = new Token(TEXT, LITERAL_P, OpCodes::LITERAL, (Value) (new std::string {c}));
+            token = new Token(TEXT, LITERAL_P, OpCodes::NO_OP, (Value) (new std::string {c}));
             continue;
         }
 

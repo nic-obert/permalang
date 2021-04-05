@@ -21,9 +21,6 @@ namespace Tokens
         TEXT,
         INT,
         FLOAT,
-        ARITHMETIC_OP,
-        LOGICAL_OP,
-        ASSIGNMENT_OP,
         STRING,
         KEYWORD,
         BOOL,
@@ -70,7 +67,7 @@ namespace Tokens
     };
 
 
-    TokenList* tokenize(std::string script);
+    TokenList* tokenize(std::string& script);
     
 
 };

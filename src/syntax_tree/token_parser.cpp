@@ -1,8 +1,7 @@
 #include "token.hh"
-#include "keywords.hh"
-#include "operators.hh"
 #include "syntax_tree.hh"
 #include "symbol_table.hh"
+#include "op_codes.hh"
 
 
 #define RIGHT 0
@@ -107,7 +106,7 @@ void declarationSatisfy(Token* token, TokenType type, syntax_tree::Statement* st
         std::cerr << "Missing token of operator type " << REFERENCE << " to the right of " << *token << std::endl;
         exit(1);
     }
-    if (token->next->operatorType != REFERENCE)
+    if (token->next->opCode != REFERENCE)
     {
         std::cerr << "Token " << *token << " requires token of operator type " << REFERENCE << " to the right, but " << *token->next << " was provided" << std::endl;
         exit(1);
@@ -118,7 +117,7 @@ void declarationSatisfy(Token* token, TokenType type, syntax_tree::Statement* st
 
     statement->remove(token->next, DELETE);
 
-    token->operatorType = REFERENCE;
+    token->opCode = REFERENCE;
 
     symbol_table::SymbolTable::declare(
         (std::string*) token->value,
@@ -142,7 +141,7 @@ void assignSatisfy(Token* token, syntax_tree::Statement* statement)
         exit(1);
     }
 
-    if (token->prev->operatorType != REFERENCE)
+    if (token->prev->opCode != REFERENCE)
     {
         std::cerr << "Token " << *token << " requires token of operator type " << REFERENCE << " to the left, but " << *token->prev << " was provided" << std::endl;
             exit(1);
@@ -176,7 +175,7 @@ void incDecSatisfy(Token* token, syntax_tree::Statement* statement)
         std::cerr << "Missing token of operator type " << REFERENCE << " to the left of " << *token << std::endl;
         exit(1);
     }
-    if (token->next->operatorType != REFERENCE)
+    if (token->next->opCode != REFERENCE)
     {
         std::cerr << "Token " << *token << " requires token of operator type " << REFERENCE << " to the left, but " << *token->prev << " was provided" << std::endl;
         exit(1);
@@ -187,7 +186,7 @@ void incDecSatisfy(Token* token, syntax_tree::Statement* statement)
 
     statement->remove(token->prev, DELETE);
 
-    token->operatorType = REFERENCE;
+    token->opCode = REFERENCE;
 }
 
 
@@ -197,104 +196,84 @@ void syntax_tree::Statement::satisfy(Token* token)
     // set token's priority to 0 right away so that it doesn't get evaluated multiple times
     token->priority = 0;
 
-    switch (token->type)
+    switch (token->opCode)
     {
-    case ARITHMETIC_OP:
+    case ARITHMETICAL_SUM:
+    case ARITHMETICAL_SUB:
+    case ARITHMETICAL_MUL:
+    case ARITHMETICAL_DIV:
+    case ARITHMETICAL_POW:
     {
-        using namespace operators::arithmetical;
+        binarySatisfy(token, INT, INT, this);
+        token->opCode = LITERAL;
+        break;
+    }
 
-        switch ((ArithmeticalOperators) token->value)
-        {
-        case POWER:
-        case DIVISION:
-        case MULTIPLICATION:
-        case SUBTRACTION:
-        case SUM:
-            binarySatisfy(token, INT, INT, this);
-            token->operatorType = LITERAL;
-            break;
-        
-        case INCREMENT:
-        case DECREMENT:
-            incDecSatisfy(token, this);
-            break;
-        
-        }
+    case ARITHMETICAL_INC:
+    case ARITHMETICAL_DEC:
+    {
+        incDecSatisfy(token, this);
+        break;
+    }
+
+    case LOGICAL_EQ:
+    case LOGICAL_NOT_EQ:
+    case LOGICAL_AND:
+    case LOGICAL_OR:
+    case LOGICAL_LESS:
+    case LOGICAL_LESS_EQ:
+    case LOGICAL_GREATER:
+    case LOGICAL_GREATER_EQ:
+    {
+        binarySatisfy(token, BOOL, BOOL, this);
+        token->opCode = LITERAL;
         break;
     }
     
-    case LOGICAL_OP:
+    case LOGICAL_NOT:
     {
-        using namespace operators::logical;
-
-        switch ((LogicalOperators) token->value)
-        {
-        case EQUALITY:
-        case INEQUALITY:
-        case AND:
-        case OR:
-        case GREATER_THAN:
-        case GREATER_EQUAL:
-        case LESS_THAN:
-        case LESS_EQUAL:
-            binarySatisfy(token, BOOL, BOOL, this);
-            token->operatorType = LITERAL;
-            break;
-
-        case NOT:
-            unarySatisfy(token, BOOL, RIGHT, this);
-            token->operatorType = LITERAL;
-            break;
-        }
-
+        unarySatisfy(token, BOOL, RIGHT, this);
+        token->opCode = LITERAL;
         break;
     }
 
-    case ASSIGNMENT_OP: 
+
+    case ASSIGNMENT_ASSIGN:
+    case ASSIGNMENT_ADD:
+    case ASSIGNMENT_SUB:
+    case ASSIGNMENT_DIV:
+    case ASSIGNMENT_POW:
+    case ASSIGNMENT_MUL:
     {
-        using namespace operators::assignment;
-
-        switch ((AssignmentOperators) token->value)
-        {
-        case ASSIGNMENT:
-        case ADD:
-        case SUBTRACT:
-        case DIVIDE:
-        case ELEVATE:
-        case MULTIPLY:
-            assignSatisfy(token, this);
-            break;
-        }
-
+        assignSatisfy(token, this);
         break;
     }
 
-    case KEYWORD:
+
+    case DECLARATION_INT:
+        declarationSatisfy(token, TokenType::INT, this);
+        break;
+    case DECLARATION_STRING:
+        declarationSatisfy(token, TokenType::STRING, this);
+        break;
+    case DECLARATION_FLOAT:
+        declarationSatisfy(token, TokenType::FLOAT, this);
+        break;
+    case DECLARATION_BOOL:
+        declarationSatisfy(token, TokenType::BOOL, this);
+        break;
+    
+    case FLOW_IF:
+    case FLOW_ELSE:
+    case FLOW_WHILE:
+    case FLOW_FOR:
     {
-
-        switch ((Keywords::Keywords) token->value)
-        {
-        case Keywords::Keywords::INT:
-            declarationSatisfy(token, TokenType::INT, this);
-            break;
-        case Keywords::Keywords::STRING:
-            declarationSatisfy(token, TokenType::STRING, this);
-            break;
-        case Keywords::Keywords::FLOAT:
-            declarationSatisfy(token, TokenType::FLOAT, this);
-            break;
-        
-        case Keywords::Keywords::IF:
-        case Keywords::Keywords::ELSE:
-            std::cerr << "not implemented" << std::endl;
-            exit(1);
-            break;
-        }
-
+        std::cerr << "not implemented" << std::endl;
+        exit(1);
         break;
     }
 
-    }
+    } // switch (token->opCode)
 
 }
 

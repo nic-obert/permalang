@@ -1,32 +1,34 @@
-
+#include "op_codes.hh"
 #include "token.hh"
 #include "operators.hh"
 
 
 
-const char* operators::assignment::assignmentOperatorName(AssignmentOperators op)
+const char* operators::assignment::assignmentOperatorName(OpCodes op)
 {
     switch (op)
     {
-    case ASSIGNMENT:
+    case ASSIGNMENT_ASSIGN:
         return "=";
     
-    case ADD:
+    case ASSIGNMENT_ADD:
         return "+=";
 
-    case SUBTRACT:
+    case ASSIGNMENT_SUB:
         return "-=";
 
-    case MULTIPLY:
+    case ASSIGNMENT_MUL:
         return "*=";
 
-    case DIVIDE:
+    case ASSIGNMENT_DIV:
         return "/=";
     
-    case ELEVATE:
+    case ASSIGNMENT_POW:
         return "^=";
     
     }
+
+    return "UNDEFINED ASSIGNMENT OPERATOR";
 }
 
 

@@ -2,6 +2,7 @@
 
 #include "token.hh"
 #include "syntax_tree.hh"
+#include "op_codes.hh"
 
 
 namespace operators{};
@@ -10,20 +11,7 @@ namespace operators{};
 namespace operators::arithmetical
 {
 
-
-    typedef enum ArithmeticalOperators
-    {
-        SUM,
-        SUBTRACTION,
-        MULTIPLICATION,
-        DIVISION,
-        POWER,
-        INCREMENT,
-        DECREMENT
-    } ArithmeticalOperators;
-
-
-    const char* arithmeticalOperatorName(ArithmeticalOperators op);
+    const char* arithmeticalOperatorName(OpCodes op);
 
 };
 
@@ -31,21 +19,7 @@ namespace operators::arithmetical
 namespace operators::logical
 {
 
-    typedef enum LogicalOperators
-    {
-        EQUALITY,
-        INEQUALITY,
-        AND,
-        OR,
-        GREATER_THAN,
-        LESS_THAN,
-        GREATER_EQUAL,
-        LESS_EQUAL,
-        NOT
-    } LogicalOperator;
-
-
-    const char* logicalOperatorName(LogicalOperators op);
+    const char* logicalOperatorName(OpCodes op);
     
 };
 
@@ -53,17 +27,7 @@ namespace operators::logical
 namespace operators::assignment
 {
 
-    typedef enum AssignmentOperators
-    {
-        ASSIGNMENT,
-        ADD,
-        SUBTRACT,
-        MULTIPLY,
-        DIVIDE,
-        ELEVATE
-    } AssignmentOperators;
-
-
-    const char* assignmentOperatorName(AssignmentOperators op);
+    const char* assignmentOperatorName(OpCodes op);
 
 };
+

@@ -1,5 +1,9 @@
 #pragma once
 
+
+#include "iostream"
+
+
 #define isLogicalOp(x) (OpCodes::LOGICAL_ < x && x < OpCodes::ARITHMETICAL_)
 #define isArithmeticalOp(x) (OpCodes::ARITHMETICAL_ < x && x < OpCodes::ASSIGNMENT_)
 #define isAssignmentOp(x) (OpCodes::ASSIGNMENT_ < x && x < OpCodes::DECLARATION_)
@@ -63,4 +67,7 @@ typedef enum OpCodes
     NO_OP
 
 } OpCodes;
+
+
+std::ostream& operator<<(std::ostream& stream, OpCodes const& opCode);
 

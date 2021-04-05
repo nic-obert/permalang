@@ -11,9 +11,6 @@
 using namespace Tokens;
 
 
-
-
-
 std::ostream& operator<<(std::ostream& stream, TokenType const& type)
 {
     switch (type)
@@ -32,15 +29,6 @@ std::ostream& operator<<(std::ostream& stream, TokenType const& type)
         
     case STRING:
         return stream << "STRING";
-    
-    case ARITHMETIC_OP:
-        return stream << "ARITHMETIC OPERATOR";
-    
-    case ASSIGNMENT_OP:
-        return stream << "ASSIGNMENT OPERATOR";
-
-    case LOGICAL_OP:
-        return stream << "LOGICAL OPERATOR";
 
     case KEYWORD:
         return stream << "KEYWORD";
@@ -114,28 +102,28 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         
         if (token.type == KEYWORD) 
         {
-            stream << "<" << token.type << ": " << Keywords::keywordName(token.opCode) << " (" << token.priority << ")>";
+            stream << "<" << TokenType::KEYWORD << ": " << Keywords::keywordName(token.opCode) << " (" << token.priority << ")>";
             return stream;
         }
 
-        if (isArithmeticalOp(token.type))
+        if (isArithmeticalOp(token.opCode))
         {
             using namespace operators::arithmetical;
-            stream << "<" << token.type << ": " << arithmeticalOperatorName((operators::arithmetical::ArithmeticalOperators) token.value) << " (" << token.priority << ")>";
+            stream << "<ARITHMETICAL OPERATOR: " << arithmeticalOperatorName(token.opCode) << " (" << token.priority << ")>";
             return stream;
         }
 
-        if (isAssignmentOp(token.type))
+        if (isAssignmentOp(token.opCode))
         {
             using namespace operators::assignment;
-            stream << "<" << token.type << ": " << assignmentOperatorName((AssignmentOperators) token.value) << " (" << token.priority << ")>";
+            stream << "<ASSIGNMENT OPERATOR: " << assignmentOperatorName(token.opCode) << " (" << token.priority << ")>";
             return stream;
         }
 
-        if (isLogicalOp(token.type))
+        if (isLogicalOp(token.opCode))
         {
             using namespace operators::logical;
-            stream << "<" << token.type << ": " << logicalOperatorName((LogicalOperators) token.value) << " (" << token.priority << ")>";
+            stream << "<LOGICAL OPERATOR: " << logicalOperatorName(token.opCode) << " (" << token.priority << ")>";
             return stream;
         }
         

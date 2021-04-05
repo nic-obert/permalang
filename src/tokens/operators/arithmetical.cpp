@@ -1,35 +1,38 @@
-
+#include "op_codes.hh"
 #include "token.hh"
 #include "operators.hh"
 #include "syntax_tree.hh"
 
 
 
-const char* operators::arithmetical::arithmeticalOperatorName(ArithmeticalOperators op)
+const char* operators::arithmetical::arithmeticalOperatorName(OpCodes op)
 {
     switch (op)
     {
-    case SUM:
+    case ARITHMETICAL_SUM:
         return "+";
 
-    case SUBTRACTION:
+    case ARITHMETICAL_SUB:
         return "-";
     
-    case MULTIPLICATION:
+    case ARITHMETICAL_MUL:
         return "*";
 
-    case DIVISION:
+    case ARITHMETICAL_DIV:
         return "/";
 
-    case POWER:
+    case ARITHMETICAL_POW:
         return "^";
     
-    case INCREMENT:
+    case ARITHMETICAL_INC:
         return "++";
 
-    case DECREMENT:
+    case ARITHMETICAL_DEC:
         return "--";
     
     }
+
+    return "UNDEFINED ARITHMETICAL OPERATOR";
+
 }
 
