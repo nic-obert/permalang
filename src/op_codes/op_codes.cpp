@@ -83,3 +83,45 @@ std::ostream& operator<<(std::ostream& stream, OpCodes const& opCode)
     return stream << "UNDEFINED OPCODE";
 }
 
+
+OpType operatorType(OpCodes op)
+{
+    switch (op)
+    {
+    case LOGICAL_AND:
+    case LOGICAL_NOT_EQ:
+    case LOGICAL_EQ:
+    case LOGICAL_GREATER:
+    case LOGICAL_GREATER_EQ:
+    case LOGICAL_LESS:
+    case LOGICAL_LESS_EQ:
+    case ARITHMETICAL_SUM:
+    case ARITHMETICAL_MUL:
+    case ARITHMETICAL_DIV:
+    case ARITHMETICAL_SUB:
+    case ARITHMETICAL_MOD:
+    case ARITHMETICAL_POW:
+    case ASSIGNMENT_ADD:
+    case ASSIGNMENT_DIV:
+    case ASSIGNMENT_ASSIGN:
+    case ASSIGNMENT_MUL:
+    case ASSIGNMENT_POW:
+    case ASSIGNMENT_SUB:
+        return OpType::BINARY;
+    
+    case LOGICAL_NOT:
+    case ARITHMETICAL_DEC:
+    case ARITHMETICAL_INC:
+    case DECLARATION_BOOL:
+    case DECLARATION_FLOAT:
+    case DECLARATION_INT:
+    case DECLARATION_STRING:
+        return OpType::UNARY;
+    
+    default:
+        return OpType::STANDALONE;
+    
+    }
+}
+
+

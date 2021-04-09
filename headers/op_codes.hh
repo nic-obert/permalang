@@ -1,15 +1,30 @@
 #pragma once
 
 
-#include "iostream"
+#include <iostream>
 
 
 #define isLogicalOp(x) (OpCodes::LOGICAL_ < x && x < OpCodes::ARITHMETICAL_)
+
 #define isArithmeticalOp(x) (OpCodes::ARITHMETICAL_ < x && x < OpCodes::ASSIGNMENT_)
+
 #define isAssignmentOp(x) (OpCodes::ASSIGNMENT_ < x && x < OpCodes::DECLARATION_)
+
 #define isDeclarationOp(x) (OpCodes::DECLARATION_ < x && x < OpCodes::LITERAL_)
+
 #define isFlowOp(x) (OpCodes::FLOW_ < x && x < OpCodes::NO_OP)
 
+#define isValue(x) (OpCodes::LITERAL == x || OpCodes::REFERENCE == x)
+
+#define isOperator(x) (!isValue(x) && x != OpCodes::NO_OP)
+
+
+typedef enum OpType
+{
+    STANDALONE, // 0
+    UNARY,      // 1
+    BINARY      // 2
+} OpType;
 
 
 typedef enum OpCodes
@@ -67,6 +82,9 @@ typedef enum OpCodes
     NO_OP
 
 } OpCodes;
+
+
+OpType operatorType(OpCodes op);
 
 
 std::ostream& operator<<(std::ostream& stream, OpCodes const& opCode);

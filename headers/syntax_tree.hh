@@ -42,12 +42,6 @@ namespace syntax_tree
 
 
         void add(Statement* statement);
-
-
-        Tokens::Token* getFirst() const;
-
-
-        Tokens::Token* getLast() const;    
     
     };
 

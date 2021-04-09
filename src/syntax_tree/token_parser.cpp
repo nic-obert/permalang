@@ -37,7 +37,7 @@ void binarySatisfy(Token* token, TokenType leftType, TokenType rightType, syntax
         exit(1);
     }
 
-
+    // pointer to array of token pointers
     token->value = (Value) new Token*[2] {token->prev, token->next};
 
     token->prev->parent = token;

@@ -6,6 +6,7 @@
 #include "token.hh"
 #include "syntax_tree.hh"
 #include "symbol_table.hh"
+#include "tac.hh"
 
 
 std::string loadFile(const char* path)
@@ -31,6 +32,7 @@ int main(int argc, const char** argv)
 {
     using namespace Tokens;
     using namespace syntax_tree;
+    using namespace tac;
 
     if (argc < 2) {
         std::cerr << "No file specified" << std::endl;
@@ -48,5 +50,11 @@ int main(int argc, const char** argv)
     syntaxTree.parse();
 
     std::cout << syntaxTree << std::endl;
+
+    Tac tac = Tac();
+    tac.parseTree(syntaxTree);
+
+    std::cout << tac << std::endl;
+
 }
 
