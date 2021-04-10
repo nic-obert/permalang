@@ -59,14 +59,14 @@ namespace tac
     {
     public:
 
-        TacInstruction* next;
-        TacInstruction* prev;
+        TacInstruction* next = nullptr;
+        TacInstruction* prev = nullptr;
 
         TacOp operation;
 
-        TacValue* addr1;
-        TacValue* addr2;
-        TacValue* addr3;
+        TacValue* addr1 = nullptr;
+        TacValue* addr2 = nullptr;
+        TacValue* addr3 = nullptr;
 
 
         TacInstruction(TacOp operation);
@@ -88,7 +88,7 @@ namespace tac
 
     public:
 
-        TacInstruction* start;
+        TacInstruction* start = nullptr;
 
         Tac();
 

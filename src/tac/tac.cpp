@@ -47,12 +47,12 @@ void Tac::parseOperator(const Tokens::Token* token)
     using namespace Tokens;
 
     // treat token's value as a pointer to an array of token pointers
-    const Token*** operands = (const Token***) token->value; 
+    const Token** operands = (const Token**) token->value; 
     
     // loop over operands
     for (unsigned char i = 0; i != operatorType(token->opCode); i++)
     {
-        const Token* operand = operands[0][i];
+        const Token* operand = operands[i];
 
         if (isOperator(operand->opCode))
         {
