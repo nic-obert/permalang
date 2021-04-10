@@ -44,17 +44,17 @@ int main(int argc, const char** argv)
 
     TokenList* tokens = tokenize(file);
 
-    std::cout << *tokens << std::endl;
+    std::cout << *tokens << "\n" << std::endl;
 
     SyntaxTree syntaxTree = SyntaxTree(tokens);
     syntaxTree.parse();
 
-    std::cout << syntaxTree << std::endl;
+    std::cout << syntaxTree << "\n" << std::endl;
 
     Tac tac = Tac();
     tac.parseTree(syntaxTree);
 
-    std::cout << tac << std::endl;
+    std::cout << tac << "\n" << std::endl;
 
 }
 

@@ -70,6 +70,9 @@ namespace tac
 
 
         TacInstruction(TacOp operation);
+        TacInstruction(TacOp operation, TacValue* addr1);
+        TacInstruction(TacOp operation, TacValue* addr1, TacValue* addr2);
+        TacInstruction(TacOp operation, TacValue* addr1, TacValue* addr2, TacValue* addr3);
 
     };
 

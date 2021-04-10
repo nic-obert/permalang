@@ -11,6 +11,28 @@ TacInstruction::TacInstruction(TacOp operation)
 }
 
 
+TacInstruction::TacInstruction(TacOp operation, TacValue* addr1)
+: operation(operation), addr1(addr1)
+{
+
+}
+
+
+TacInstruction::TacInstruction(TacOp operation, TacValue* addr1, TacValue* addr2)
+: operation(operation), addr1(addr1), addr2(addr2)
+{
+    
+}
+
+
+TacInstruction::TacInstruction(TacOp operation, TacValue* addr1, TacValue* addr2, TacValue* addr3)
+: operation(operation), addr1(addr1), addr2(addr2), addr3(addr3)
+{
+    
+}
+
+
+
 std::ostream& operator<<(std::ostream& stream, TacInstruction const& instruction)
 {
     switch (instruction.operation)

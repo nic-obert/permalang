@@ -168,7 +168,7 @@ void TokenList::remove(Token* token)
 
 std::ostream& operator<<(std::ostream& stream, TokenList const& list)
 {
-    stream << "{\n";
+    stream << "Token List: {\n";
     if (list.first == nullptr)
         stream << "\tEmpty token line\n";
 
@@ -177,6 +177,6 @@ std::ostream& operator<<(std::ostream& stream, TokenList const& list)
         stream << "\t" << *token << "\n";
     }
 
-    stream << "}\n";
+    stream << "}";
 }
 

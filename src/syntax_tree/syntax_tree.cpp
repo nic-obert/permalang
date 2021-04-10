@@ -118,12 +118,14 @@ void SyntaxTree::parse()
 
 
 std::ostream& operator<<(std::ostream& stream, SyntaxTree const& tree)
-{
+{   
+    stream << "Syntax Tree: {\n";
+
     for (Statement* statement = tree.statements.start; statement != nullptr; statement = statement->next)
     {
-        stream << *statement << "\n";
+        stream << "\t" << *statement << "\n";
     }
 
-    return stream;
+    return stream << "}";
 }
 
