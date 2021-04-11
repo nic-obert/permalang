@@ -2,6 +2,7 @@
 #include "syntax_tree.hh"
 #include "symbol_table.hh"
 #include "op_codes.hh"
+#include "utils.hh"
 
 
 #define RIGHT 0
@@ -38,10 +39,9 @@ void binarySatisfy(Token* token, TokenType leftType, TokenType rightType, syntax
     }
 
     // pointer to array of token pointers
-    token->value = (Value) new Token*[2] {token->prev, token->next};
+    token->value = toValue((new Token*[2] {token->prev, token->next}));
 
-    token->prev->parent = token;
-    token->next->parent = token;
+    token->type = token->prev->type;
 
     // remove tokens to the left and right
     statement->remove(token->prev);
@@ -66,9 +66,8 @@ void unarySatisfy(Token* token, TokenType type, char side, syntax_tree::Statemen
             exit(1);
         }
 
-        token->value = (Value) token->prev;
-
-        token->prev->parent = token;
+        token->value = toValue(new Token*[1] {token->prev});
+        token->type = token->prev->type;
 
         statement->remove(token->prev);
 
@@ -86,9 +85,8 @@ void unarySatisfy(Token* token, TokenType type, char side, syntax_tree::Statemen
             exit(1);
         }
 
-        token->value = (Value) token->next;
-
-        token->next->parent = token;
+        token->value = toValue(new Token*[1] {token->next});
+        token->type = token->next->type;
 
         statement->remove(token->next);
 
@@ -153,13 +151,15 @@ void assignSatisfy(Token* token, syntax_tree::Statement* statement)
     }
 
 
-    token->value = (Value) new Token*[2] {token->prev, token->next};
+    token->value = toValue((new Token*[2] {token->prev, token->next}));
 
     // update symbol table
     symbol_table::SymbolTable::assign(
         (std::string*) token->prev->value,
         new symbol_table::Symbol(token->next->value, token->prev->type)
     );
+
+    token->type = token->prev->type;
 
     // remove tokens to the left and right
     statement->remove(token->prev);
@@ -181,12 +181,12 @@ void incDecSatisfy(Token* token, syntax_tree::Statement* statement)
         exit(1);
     }
 
-    token->value = token->prev->value;
+
+    token->value = toValue(token->prev);
     token->type = token->prev->type;
 
     statement->remove(token->prev, DELETE);
 
-    token->opCode = REFERENCE;
 }
 
 
@@ -205,7 +205,6 @@ void syntax_tree::Statement::satisfy(Token* token)
     case ARITHMETICAL_POW:
     {
         binarySatisfy(token, INT, INT, this);
-        token->opCode = LITERAL;
         break;
     }
 
@@ -226,14 +225,12 @@ void syntax_tree::Statement::satisfy(Token* token)
     case LOGICAL_GREATER_EQ:
     {
         binarySatisfy(token, BOOL, BOOL, this);
-        token->opCode = LITERAL;
         break;
     }
     
     case LOGICAL_NOT:
     {
         unarySatisfy(token, BOOL, RIGHT, this);
-        token->opCode = LITERAL;
         break;
     }
 

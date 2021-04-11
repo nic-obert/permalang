@@ -38,8 +38,6 @@ namespace Tokens
 
         OpCodes opCode;
 
-        Token* parent = nullptr;
-
         Token* prev = nullptr;
         Token* next = nullptr;
 

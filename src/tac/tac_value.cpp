@@ -1,6 +1,4 @@
 #include "tac.hh"
-
-
 #include "utils.hh"
 
 #include <iostream>

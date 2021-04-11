@@ -56,7 +56,7 @@ void Tac::parseOperator(const Tokens::Token* token)
     // treat token's value as a pointer to an array of token pointers
     const Token** operands = (const Token**) token->value; 
     
-    // loop over operands
+    // loop over operands and evaluate those first
     for (unsigned char i = 0; i != operatorType(token->opCode); i++)
     {
         const Token* operand = operands[i];
@@ -66,99 +66,98 @@ void Tac::parseOperator(const Tokens::Token* token)
             parseOperator(operand);
         }
 
-        // generate three address code
-        switch (token->opCode)
-        {
-            case OpCodes::ARITHMETICAL_SUM:
-            {
-                /*
-                    r = a + b
-                */
-
-                const Address* result = Address::getAddress();
-
-                add(new TacInstruction(
-                    TacOp::SUM,
-                    new TacValue(true, toValue(result)),
-                    new TacValue(isReference(operands[0]->opCode), operands[0]->value),
-                    new TacValue(isReference(operands[1]->opCode), operands[1]->value)
-                ));
-
-                break;
-            }
-
-            case OpCodes::ARITHMETICAL_SUB:
-            {
-                /*
-                    r = a - b
-                */
-
-                const Address* result = Address::getAddress();
-
-                add(new TacInstruction(
-                    TacOp::SUB,
-                    new TacValue(true, toValue(result)),
-                    new TacValue(isReference(operands[0]->opCode), operands[0]->value),
-                    new TacValue(isReference(operands[1]->opCode), operands[1]->value)
-                ));
-
-                break;
-            }
-
-            case OpCodes::ARITHMETICAL_MUL:
-            {
-                /*
-                    r = a * b
-                */
-
-                const Address* result = Address::getAddress();
-
-                add(new TacInstruction(
-                    TacOp::MUL,
-                    new TacValue(true, toValue(result)),
-                    new TacValue(isReference(operands[0]->opCode), operands[0]->value),
-                    new TacValue(isReference(operands[1]->opCode), operands[1]->value)
-                ));
-
-                break;
-            }
-
-            case OpCodes::ARITHMETICAL_DIV:
-            {
-                /*
-                    r = a - b
-                */
-
-                const Address* result = Address::getAddress();
-
-                add(new TacInstruction(
-                    TacOp::DIV,
-                    new TacValue(true, toValue(result)),
-                    new TacValue(isReference(operands[0]->opCode), operands[0]->value),
-                    new TacValue(isReference(operands[1]->opCode), operands[1]->value)
-                ));
-
-                break;
-            }
-
-            case OpCodes::ASSIGNMENT_ASSIGN:
-            {
-                /*
-                    a = b
-                */
-
-               add(new TacInstruction(
-                   TacOp::ASSIGN,
-                   new TacValue(true, toValue(operands[0]->value)),
-                   new TacValue(isReference(operands[1]->opCode), toValue(operands[1]))
-               ));
-
-               break;
-            }
-        }
-
     }
 
+    // generate three address code for the operator
+    switch (token->opCode)
+    {
+        case OpCodes::ARITHMETICAL_SUM:
+        {
+            /*
+                r = a + b
+            */
+
+            const Address* result = Address::getAddress();
+
+            add(new TacInstruction(
+                TacOp::SUM,
+                new TacValue(true, toValue(result)),
+                new TacValue(isReference(operands[0]->opCode), operands[0]->value),
+                new TacValue(isReference(operands[1]->opCode), operands[1]->value)
+            ));
+
+            break;
+        }
+
+        case OpCodes::ARITHMETICAL_SUB:
+        {
+            /*
+                r = a - b
+            */
+
+            const Address* result = Address::getAddress();
+
+            add(new TacInstruction(
+                TacOp::SUB,
+                new TacValue(true, toValue(result)),
+                new TacValue(isReference(operands[0]->opCode), operands[0]->value),
+                new TacValue(isReference(operands[1]->opCode), operands[1]->value)
+            ));
+
+            break;
+        }
+
+        case OpCodes::ARITHMETICAL_MUL:
+        {
+            /*
+                r = a * b
+            */
+
+            const Address* result = Address::getAddress();
+
+            add(new TacInstruction(
+                TacOp::MUL,
+                new TacValue(true, toValue(result)),
+                new TacValue(isReference(operands[0]->opCode), operands[0]->value),
+                new TacValue(isReference(operands[1]->opCode), operands[1]->value)
+            ));
+
+            break;
+        }
+
+        case OpCodes::ARITHMETICAL_DIV:
+        {
+            /*
+                r = a - b
+            */
+
+            const Address* result = Address::getAddress();
+
+            add(new TacInstruction(
+                TacOp::DIV,
+                new TacValue(true, toValue(result)),
+                new TacValue(isReference(operands[0]->opCode), operands[0]->value),
+                new TacValue(isReference(operands[1]->opCode), operands[1]->value)
+            ));
+
+            break;
+        }
+
+        case OpCodes::ASSIGNMENT_ASSIGN:
+        {
+            /*
+                a = b
+            */
+
+            add(new TacInstruction(
+                TacOp::ASSIGN,
+                new TacValue(true, toValue(operands[0]->value)),
+                new TacValue(isReference(operands[1]->opCode), toValue(operands[1]->value))
+            ));
+
+            break;
+        }
+    }
 
 }
 

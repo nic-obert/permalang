@@ -217,7 +217,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
 
         if (c == '+')
         {
-            token = new Token(NONE, SUM_P, OpCodes::ARITHMETICAL_SUB);
+            token = new Token(NONE, SUM_P, OpCodes::ARITHMETICAL_SUM);
             continue;
         }
         if (c == '-')

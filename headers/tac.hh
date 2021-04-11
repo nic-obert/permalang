@@ -40,6 +40,7 @@ namespace tac
         // TODO implement a more efficient way of getting addresses
         static const Address* getAddress();
 
+        // TODO free addresses based on scope to avoid memory leaks
         static void free(const Address* address);
 
     };

@@ -1,2 +1,2 @@
-int i = 1;
-int var = 4;
+int i = 1 + 2;
+i = i - 1;
