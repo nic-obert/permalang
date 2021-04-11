@@ -30,12 +30,12 @@ void Tac::add(TacInstruction* in)
 }
 
 
-void Tac::parseTree(syntax_tree::SyntaxTree const& tree)
+void Tac::parseTree(syntax_tree::SyntaxTree& tree)
 {
     using namespace syntax_tree;
     using namespace Tokens;
 
-    for (const Statement* statement = tree.statements.start; statement != nullptr; statement = statement->next)
+    for (Statement* statement = tree.statements.start; statement != nullptr; statement = statement->next)
     {
         Token* root = statement->root;
 
@@ -49,17 +49,17 @@ void Tac::parseTree(syntax_tree::SyntaxTree const& tree)
 }
 
 
-void Tac::parseOperator(const Tokens::Token* token)
+void Tac::parseOperator(Tokens::Token* token)
 {
     using namespace Tokens;
 
     // treat token's value as a pointer to an array of token pointers
-    const Token** operands = (const Token**) token->value; 
+    Token** operands = (Token**) token->value; 
     
     // loop over operands and evaluate those first
     for (unsigned char i = 0; i != operatorType(token->opCode); i++)
     {
-        const Token* operand = operands[i];
+        Token* operand = operands[i];
 
         if (isOperator(operand->opCode))
         {
@@ -86,6 +86,9 @@ void Tac::parseOperator(const Tokens::Token* token)
                 new TacValue(isReference(operands[1]->opCode), operands[1]->value)
             ));
 
+            token->opCode = REFERENCE;
+            token->value = toValue(result);
+
             break;
         }
 
@@ -103,6 +106,9 @@ void Tac::parseOperator(const Tokens::Token* token)
                 new TacValue(isReference(operands[0]->opCode), operands[0]->value),
                 new TacValue(isReference(operands[1]->opCode), operands[1]->value)
             ));
+
+            token->opCode = REFERENCE;
+            token->value = toValue(result);
 
             break;
         }
@@ -122,6 +128,9 @@ void Tac::parseOperator(const Tokens::Token* token)
                 new TacValue(isReference(operands[1]->opCode), operands[1]->value)
             ));
 
+            token->opCode = REFERENCE;
+            token->value = toValue(result);
+
             break;
         }
 
@@ -140,6 +149,9 @@ void Tac::parseOperator(const Tokens::Token* token)
                 new TacValue(isReference(operands[1]->opCode), operands[1]->value)
             ));
 
+            token->opCode = REFERENCE;
+            token->value = toValue(result);
+
             break;
         }
 
@@ -151,9 +163,11 @@ void Tac::parseOperator(const Tokens::Token* token)
 
             add(new TacInstruction(
                 TacOp::ASSIGN,
-                new TacValue(true, toValue(operands[0]->value)),
-                new TacValue(isReference(operands[1]->opCode), toValue(operands[1]->value))
+                new TacValue(true, operands[0]->value),
+                new TacValue(isReference(operands[1]->opCode), operands[1]->value)
             ));
+
+            token->value = operands[0]->value;
 
             break;
         }
@@ -172,5 +186,11 @@ std::ostream& operator<<(std::ostream& stream, tac::Tac const& tac)
     }
 
     return stream << "}";
+}
+
+
+std::ostream& operator<<(std::ostream& stream, tac::Tac const* tac)
+{
+    return stream << *tac;
 }
 

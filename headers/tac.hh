@@ -6,6 +6,7 @@
 #include "token.hh"
 
 #include <iostream>
+#include <unordered_map>
 
 
 #define BASE_ADDRESSES 8
@@ -35,7 +36,11 @@ namespace tac
         // Addresses can only be obtained via getAddress()
         Address();
 
+        static std::unordered_map<Value, unsigned int> addresses;
+
     public:
+
+        static bool isTempAddress(Value address);
 
         // TODO implement a more efficient way of getting addresses
         static const Address* getAddress();
@@ -88,7 +93,7 @@ namespace tac
         void add(TacInstruction* in);
 
         // recursive function that parses a single operator token
-        void parseOperator(const Tokens::Token* token);
+        void parseOperator(Tokens::Token* token);
 
     public:
 
@@ -97,7 +102,7 @@ namespace tac
         Tac();
 
         // transforms a syntax tree to a tac instructions linked list
-        void parseTree(syntax_tree::SyntaxTree const& tree);
+        void parseTree(syntax_tree::SyntaxTree& tree);
 
     };
 
@@ -105,13 +110,16 @@ namespace tac
 
 
 std::ostream& operator<<(std::ostream& stream, tac::Tac const& tac);
+std::ostream& operator<<(std::ostream& stream, tac::Tac const* tac);
 
 std::ostream& operator<<(std::ostream& stream, tac::TacInstruction const& instruction);
+std::ostream& operator<<(std::ostream& stream, tac::TacInstruction const* instruction);
 
 std::ostream& operator<<(std::ostream& stream, tac::TacValue const& value);
+std::ostream& operator<<(std::ostream& stream, tac::TacValue const* value);
 
 std::ostream& operator<<(std::ostream& stream, tac::TacOp const& op);
 
-std::ostream& operator<<(std::ostream& stream, tac::Address const& address);
+std::ostream& operator<<(std::ostream& stream, tac::Address const* address);
 
 

@@ -10,8 +10,7 @@ using namespace symbol_table;
 
 
 // initialize Symbol Table
-std::unordered_map<std::string, Symbol*>* SymbolTable::table = 
-    new std::unordered_map<std::string, Symbol*>();
+std::unordered_map<std::string, Symbol*> SymbolTable::table = std::unordered_map<std::string, Symbol*>();
 
 ScopeStack* SymbolTable::scopes = new ScopeStack();
 
@@ -19,7 +18,7 @@ ScopeStack* SymbolTable::scopes = new ScopeStack();
 void SymbolTable::assign(std::string* identifier, Symbol* symbol)
 {
     // check if token was not declared
-    if (table->find(*identifier) == table->end())
+    if (table.find(*identifier) == table.end())
     {
         // TODO implement error handling
         std::cerr << "\"" << *identifier << "\" was not declared" << std::endl;
@@ -29,14 +28,14 @@ void SymbolTable::assign(std::string* identifier, Symbol* symbol)
     // TODO implement type checking
 
     // dereference table since it's allocated on the heap
-    (*table)[*identifier] = symbol;
+    table[*identifier] = symbol;
 }
 
 
 void SymbolTable::declare(std::string* identifier, Symbol* symbol)
 {
     // check if token was already declared
-    if (table->find(*identifier) != table->end())
+    if (table.find(*identifier) != table.end())
     {
         // TODO implement error handling
         // TODO implement scope specific checking
@@ -44,16 +43,16 @@ void SymbolTable::declare(std::string* identifier, Symbol* symbol)
         exit(1);
     }
 
-    (*table)[*identifier] = symbol;
+    table[*identifier] = symbol;
 }
 
 
 Symbol* SymbolTable::get(std::string* identifier)
 {
     std::unordered_map<std::string, Symbol*>::iterator iterator;
-    iterator = table->find(*identifier);
+    iterator = table.find(*identifier);
 
-    if (iterator == table->end())
+    if (iterator == table.end())
     {
         std::cerr << "\"" << *identifier << "\" was not declared" << std::endl;
         exit(1);

@@ -21,6 +21,13 @@ std::ostream& operator<<(std::ostream& stream, TacValue const& value)
         return stream << (const Address*) value.value;
     }
     
-    return stream << value;
+    return stream << value.value;
 }
+
+
+std::ostream& operator<<(std::ostream& stream, TacValue const* value)
+{
+    return stream << *value;
+}
+
 

@@ -54,7 +54,7 @@ namespace symbol_table
     {
     private:
 
-        static std::unordered_map<std::string, Symbol*>* table;
+        static std::unordered_map<std::string, Symbol*> table;
 
         static ScopeStack* scopes;
 
@@ -73,7 +73,7 @@ namespace symbol_table
 
         static void popScope();
 
-
+        
         static Symbol* get(std::string* identifier);
 
     };

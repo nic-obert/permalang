@@ -4,6 +4,8 @@
 #include "op_codes.hh"
 #include "utils.hh"
 
+#include <string>
+
 
 #define RIGHT 0
 #define LEFT 1
@@ -11,6 +13,17 @@
 
 using namespace Tokens;
 
+
+// returns the TokenType of a given token, throws exception if token is not declared
+TokenType tokenTypeOf(const Token* token)
+{
+    if (token->opCode == OpCodes::REFERENCE)
+    {
+        return symbol_table::SymbolTable::get((std::string*) token->value)->type;
+    }
+    
+    return token->type;
+}
 
 
 void binarySatisfy(Token* token, TokenType leftType, TokenType rightType, syntax_tree::Statement* statement)
@@ -27,12 +40,12 @@ void binarySatisfy(Token* token, TokenType leftType, TokenType rightType, syntax
         exit(1);
     }
 
-    if (token->prev->type != leftType)
+    if (tokenTypeOf(token->prev) != leftType)
     {
         std::cerr << "Token " << *token << " requires token of type " << leftType << " to the left, but " << *token->prev << " was provided" << std::endl;
             exit(1);
     }
-    else if (token->next->type != rightType)
+    else if (tokenTypeOf(token->next) != rightType)
     {
         std::cerr << "Token " << *token << " requires token of type " << rightType << " to the right, but " << *token->prev << " was provided" << std::endl;
         exit(1);
@@ -41,7 +54,7 @@ void binarySatisfy(Token* token, TokenType leftType, TokenType rightType, syntax
     // pointer to array of token pointers
     token->value = toValue((new Token*[2] {token->prev, token->next}));
 
-    token->type = token->prev->type;
+    token->type = tokenTypeOf(token->prev);
 
     // remove tokens to the left and right
     statement->remove(token->prev);
@@ -60,14 +73,14 @@ void unarySatisfy(Token* token, TokenType type, char side, syntax_tree::Statemen
             std::cerr << "Missing token of type " << type << " to the left of " << *token << std::endl;
             exit(1);
         }
-        if (token->prev->type != type)
+        if (tokenTypeOf(token->prev) != type)
         {
             std::cerr << "Token " << *token << " requires token of type " << token << " to the left, but " << *token->prev << " was provided" << std::endl;
             exit(1);
         }
 
         token->value = toValue(new Token*[1] {token->prev});
-        token->type = token->prev->type;
+        token->type = tokenTypeOf(token->prev);
 
         statement->remove(token->prev);
 
@@ -79,14 +92,14 @@ void unarySatisfy(Token* token, TokenType type, char side, syntax_tree::Statemen
             std::cerr << "Missing token of type " << type << " to the right of " << *token << std::endl;
             exit(1);
         }
-        if (token->next->type != type)
+        if (tokenTypeOf(token->next) != type)
         {
             std::cerr << "Token " << *token << " requires token of type " << type << " to the left, but " << *token->prev << " was provided" << std::endl;
             exit(1);
         }
 
         token->value = toValue(new Token*[1] {token->next});
-        token->type = token->next->type;
+        token->type = tokenTypeOf(token->next);
 
         statement->remove(token->next);
 
@@ -144,9 +157,9 @@ void assignSatisfy(Token* token, syntax_tree::Statement* statement)
         std::cerr << "Token " << *token << " requires token of operator type " << REFERENCE << " to the left, but " << *token->prev << " was provided" << std::endl;
             exit(1);
     }
-    else if (token->next->type != token->prev->type)
+    else if (tokenTypeOf(token->next) != tokenTypeOf(token->prev))
     {
-        std::cerr << "Token " << *token << " requires token of type " << token->prev->type << " to the right, but " << *token->prev << " was provided" << std::endl;
+        std::cerr << "Token " << *token << " requires token of type " << tokenTypeOf(token->prev) << " to the right, but " << *token->prev << " was provided" << std::endl;
         exit(1);
     }
 
@@ -159,7 +172,7 @@ void assignSatisfy(Token* token, syntax_tree::Statement* statement)
         new symbol_table::Symbol(token->next->value, token->prev->type)
     );
 
-    token->type = token->prev->type;
+    token->type = tokenTypeOf(token->prev);
 
     // remove tokens to the left and right
     statement->remove(token->prev);
@@ -183,7 +196,7 @@ void incDecSatisfy(Token* token, syntax_tree::Statement* statement)
 
 
     token->value = toValue(token->prev);
-    token->type = token->prev->type;
+    token->type = tokenTypeOf(token->prev);
 
     statement->remove(token->prev, DELETE);
 

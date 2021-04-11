@@ -67,3 +67,8 @@ std::ostream& operator<<(std::ostream& stream, TacInstruction const& instruction
     }
 }
 
+
+std::ostream& operator<<(std::ostream& stream, TacInstruction const* instruction)
+{
+    return stream << *instruction;
+}
