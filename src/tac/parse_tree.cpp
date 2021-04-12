@@ -1,6 +1,7 @@
 #include "tac.hh"
 #include "utils.hh"
 #include "op_codes.hh"
+#include "token.hh"
 
 
 // converts a token->value (real reference) to a const Address*
@@ -10,6 +11,7 @@
 
 
 using namespace tac;
+using namespace Tokens;
 
 
 
@@ -52,8 +54,21 @@ void Tac::parseOperator(Tokens::Token* token)
     }
 
     // generate three address code for the operator
-    switch (token->opCode)
-    {
+    token->value = toValue(tacFor(token->opCode, operands));
+    token->opCode = REFERENCE;
+
+}
+
+
+const Address* Tac::tacFor(OpCodes opCode, Token** operands)
+{
+    switch (opCode)
+    {   
+
+
+// BASIC OPERATIONS
+
+
         case OpCodes::ARITHMETICAL_SUM:
         {
             /*
@@ -69,10 +84,7 @@ void Tac::parseOperator(Tokens::Token* token)
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
-            token->opCode = REFERENCE;
-            token->value = toValue(result);
-
-            break;
+            return result;
         }
 
         case OpCodes::ARITHMETICAL_SUB:
@@ -90,10 +102,7 @@ void Tac::parseOperator(Tokens::Token* token)
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
-            token->opCode = REFERENCE;
-            token->value = toValue(result);
-
-            break;
+            return result;
         }
 
         case OpCodes::ARITHMETICAL_MUL:
@@ -111,10 +120,7 @@ void Tac::parseOperator(Tokens::Token* token)
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
-            token->opCode = REFERENCE;
-            token->value = toValue(result);
-
-            break;
+            return result;
         }
 
         case OpCodes::ARITHMETICAL_DIV:
@@ -132,10 +138,7 @@ void Tac::parseOperator(Tokens::Token* token)
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
-            token->opCode = REFERENCE;
-            token->value = toValue(result);
-
-            break;
+            return result;
         }
 
         case OpCodes::ASSIGNMENT_ASSIGN:
@@ -150,10 +153,12 @@ void Tac::parseOperator(Tokens::Token* token)
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
-            token->value = operands[0]->value;
-
-            break;
+            return toAddress(operands[0]->value);
         }
+
+
+// COMPLEX OPERATIONS
+
 
         case OpCodes::ASSIGNMENT_ADD:
         {
@@ -164,11 +169,11 @@ void Tac::parseOperator(Tokens::Token* token)
             add(new TacInstruction(
                 TacOp::SUM,
                 new TacValue(true, operands[0]->value),
-                new TacValue(true, operands[0]->value),
+                new TacValue(isReference(operands[0]), operands[0]->value),
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
-            break;
+            return toAddress(operands[0]->value);
         }
 
         case OpCodes::ASSIGNMENT_SUB:
@@ -180,11 +185,11 @@ void Tac::parseOperator(Tokens::Token* token)
             add(new TacInstruction(
                 TacOp::SUB,
                 new TacValue(true, operands[0]->value),
-                new TacValue(true, operands[0]->value),
+                new TacValue(isReference(operands[0]), operands[0]->value),
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
-            break;
+            return toAddress(operands[0]->value);
         }
 
         case OpCodes::ASSIGNMENT_MUL:
@@ -196,10 +201,11 @@ void Tac::parseOperator(Tokens::Token* token)
             add(new TacInstruction(
                 TacOp::MUL,
                 new TacValue(true, operands[0]->value),
-                new TacValue(true, operands[0]->value),
+                new TacValue(isReference(operands[0]), operands[0]->value),
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
+            return toAddress(operands[0]->value);
             break;
         }
 
@@ -212,9 +218,11 @@ void Tac::parseOperator(Tokens::Token* token)
             add(new TacInstruction(
                 TacOp::DIV,
                 new TacValue(true, operands[0]->value),
-                new TacValue(true, operands[0]->value),
+                new TacValue(isReference(operands[0]), operands[0]->value),
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
+
+            return toAddress(operands[0]->value);
 
             break;
         }
@@ -232,8 +240,6 @@ void Tac::parseOperator(Tokens::Token* token)
                 new TacValue(false, 1)
             ));
 
-            token->value = operands[0]->value;
-
             break;
         }
 
@@ -249,8 +255,6 @@ void Tac::parseOperator(Tokens::Token* token)
                 new TacValue(true, operands[0]->value),
                 new TacValue(false, 1)
             ));
-
-            token->value = operands[0]->value;
 
             break;
         }
@@ -269,11 +273,8 @@ void Tac::parseOperator(Tokens::Token* token)
                 new TacValue(isReference(operands[0]), operands[0]->value),
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
-
-            token->opCode = REFERENCE;
-            token->value = toValue(result);
         
-            break;
+            return result;
         }
 
         case OpCodes::LOGICAL_NOT_EQ:
@@ -283,26 +284,36 @@ void Tac::parseOperator(Tokens::Token* token)
                 r = r == 0
             */
 
-            const Address* result = Address::getAddress();
+            const Address* result = tacFor(OpCodes::LOGICAL_EQ, operands);
 
+            // create an array of operands
+            Token op1 = Token(NONE, 0, REFERENCE, toValue(result));
+            Token op2 = Token(NONE, 0, LITERAL, 0);
+            Token* ops[2] = { &op1, &op2 };
+
+            return tacFor(OpCodes::LOGICAL_EQ, ops);
+        }
+
+        case OpCodes::LOGICAL_AND:
+        {
+            /*
+                r = a == 1
+                if r jump l1:  
+                jump l2         # first is false --> whole statement is false
+            l1:
+                r = b == 1
+            l2:
+
+            */
+                
             add(new TacInstruction(
-                TacOp::EQ,
-                new TacValue(true, toValue(result)),
-                new TacValue(isReference(operands[0]), operands[0]->value),
-                new TacValue(isReference(operands[1]), operands[1]->value)
-            ));
-            add(new TacInstruction(
-                TacOp::EQ,
-                new TacValue(true, toValue(result)),
-                new TacValue(true, toValue(result)),
-                new TacValue(false, 0)
+                TacOp::EQ
             ));
 
-            token->opCode = REFERENCE;
-            token->value = toValue(result);
 
             break;
         }
-    }
+
+    } // switch (token->opCode)
 
 }

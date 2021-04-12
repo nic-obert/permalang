@@ -96,6 +96,10 @@ namespace tac
         // recursive function that parses a single operator token
         void parseOperator(Tokens::Token* token);
 
+        // recursive function that generates TAC for a complex operation
+        // returns a reference to the result of the operation
+        const Address* tacFor(OpCodes opCode, Tokens::Token** operands);
+
     public:
 
         TacInstruction* start = nullptr;
