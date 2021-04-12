@@ -188,17 +188,17 @@ void incDecSatisfy(Token* token, syntax_tree::Statement* statement)
         std::cerr << "Missing token of operator type " << REFERENCE << " to the left of " << *token << std::endl;
         exit(1);
     }
-    if (token->next->opCode != REFERENCE)
+    if (token->prev->opCode != REFERENCE)
     {
         std::cerr << "Token " << *token << " requires token of operator type " << REFERENCE << " to the left, but " << *token->prev << " was provided" << std::endl;
         exit(1);
     }
 
 
-    token->value = toValue(token->prev);
+    token->value = toValue(new Token*[1] {token->prev});
     token->type = tokenTypeOf(token->prev);
 
-    statement->remove(token->prev, DELETE);
+    statement->remove(token->prev);
 
 }
 

@@ -26,6 +26,8 @@ std::ostream& operator<<(std::ostream& stream, TacOp const& op)
         return stream << '*';
     case DIV:
         return stream << '/';
+    case EQ:
+        return stream << "==";
     case TacOp::NO_OP:
         return stream << "NO OP";
     

@@ -22,9 +22,10 @@ namespace tac
         LABEL,
         ASSIGN,
         SUM,
+        SUB,
         MUL,
         DIV,
-        SUB,
+        EQ,
         NO_OP
     } TacOp;
 

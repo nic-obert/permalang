@@ -41,6 +41,7 @@ std::ostream& operator<<(std::ostream& stream, TacInstruction const& instruction
         case SUB:
         case MUL:
         case DIV:
+        case EQ:
             return stream << instruction.addr1 
                 << " " << TacOp::ASSIGN << " " << " "
                 << instruction.addr2 << " " 

@@ -1,2 +1,3 @@
-int i = 1 + 2;
-i = i - 1;
+bool a = true;
+bool b = true;
+bool c = a != b;

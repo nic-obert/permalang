@@ -6,6 +6,8 @@
 #include "op_codes.hh"
 
 
+using namespace Keywords;
+
 
 const char* Keywords::keywordName(OpCodes keyword)
 {
@@ -35,7 +37,7 @@ const char* Keywords::keywordName(OpCodes keyword)
 }
 
 
-OpCodes Keywords::isKeyword(std::string word)
+OpCodes Keywords::isKeyword(std::string const& word)
 {
     auto keyword = keywordsMap.find(word);
     if (keyword == keywordsMap.end())
@@ -71,5 +73,25 @@ int Keywords::keywordPriority(OpCodes keyword)
     }
 
     return 0;
+}
+
+
+bool Keywords::hasValue(std::string const& word, Value& value, Tokens::TokenType& type)
+{
+    auto val = keywordsValues.find(word);
+    if (val == keywordsValues.end())
+    {
+        return false;
+    }
+    value = val->second.value;
+    type = val->second.type;
+    return true;
+}
+
+
+KeywordValue::KeywordValue(Value value, Tokens::TokenType type)
+: value(value), type(type)
+{
+
 }
 

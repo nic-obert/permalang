@@ -32,16 +32,11 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                     {
                         if (isDigit(c))
                         {
-                            if (token == nullptr)
-                            {
-                                token = new Token(INT, LITERAL_P, OpCodes::LITERAL, toDigit(c));
-                            } else {
-                                token->value *= 10;
-                                token->value += toDigit(c);
-                            }
-
+                            token->value *= 10;
+                            token->value += toDigit(c);                  
                             continue;
-                        } else if (c == '.')
+                        } 
+                        else if (c == '.')
                         {
                             //decimal
 
@@ -52,7 +47,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                         AddToken;               
 
                         break;
-                    } // INT
+                    } // case INT
 
                     case STRING: 
                     {
@@ -67,12 +62,12 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                         // add character to string
                         *((std::string*) token->value) += c;
                         continue;
-                    } // STRING
+                    } // case STRING
 
                 } // switch (token->type)
 
                 break;
-            } // LITERAL
+            } // case LITERAL
 
             case OpCodes::NO_OP:
             {
@@ -92,23 +87,41 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                         // check if text is a keyword
                         OpCodes opCode = Keywords::isKeyword(*(std::string*) token->value);
                         if (opCode == OpCodes::NO_OP)
-                        {
+                        {   
+                            // check if keyword has a predefined value
+
+                            // temporary variables
+                            Value _value; 
+                            TokenType _type;
+
+                            if (Keywords::hasValue(*(std::string*) token->value, _value, _type))
+                            {
+                                token->type = _type;
+                                token->priority = LITERAL_P;
+                                token->opCode = OpCodes::LITERAL;
+                                token->value = _value;
+                                AddToken;
+                                break;
+                            }
+
                             // if word is not a keyword it's a reference
                             token->opCode = OpCodes::REFERENCE;
                             AddToken;
                         } else {
                             // if word is a keyword instead
-                            token = new Token(KEYWORD, Keywords::keywordPriority(opCode), opCode);
+                            token->type = KEYWORD;
+                            token->priority = Keywords::keywordPriority(opCode);
+                            token->opCode = opCode;
                             AddToken;
                         }
 
                         break;
-                    } // TEXT
+                    } // case TEXT
 
                 } // switch (token->type)
 
                 break;
-            } // NO_OP
+            } // case NO_OP
             
             // arithmetical operators
 
@@ -116,65 +129,79 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
             {
                 if (c == '=')
                 {
-                    token = new Token(NONE, ASSIGNMENT_P, OpCodes::ASSIGNMENT_ADD);
+                    token->type = NONE;
+                    token->priority = ASSIGNMENT_P;
+                    token->opCode = OpCodes::ASSIGNMENT_ADD;
                     AddToken;
                     continue;
                 } else if (c == '+')
                 {
-                    token = new Token(NONE, INCREMEN_P, OpCodes::ARITHMETICAL_INC);
+                    token->type = NONE;
+                    token->priority = INCREMEN_P;
+                    token->opCode = OpCodes::ARITHMETICAL_INC;
                     AddToken;
                     continue;
                 }
                 AddToken;
                 break;
-            }
+            } // case ARITHMETICAL_SUM
             
             case OpCodes::ARITHMETICAL_SUB:
             {
                 if (c == '=')
                 {
-                    token = new Token(NONE, ASSIGNMENT_P, OpCodes::ARITHMETICAL_SUB);
+                    token->type = NONE;
+                    token->priority = ASSIGNMENT_P;
+                    token->opCode = OpCodes::ARITHMETICAL_SUB;
                     AddToken;
                     continue;
                 } else if (c == '-')
                 {
-                    token = new Token(NONE, DECREMENT_P, OpCodes::ARITHMETICAL_DEC);
+                    token->type = NONE;
+                    token->priority = DECREMENT_P;
+                    token->opCode = OpCodes::ARITHMETICAL_DEC;
                     AddToken;
                     continue;
                 }
                 AddToken;
                 break;
-            }
+            } // case ARITHMETICAL_SUB
             
             case OpCodes::ARITHMETICAL_MUL:
             {
                 if (c == '=')
                 {
-                    token = new Token(NONE, ASSIGNMENT_P, OpCodes::ASSIGNMENT_MUL);
+                    token->type = NONE;
+                    token->priority = ASSIGNMENT_P;
+                    token->opCode = OpCodes::ASSIGNMENT_MUL;
                     AddToken;
                     continue;
                 }
                 AddToken;
                 break;
-            }
+            } // case ARITHMETICAL_MUL
 
             case OpCodes::ARITHMETICAL_DIV:
             {
                 if (c == '=')
                 {
-                    token = new Token(NONE, ASSIGNMENT_P, OpCodes::ASSIGNMENT_DIV);
+                    token->type = NONE;
+                    token->priority = ASSIGNMENT_P;
+                    token->opCode = OpCodes::ASSIGNMENT_DIV;
                     AddToken;
                     continue;
                 }
                 AddToken;
                 break;
-            }
+            } // case ARITHMETICAL_DIV
 
             case OpCodes::ARITHMETICAL_POW:
             {
                 if (c == '=')
                 {
-                    token = new Token(NONE, ASSIGNMENT_P, OpCodes::ASSIGNMENT_POW);
+                    token->type = NONE;
+                    token->priority = ASSIGNMENT_P;
+                    token->opCode = OpCodes::ASSIGNMENT_POW;
                     AddToken;
                     continue;
                 }
@@ -184,18 +211,39 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
 
             // assignment operators    
             
-            case OpCodes::ASSIGNMENT_ASSIGN: {
+            case OpCodes::ASSIGNMENT_ASSIGN:
+            {
                 
                 if (c == '=')
                 {
-                    token = new Token(NONE, EQUALITY_P, OpCodes::LOGICAL_EQ);
+                    token->type = NONE;
+                    token->priority = EQUALITY_P;
+                    token->opCode = OpCodes::LOGICAL_EQ;
                     AddToken;
                     continue;
                 }
                 
                 AddToken;
                 break;
-            }
+            } // case ASSIGNMENT_ASSIGN
+
+            // logical operators
+
+            case OpCodes::LOGICAL_NOT:
+            {
+                // !=
+                if (c == '=')
+                {
+                    token->type = NONE;
+                    token->priority = INEQUALITY_P;
+                    token->opCode = OpCodes::LOGICAL_NOT_EQ;
+                    AddToken;
+                    continue;
+                }
+                
+                AddToken;
+                break;
+            } // case LOGICAL_NOT
 
             } // switch (token->opCodes)
 
@@ -258,8 +306,14 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
 
         if (c == ';')
         {
-            token = new Token(ENDS, 0, OpCodes::NO_OP);
+            token = new Token(ENDS, LITERAL_P, OpCodes::NO_OP);
             AddToken;
+            continue;
+        }
+
+        if (c == '!')
+        {
+            token = new Token(NONE, NOT_P, OpCodes::LOGICAL_NOT);
             continue;
         }
 

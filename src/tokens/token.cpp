@@ -26,6 +26,9 @@ std::ostream& operator<<(std::ostream& stream, TokenType const& type)
 
     case FLOAT:
         return stream << "FLOAT";
+    
+    case BOOL:
+        return stream << "BOOL";
         
     case STRING:
         return stream << "STRING";
@@ -72,10 +75,17 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
             stream << "<" << token.type << ": " << *((std::string*) token.value) << " (" << token.priority << ")>";
             return stream;
         }
+
+        case BOOL:
+        {
+            stream << "<" << token.type << ": " << ((token.value == 0) ? "false" : "true") << " (" << token.priority << ")>";
+            return stream;
         }
 
+        } // switch (token.type)
+
         break;
-    }
+    } // case LITERAL
     
     case REFERENCE:
     {
@@ -95,7 +105,7 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         }
 
         break;
-    }
+    } // case REFERENCE
         
     default:
     {
@@ -124,6 +134,11 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         {
             using namespace operators::logical;
             stream << "<LOGICAL OPERATOR: " << logicalOperatorName(token.opCode) << " (" << token.priority << ")>";
+            return stream;
+        }
+
+        if (token.type == ENDS)
+        {
             return stream;
         }
         
