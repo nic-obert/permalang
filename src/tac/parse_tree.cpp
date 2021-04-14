@@ -7,7 +7,7 @@
 // converts a token->value (real reference) to a const Address*
 #define toAddress(reference) ((const Address*) reference)
 
-#define isReference(token) (token->opCode == OpCodes::REFERENCE)
+#define isReference(token) ((TacValueType) (token->opCode == OpCodes::REFERENCE))
 
 
 using namespace tac;
@@ -79,7 +79,7 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
 
             add(new TacInstruction(
                 TacOp::SUM,
-                new TacValue(true, toValue(result)),
+                new TacValue(TacValueType::ADDRESS, toValue(result)),
                 new TacValue(isReference(operands[0]), operands[0]->value),
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
@@ -97,7 +97,7 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
 
             add(new TacInstruction(
                 TacOp::SUB,
-                new TacValue(true, toValue(result)),
+                new TacValue(TacValueType::ADDRESS, toValue(result)),
                 new TacValue(isReference(operands[0]), operands[0]->value),
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
@@ -115,7 +115,7 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
 
             add(new TacInstruction(
                 TacOp::MUL,
-                new TacValue(true, toValue(result)),
+                new TacValue(TacValueType::ADDRESS, toValue(result)),
                 new TacValue(isReference(operands[0]), operands[0]->value),
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
@@ -133,7 +133,7 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
 
             add(new TacInstruction(
                 TacOp::DIV,
-                new TacValue(true, toValue(result)),
+                new TacValue(TacValueType::ADDRESS, toValue(result)),
                 new TacValue(isReference(operands[0]), operands[0]->value),
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
@@ -149,7 +149,7 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
 
             add(new TacInstruction(
                 TacOp::ASSIGN,
-                new TacValue(true, operands[0]->value),
+                new TacValue(TacValueType::ADDRESS, operands[0]->value),
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
@@ -168,7 +168,7 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
 
             add(new TacInstruction(
                 TacOp::SUM,
-                new TacValue(true, operands[0]->value),
+                new TacValue(TacValueType::ADDRESS, operands[0]->value),
                 new TacValue(isReference(operands[0]), operands[0]->value),
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
@@ -184,7 +184,7 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
 
             add(new TacInstruction(
                 TacOp::SUB,
-                new TacValue(true, operands[0]->value),
+                new TacValue(TacValueType::ADDRESS, operands[0]->value),
                 new TacValue(isReference(operands[0]), operands[0]->value),
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
@@ -200,7 +200,7 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
 
             add(new TacInstruction(
                 TacOp::MUL,
-                new TacValue(true, operands[0]->value),
+                new TacValue(TacValueType::ADDRESS, operands[0]->value),
                 new TacValue(isReference(operands[0]), operands[0]->value),
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
@@ -217,7 +217,7 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
 
             add(new TacInstruction(
                 TacOp::DIV,
-                new TacValue(true, operands[0]->value),
+                new TacValue(TacValueType::ADDRESS, operands[0]->value),
                 new TacValue(isReference(operands[0]), operands[0]->value),
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
@@ -235,9 +235,9 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
 
             add(new TacInstruction(
                 TacOp::SUM,
-                new TacValue(true, operands[0]->value),
-                new TacValue(true, operands[0]->value),
-                new TacValue(false, 1)
+                new TacValue(TacValueType::ADDRESS, operands[0]->value),
+                new TacValue(TacValueType::ADDRESS, operands[0]->value),
+                new TacValue(TacValueType::LITERAL, 1)
             ));
 
             break;
@@ -251,9 +251,9 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
 
             add(new TacInstruction(
                 TacOp::SUB,
-                new TacValue(true, operands[0]->value),
-                new TacValue(true, operands[0]->value),
-                new TacValue(false, 1)
+                new TacValue(TacValueType::ADDRESS, operands[0]->value),
+                new TacValue(TacValueType::ADDRESS, operands[0]->value),
+                new TacValue(TacValueType::LITERAL, 1)
             ));
 
             break;
@@ -269,7 +269,7 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
 
             add(new TacInstruction(
                 TacOp::EQ,
-                new TacValue(true, toValue(result)),
+                new TacValue(TacValueType::ADDRESS, toValue(result)),
                 new TacValue(isReference(operands[0]), operands[0]->value),
                 new TacValue(isReference(operands[1]), operands[1]->value)
             ));
@@ -288,7 +288,7 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
 
             // create an array of operands
             Token op1 = Token(NONE, 0, REFERENCE, toValue(result));
-            Token op2 = Token(NONE, 0, LITERAL, 0);
+            Token op2 = Token(NONE, 0, OpCodes::LITERAL, 0);
             Token* ops[2] = { &op1, &op2 };
 
             return tacFor(OpCodes::LOGICAL_EQ, ops);
@@ -306,12 +306,34 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
 
             */
                 
+            // create array of operands
+            Token op2 = Token(INT, 0, OpCodes::LITERAL, 1);
+            Token* ops[2] = { operands[0], &op2 };
+
+            TacInstruction* l1 = new TacInstruction(TacOp::LABEL);
+            TacInstruction* l2 = new TacInstruction(TacOp::LABEL);
+
+            const Address* result = tacFor(OpCodes::LOGICAL_EQ, ops);
+
             add(new TacInstruction(
-                TacOp::EQ
+                TacOp::IF,
+                new TacValue(TacValueType::ADDRESS, toValue(result)),
+                new TacValue(TacValueType::LABEL, toValue(l1))
+            ));
+            add(new TacInstruction(
+                TacOp::JUMP,
+                new TacValue(TacValueType::LABEL, toValue(l2))
             ));
 
+            add(l1);
 
-            break;
+            ops[0] = operands[0];
+            
+            result = tacFor(OpCodes::LOGICAL_EQ, ops);
+
+            add(l2);
+
+            return result;
         }
 
     } // switch (token->opCode)

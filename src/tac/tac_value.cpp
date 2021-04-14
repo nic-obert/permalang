@@ -7,8 +7,8 @@
 using namespace tac;
 
 
-TacValue::TacValue(bool isAddress, Value value)
-: isAddress(isAddress), value(value)
+TacValue::TacValue(TacValueType type, Value value)
+: type(type), value(value)
 {
     
 }
@@ -16,12 +16,15 @@ TacValue::TacValue(bool isAddress, Value value)
 
 std::ostream& operator<<(std::ostream& stream, TacValue const& value)
 {
-    if (value.isAddress)
+    switch (value.type)
     {
-        return stream << (const Address*) value.value;
+        case TacValueType::ADDRESS:
+            return stream << (const Address*) value.value;
+        case TacValueType::LITERAL:
+            return stream << value.value;
+        case TacValueType::LABEL:
+            return stream << "@[" << (void*) value.value << ']';
     }
-    
-    return stream << value.value;
 }
 
 

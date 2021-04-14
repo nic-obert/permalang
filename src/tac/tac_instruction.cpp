@@ -37,31 +37,35 @@ std::ostream& operator<<(std::ostream& stream, TacInstruction const& instruction
 {
     switch (instruction.operation)
     {
-        case SUM:
-        case SUB:
-        case MUL:
-        case DIV:
-        case EQ:
+        case TacOp::SUM:
+        case TacOp::SUB:
+        case TacOp::MUL:
+        case TacOp::DIV:
+        case TacOp::EQ:
             return stream << instruction.addr1 
                 << " " << TacOp::ASSIGN << " " << " "
                 << instruction.addr2 << " " 
                 << instruction.operation << " " 
                 << instruction.addr3;
         
-        case ASSIGN:
+        case TacOp::ASSIGN:
             return stream << instruction.addr1
                 << " " << TacOp::ASSIGN << " " 
                 << instruction.addr2;
         
-        case JUMP:
-            return stream << instruction.operation << " " 
+        case TacOp::JUMP:
+            return stream << TacOp::JUMP << " " 
                 << instruction.addr1;
         
-        case IF:
-            return stream << instruction.operation << " "
+        case TacOp::IF:
+            return stream << TacOp::IF << " "
                 << instruction.addr1 << " "
                 << TacOp::JUMP << " " 
                 << instruction.addr2;
+        
+        case TacOp::LABEL:
+            return stream << "@["
+                << (void*) &instruction << "]:";
 
         default:
             return stream << instruction.operation;

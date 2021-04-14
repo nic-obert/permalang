@@ -24,6 +24,23 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
         {
             switch (token->opCode)
             {
+
+            case OpCodes::ADDRESS_OF:
+            {
+                if (c == '&')
+                {
+                    token->opCode = OpCodes::LOGICAL_AND;
+                    token->priority = AND_P;
+                    AddToken;
+                    continue;
+                }
+
+                AddToken;
+                break;
+
+            } // case ADDRESS_OF
+
+
             case OpCodes::LITERAL:
             {
                 switch (token->type)
@@ -68,6 +85,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
 
                 break;
             } // case LITERAL
+
 
             case OpCodes::NO_OP:
             {
@@ -123,7 +141,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                 break;
             } // case NO_OP
             
-            // arithmetical operators
+// ARITHMETICAL OPERATORS
 
             case OpCodes::ARITHMETICAL_SUM:
             {
@@ -209,7 +227,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                 break;
             }
 
-            // assignment operators    
+// ASSIGNMENT OPERATORS   
             
             case OpCodes::ASSIGNMENT_ASSIGN:
             {
@@ -227,7 +245,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                 break;
             } // case ASSIGNMENT_ASSIGN
 
-            // logical operators
+// LOGICAL OPERATORS
 
             case OpCodes::LOGICAL_NOT:
             {
@@ -244,6 +262,8 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                 AddToken;
                 break;
             } // case LOGICAL_NOT
+
+
 
             } // switch (token->opCodes)
 
@@ -293,6 +313,12 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
         if (c == '=')
         {
             token = new Token(NONE, ASSIGNMENT_P, OpCodes::ASSIGNMENT_ASSIGN);
+            continue;
+        }
+
+        if (c == '&')
+        {
+            token = new Token(NONE, ADDRESS_OF_P, OpCodes::ADDRESS_OF);
             continue;
         }
 

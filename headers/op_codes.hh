@@ -72,6 +72,8 @@ typedef enum OpCodes
 
     REFERENCE,
 
+    ADDRESS_OF,
+
     FLOW_,
 
     FLOW_IF,

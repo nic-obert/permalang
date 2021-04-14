@@ -15,11 +15,11 @@
 namespace tac
 {   
 
-    typedef enum TacOp
+    typedef enum class TacOp
     {
+        LABEL,
         IF,
         JUMP,
-        LABEL,
         ASSIGN,
         SUM,
         SUB,
@@ -28,6 +28,14 @@ namespace tac
         EQ,
         NO_OP
     } TacOp;
+
+
+    typedef enum class TacValueType
+    {
+        LITERAL, // 0 --> false
+        ADDRESS, // 1 --> true
+        LABEL    // 2
+    } TacValueType;
 
 
     class Address
@@ -54,10 +62,10 @@ namespace tac
 
     typedef struct TacValue 
     {
-        bool isAddress;
+        TacValueType type;
         Value value;
 
-        TacValue(bool isAddress, Value value);
+        TacValue(TacValueType type, Value value);
 
     } TacValue;
 

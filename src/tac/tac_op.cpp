@@ -10,23 +10,23 @@ std::ostream& operator<<(std::ostream& stream, TacOp const& op)
 {
     switch (op)
     {
-    case IF:
+    case TacOp::IF:
         return stream << "if";
-    case JUMP:
+    case TacOp::JUMP:
         return stream << "jump";
-    case LABEL:
+    case TacOp::LABEL:
         return stream << "label";
-    case ASSIGN:
+    case TacOp::ASSIGN:
         return stream << '=';
-    case SUM:
+    case TacOp::SUM:
         return stream << '+';
-    case SUB:
+    case TacOp::SUB:
         return stream << '-';
-    case MUL:
+    case TacOp::MUL:
         return stream << '*';
-    case DIV:
+    case TacOp::DIV:
         return stream << '/';
-    case EQ:
+    case TacOp::EQ:
         return stream << "==";
     case TacOp::NO_OP:
         return stream << "NO OP";
