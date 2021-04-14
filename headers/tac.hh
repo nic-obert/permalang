@@ -26,6 +26,7 @@ namespace tac
         MUL,
         DIV,
         EQ,
+        LESS,
         NO_OP
     } TacOp;
 

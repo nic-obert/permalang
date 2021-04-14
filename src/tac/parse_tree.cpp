@@ -156,6 +156,41 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
             return toAddress(operands[0]->value);
         }
 
+        case OpCodes::LOGICAL_EQ:
+        {
+            /*
+                r = a == b
+            */
+
+            const Address* result = Address::getAddress();
+
+            add(new TacInstruction(
+                TacOp::EQ,
+                new TacValue(TacValueType::ADDRESS, toValue(result)),
+                new TacValue(isReference(operands[0]), operands[0]->value),
+                new TacValue(isReference(operands[1]), operands[1]->value)
+            ));
+        
+            return result;
+        }
+
+        case OpCodes::LOGICAL_LESS:
+        {
+            /*
+                r = a < b
+            */
+
+            const Address* result = Address::getAddress();
+
+            add(new TacInstruction(
+                TacOp::LESS,
+                new TacValue(TacValueType::ADDRESS, toValue(result)),
+                new TacValue(isReference(operands[0]), operands[0]->value),
+                new TacValue(isReference(operands[1]), operands[1]->value)
+            ));
+
+            return result;
+        }
 
 // COMPLEX OPERATIONS
 
@@ -259,24 +294,6 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
             break;
         }
 
-        case OpCodes::LOGICAL_EQ:
-        {
-            /*
-                r = a == b
-            */
-
-            const Address* result = Address::getAddress();
-
-            add(new TacInstruction(
-                TacOp::EQ,
-                new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(isReference(operands[0]), operands[0]->value),
-                new TacValue(isReference(operands[1]), operands[1]->value)
-            ));
-        
-            return result;
-        }
-
         case OpCodes::LOGICAL_NOT_EQ:
         {
             /*
@@ -366,7 +383,102 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
             add(l1);
 
             return result;
+        }
 
+        case OpCodes::LOGICAL_NOT:
+        {
+            /*
+                r = a == 0
+            */
+
+            Token op2 = Token(TokenType::INT, 0, OpCodes::LITERAL, 0);
+            Token* ops[2] = { operands[0], &op2 };
+
+            return tacFor(OpCodes::LOGICAL_EQ, ops);
+        }
+
+        case OpCodes::LOGICAL_GREATER:
+        {
+            /*
+                just flip the operands
+
+                r = b < a
+            */
+
+            Token* ops[2] = { operands[1], operands[0] };
+
+            return tacFor(OpCodes::LOGICAL_LESS, ops);
+        }
+
+        case OpCodes::LOGICAL_LESS_EQ:
+        {
+            /*
+                r = a < b
+                if r jump l1
+                r = a == b
+            l1:
+
+            */
+
+            TacInstruction* l1 = new TacInstruction(TacOp::LABEL);
+
+            const Address* result = tacFor(OpCodes::LOGICAL_LESS, operands);
+
+            add(new TacInstruction(
+                TacOp::IF,
+                new TacValue(TacValueType::ADDRESS, toValue(result)),
+                new TacValue(TacValueType::LABEL, toValue(l1))
+            ));
+
+            result = tacFor(OpCodes::LOGICAL_EQ, operands);
+
+            add(l1);
+
+            return result;
+        }
+
+        case OpCodes::LOGICAL_GREATER_EQ:
+        {
+            /*
+                r = a > b
+                if r jump l1
+                r = a == b
+            l1:
+
+            */
+
+            TacInstruction* l1 = new TacInstruction(TacOp::LABEL);
+
+            const Address* result = tacFor(OpCodes::LOGICAL_GREATER, operands);
+
+            add(new TacInstruction(
+                TacOp::IF,
+                new TacValue(TacValueType::ADDRESS, toValue(result)),
+                new TacValue(TacValueType::LABEL, toValue(l1))
+            ));
+
+            result = tacFor(OpCodes::LOGICAL_EQ, operands);
+
+            add(l1);
+
+            return result;            
+        }
+
+        case OpCodes::ADDRESS_OF:
+        {
+            /*
+                r = [a]
+            */
+
+            const Address* result = Address::getAddress();
+
+            add(new TacInstruction(
+                TacOp::ASSIGN,
+                new TacValue(TacValueType::ADDRESS, toValue(result)),
+                new TacValue(TacValueType::ADDRESS, operands[0]->value)
+            ));
+
+            return result;
         }
 
     } // switch (token->opCode)
