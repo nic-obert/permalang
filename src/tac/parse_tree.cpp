@@ -336,6 +336,39 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
             return result;
         }
 
+        case OpCodes::LOGICAL_OR:
+        {
+            /*
+                r = a == 1
+                if r jump l2
+                r = b == 1
+            l1:
+
+            */
+
+            TacInstruction* l1 = new TacInstruction(TacOp::LABEL);
+
+            Token op2 = Token(INT, 0, OpCodes::LITERAL, 1);
+            Token* ops[2] = { operands[0], &op2 };
+
+            const Address* result = tacFor(OpCodes::LOGICAL_EQ, ops);
+
+            add(new TacInstruction(
+                TacOp::IF,
+                new TacValue(TacValueType::ADDRESS, toValue(result)),
+                new TacValue(TacValueType::LABEL, toValue(l1))
+            ));
+
+            ops[0] = operands[1];
+
+            result = tacFor(OpCodes::LOGICAL_EQ, ops);
+
+            add(l1);
+
+            return result;
+
+        }
+
     } // switch (token->opCode)
 
 }

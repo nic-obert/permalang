@@ -136,6 +136,19 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                         break;
                     } // case TEXT
 
+                    default:
+                    {
+                        
+                        if (token->value == '|' && c == '|')
+                        {
+                            token->priority = OR_P;
+                            token->opCode = LOGICAL_OR;
+                            AddToken;
+                            continue;
+                        }
+
+                    } // default
+
                 } // switch (token->type)
 
                 break;
@@ -319,6 +332,12 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
         if (c == '&')
         {
             token = new Token(NONE, ADDRESS_OF_P, OpCodes::ADDRESS_OF);
+            continue;
+        }
+
+        if (c == '|')
+        {
+            token = new Token(NONE, 0, OpCodes::NO_OP, '|');
             continue;
         }
 
