@@ -15,12 +15,12 @@ namespace Keywords
 
 
     const std::unordered_map<std::string, OpCodes> keywordsMap ({
-            {"if", OpCodes::FLOW_IF},
-            {"else", OpCodes::FLOW_ELSE},
-            {"int", DECLARATION_INT},
-            {"bool", DECLARATION_BOOL},
-            {"float", DECLARATION_FLOAT},
-            {"string", DECLARATION_STRING},
+            {"if",      OpCodes::FLOW_IF},
+            {"else",    OpCodes::FLOW_ELSE},
+            {"int",     OpCodes::DECLARATION_INT},
+            {"bool",    OpCodes::DECLARATION_BOOL},
+            {"float",   OpCodes::DECLARATION_FLOAT},
+            {"string",  OpCodes::DECLARATION_STRING},
     });
 
 

@@ -8,22 +8,22 @@ const char* operators::assignment::assignmentOperatorName(OpCodes op)
 {
     switch (op)
     {
-    case ASSIGNMENT_ASSIGN:
+    case OpCodes::ASSIGNMENT_ASSIGN:
         return "=";
     
-    case ASSIGNMENT_ADD:
+    case OpCodes::ASSIGNMENT_ADD:
         return "+=";
 
-    case ASSIGNMENT_SUB:
+    case OpCodes::ASSIGNMENT_SUB:
         return "-=";
 
-    case ASSIGNMENT_MUL:
+    case OpCodes::ASSIGNMENT_MUL:
         return "*=";
 
-    case ASSIGNMENT_DIV:
+    case OpCodes::ASSIGNMENT_DIV:
         return "/=";
     
-    case ASSIGNMENT_POW:
+    case OpCodes::ASSIGNMENT_POW:
         return "^=";
     
     }

@@ -8,31 +8,31 @@ const char* operators::logical::logicalOperatorName(OpCodes op)
 {
     switch (op)
     {
-    case LOGICAL_EQ:
+    case OpCodes::LOGICAL_EQ:
         return "==";
     
-    case LOGICAL_NOT_EQ:
+    case OpCodes::LOGICAL_NOT_EQ:
         return "!=";
     
-    case LOGICAL_AND:
+    case OpCodes::LOGICAL_AND:
         return "&&";
     
-    case LOGICAL_OR:
+    case OpCodes::LOGICAL_OR:
         return "||";
 
-    case LOGICAL_GREATER:
+    case OpCodes::LOGICAL_GREATER:
         return ">";
     
-    case LOGICAL_LESS:
+    case OpCodes::LOGICAL_LESS:
         return "<";
 
-    case LOGICAL_GREATER_EQ:
+    case OpCodes::LOGICAL_GREATER_EQ:
         return ">=";
     
-    case LOGICAL_LESS_EQ:
+    case OpCodes::LOGICAL_LESS_EQ:
         return "<=";
     
-    case LOGICAL_NOT:
+    case OpCodes::LOGICAL_NOT:
         return "!";
     }
 

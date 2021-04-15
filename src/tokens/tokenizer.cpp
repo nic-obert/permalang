@@ -45,7 +45,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
             {
                 switch (token->type)
                 {
-                    case INT: 
+                    case TokenType::INT: 
                     {
                         if (isDigit(c))
                         {
@@ -66,7 +66,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                         break;
                     } // case INT
 
-                    case STRING: 
+                    case TokenType::STRING: 
                     {
                 
                         // terminate string
@@ -92,7 +92,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
 
                 switch (token->type)
                 {
-                    case TEXT: 
+                    case TokenType::TEXT: 
                     {
                         if (isText(c) || isDigit(c))
                         {
@@ -127,7 +127,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                             AddToken;
                         } else {
                             // if word is a keyword instead
-                            token->type = KEYWORD;
+                            token->type = TokenType::KEYWORD;
                             token->priority = Keywords::keywordPriority(opCode);
                             token->opCode = opCode;
                             AddToken;
@@ -142,7 +142,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                         if (token->value == '|' && c == '|')
                         {
                             token->priority = OR_P;
-                            token->opCode = LOGICAL_OR;
+                            token->opCode = OpCodes::LOGICAL_OR;
                             AddToken;
                             continue;
                         }
@@ -160,14 +160,14 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
             {
                 if (c == '=')
                 {
-                    token->type = NONE;
+                    token->type = TokenType::NONE;
                     token->priority = ASSIGNMENT_P;
                     token->opCode = OpCodes::ASSIGNMENT_ADD;
                     AddToken;
                     continue;
                 } else if (c == '+')
                 {
-                    token->type = NONE;
+                    token->type = TokenType::NONE;
                     token->priority = INCREMEN_P;
                     token->opCode = OpCodes::ARITHMETICAL_INC;
                     AddToken;
@@ -181,14 +181,14 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
             {
                 if (c == '=')
                 {
-                    token->type = NONE;
+                    token->type = TokenType::NONE;
                     token->priority = ASSIGNMENT_P;
                     token->opCode = OpCodes::ARITHMETICAL_SUB;
                     AddToken;
                     continue;
                 } else if (c == '-')
                 {
-                    token->type = NONE;
+                    token->type = TokenType::NONE;
                     token->priority = DECREMENT_P;
                     token->opCode = OpCodes::ARITHMETICAL_DEC;
                     AddToken;
@@ -202,7 +202,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
             {
                 if (c == '=')
                 {
-                    token->type = NONE;
+                    token->type = TokenType::NONE;
                     token->priority = ASSIGNMENT_P;
                     token->opCode = OpCodes::ASSIGNMENT_MUL;
                     AddToken;
@@ -216,7 +216,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
             {
                 if (c == '=')
                 {
-                    token->type = NONE;
+                    token->type = TokenType::NONE;
                     token->priority = ASSIGNMENT_P;
                     token->opCode = OpCodes::ASSIGNMENT_DIV;
                     AddToken;
@@ -230,7 +230,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
             {
                 if (c == '=')
                 {
-                    token->type = NONE;
+                    token->type = TokenType::NONE;
                     token->priority = ASSIGNMENT_P;
                     token->opCode = OpCodes::ASSIGNMENT_POW;
                     AddToken;
@@ -247,7 +247,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                 
                 if (c == '=')
                 {
-                    token->type = NONE;
+                    token->type = TokenType::NONE;
                     token->priority = EQUALITY_P;
                     token->opCode = OpCodes::LOGICAL_EQ;
                     AddToken;
@@ -265,7 +265,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                 // !=
                 if (c == '=')
                 {
-                    token->type = NONE;
+                    token->type = TokenType::NONE;
                     token->priority = INEQUALITY_P;
                     token->opCode = OpCodes::LOGICAL_NOT_EQ;
                     AddToken;
@@ -285,7 +285,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
 
         if (isDigit(c))
         {
-            token = new Token(INT, LITERAL_P, OpCodes::LITERAL, toDigit(c));
+            token = new Token(TokenType::INT, LITERAL_P, OpCodes::LITERAL, toDigit(c));
             continue;
         }
 
@@ -298,67 +298,67 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
 
         if (c == '+')
         {
-            token = new Token(NONE, SUM_P, OpCodes::ARITHMETICAL_SUM);
+            token = new Token(TokenType::NONE, SUM_P, OpCodes::ARITHMETICAL_SUM);
             continue;
         }
         if (c == '-')
         {
-            token = new Token(NONE, SUBTRACTION_P, OpCodes::ARITHMETICAL_SUB);
+            token = new Token(TokenType::NONE, SUBTRACTION_P, OpCodes::ARITHMETICAL_SUB);
             continue;
         }
         if (c == '*')
         {
-            token = new Token(NONE, MULTIPLICATION_P, OpCodes::ARITHMETICAL_MUL);
+            token = new Token(TokenType::NONE, MULTIPLICATION_P, OpCodes::ARITHMETICAL_MUL);
             continue;
         }
         if (c == '/')
         {
-            token = new Token(NONE, DIVISION_P, OpCodes::ARITHMETICAL_DIV);
+            token = new Token(TokenType::NONE, DIVISION_P, OpCodes::ARITHMETICAL_DIV);
             continue;
         }
         if (c == '^')
         {
-            token = new Token(NONE, DIVISION_P, OpCodes::ARITHMETICAL_POW);
+            token = new Token(TokenType::NONE, DIVISION_P, OpCodes::ARITHMETICAL_POW);
             continue;
         }
 
 
         if (c == '=')
         {
-            token = new Token(NONE, ASSIGNMENT_P, OpCodes::ASSIGNMENT_ASSIGN);
+            token = new Token(TokenType::NONE, ASSIGNMENT_P, OpCodes::ASSIGNMENT_ASSIGN);
             continue;
         }
 
         if (c == '&')
         {
-            token = new Token(NONE, ADDRESS_OF_P, OpCodes::ADDRESS_OF);
+            token = new Token(TokenType::NONE, ADDRESS_OF_P, OpCodes::ADDRESS_OF);
             continue;
         }
 
         if (c == '|')
         {
-            token = new Token(NONE, 0, OpCodes::NO_OP, '|');
+            token = new Token(TokenType::NONE, 0, OpCodes::NO_OP, '|');
             continue;
         }
 
 
         if (isText(c))
         {
-            token = new Token(TEXT, LITERAL_P, OpCodes::NO_OP, (Value) (new std::string {c}));
+            token = new Token(TokenType::TEXT, LITERAL_P, OpCodes::NO_OP, (Value) (new std::string {c}));
             continue;
         }
 
 
         if (c == ';')
         {
-            token = new Token(ENDS, LITERAL_P, OpCodes::NO_OP);
+            token = new Token(TokenType::ENDS, LITERAL_P, OpCodes::NO_OP);
             AddToken;
             continue;
         }
 
         if (c == '!')
         {
-            token = new Token(NONE, NOT_P, OpCodes::LOGICAL_NOT);
+            token = new Token(TokenType::NONE, NOT_P, OpCodes::LOGICAL_NOT);
             continue;
         }
 

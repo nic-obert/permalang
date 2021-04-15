@@ -29,7 +29,7 @@ SyntaxTree::SyntaxTree(Tokens::TokenList* tokens)
     {
 
         // end of statement --> add statement to list of statements
-        if (tok->type == ENDS)
+        if (tok->type == TokenType::ENDS)
         {
             // don't add empty statements
             if (statement->root != nullptr)

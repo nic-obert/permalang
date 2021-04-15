@@ -15,28 +15,28 @@ std::ostream& operator<<(std::ostream& stream, TokenType const& type)
 {
     switch (type)
     {
-    case NONE:
+    case TokenType::NONE:
         return stream << "NONE";
     
-    case TEXT:
+    case TokenType::TEXT:
         return stream << "TEXT";
 
-    case INT:
+    case TokenType::INT:
         return stream << "INT";
 
-    case FLOAT:
+    case TokenType::FLOAT:
         return stream << "FLOAT";
     
-    case BOOL:
+    case TokenType::BOOL:
         return stream << "BOOL";
         
-    case STRING:
+    case TokenType::STRING:
         return stream << "STRING";
 
-    case KEYWORD:
+    case TokenType::KEYWORD:
         return stream << "KEYWORD";
     
-    case ENDS:
+    case TokenType::ENDS:
         return stream << "END OF STATEMENT";
     
     default:
@@ -65,18 +65,18 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
 
     switch (token.opCode)
     {
-    case LITERAL:
+    case OpCodes::LITERAL:
     {
         switch (token.type)
         {
-        case TEXT:
-        case STRING: 
+        case TokenType::TEXT:
+        case TokenType::STRING: 
         {
             stream << "<" << token.type << ": " << *((std::string*) token.value) << " (" << token.priority << ")>";
             return stream;
         }
 
-        case BOOL:
+        case TokenType::BOOL:
         {
             stream << "<" << token.type << ": " << ((token.value == 0) ? "false" : "true") << " (" << token.priority << ")>";
             return stream;
@@ -87,20 +87,20 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         break;
     } // case LITERAL
     
-    case REFERENCE:
+    case OpCodes::REFERENCE:
     {
 
         switch (token.type)
         {
-        case INT:
-        case STRING:
-        case BOOL:
-        case FLOAT:
+        case TokenType::INT:
+        case TokenType::STRING:
+        case TokenType::BOOL:
+        case TokenType::FLOAT:
             stream << "<" << token.type << "*: " << *(std::string*) token.value << " (" << token.priority << ")>";
             return stream;
         
-        case TEXT:
-            stream << "<" << NONE << "*: " << *(std::string*) token.value << " (" << token.priority << ")>";
+        case TokenType::TEXT:
+            stream << "<" << TokenType::NONE << "*: " << *(std::string*) token.value << " (" << token.priority << ")>";
             return stream;
         }
 
@@ -110,7 +110,7 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
     default:
     {
         
-        if (token.type == KEYWORD) 
+        if (token.type == TokenType::KEYWORD) 
         {
             stream << "<" << TokenType::KEYWORD << ": " << Keywords::keywordName(token.opCode) << " (" << token.priority << ")>";
             return stream;
@@ -137,7 +137,13 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
             return stream;
         }
 
-        if (token.type == ENDS)
+        if (token.opCode == OpCodes::ADDRESS_OF)
+        {
+            stream << "<ADDRESS OF: & (" << token.priority << ")>";
+            return stream;
+        }
+
+        if (token.type == TokenType::ENDS)
         {
             return stream;
         }

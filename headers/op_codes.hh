@@ -19,7 +19,7 @@
 #define isOperator(x) (!isValue(x) && x != OpCodes::NO_OP)
 
 
-typedef enum OpType
+typedef enum class OpType
 {
     STANDALONE, // 0
     UNARY,      // 1
@@ -27,7 +27,7 @@ typedef enum OpType
 } OpType;
 
 
-typedef enum OpCodes
+typedef enum class OpCodes
 {
     LOGICAL_,
 

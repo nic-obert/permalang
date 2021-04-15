@@ -42,7 +42,9 @@ void Tac::parseOperator(Tokens::Token* token)
     Token** operands = (Token**) token->value; 
     
     // loop over operands and evaluate those first
-    for (unsigned char i = 0; i != operatorType(token->opCode); i++)
+    // OpType is compatible with integers 0, 1, 2 which are
+    // respectively STANDALONE, UNARY, BINARY
+    for (unsigned char i = 0; i != (unsigned char) operatorType(token->opCode); i++)
     {
         Token* operand = operands[i];
 
@@ -55,7 +57,7 @@ void Tac::parseOperator(Tokens::Token* token)
 
     // generate three address code for the operator
     token->value = toValue(tacFor(token->opCode, operands));
-    token->opCode = REFERENCE;
+    token->opCode = OpCodes::REFERENCE;
 
 }
 
@@ -304,8 +306,8 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
             const Address* result = tacFor(OpCodes::LOGICAL_EQ, operands);
 
             // create an array of operands
-            Token op1 = Token(NONE, 0, REFERENCE, toValue(result));
-            Token op2 = Token(NONE, 0, OpCodes::LITERAL, 0);
+            Token op1 = Token(TokenType::NONE, 0, OpCodes::REFERENCE, toValue(result));
+            Token op2 = Token(TokenType::NONE, 0, OpCodes::LITERAL, 0);
             Token* ops[2] = { &op1, &op2 };
 
             return tacFor(OpCodes::LOGICAL_EQ, ops);
@@ -324,7 +326,7 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
             */
                 
             // create array of operands
-            Token op2 = Token(INT, 0, OpCodes::LITERAL, 1);
+            Token op2 = Token(TokenType::INT, 0, OpCodes::LITERAL, 1);
             Token* ops[2] = { operands[0], &op2 };
 
             TacInstruction* l1 = new TacInstruction(TacOp::LABEL);
@@ -365,7 +367,7 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
 
             TacInstruction* l1 = new TacInstruction(TacOp::LABEL);
 
-            Token op2 = Token(INT, 0, OpCodes::LITERAL, 1);
+            Token op2 = Token(TokenType::INT, 0, OpCodes::LITERAL, 1);
             Token* ops[2] = { operands[0], &op2 };
 
             const Address* result = tacFor(OpCodes::LOGICAL_EQ, ops);
@@ -475,7 +477,7 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
             add(new TacInstruction(
                 TacOp::ASSIGN,
                 new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(TacValueType::ADDRESS, operands[0]->value)
+                new TacValue(TacValueType::LITERAL, operands[0]->value)
             ));
 
             return result;

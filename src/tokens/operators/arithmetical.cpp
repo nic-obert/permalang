@@ -9,25 +9,25 @@ const char* operators::arithmetical::arithmeticalOperatorName(OpCodes op)
 {
     switch (op)
     {
-    case ARITHMETICAL_SUM:
+    case OpCodes::ARITHMETICAL_SUM:
         return "+";
 
-    case ARITHMETICAL_SUB:
+    case OpCodes::ARITHMETICAL_SUB:
         return "-";
     
-    case ARITHMETICAL_MUL:
+    case OpCodes::ARITHMETICAL_MUL:
         return "*";
 
-    case ARITHMETICAL_DIV:
+    case OpCodes::ARITHMETICAL_DIV:
         return "/";
 
-    case ARITHMETICAL_POW:
+    case OpCodes::ARITHMETICAL_POW:
         return "^";
     
-    case ARITHMETICAL_INC:
+    case OpCodes::ARITHMETICAL_INC:
         return "++";
 
-    case ARITHMETICAL_DEC:
+    case OpCodes::ARITHMETICAL_DEC:
         return "--";
     
     }

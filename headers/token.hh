@@ -15,7 +15,7 @@
 namespace Tokens 
 {
 
-    typedef enum TokenType
+    typedef enum class TokenType
     {
         NONE,
         TEXT,
