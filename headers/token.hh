@@ -24,7 +24,9 @@ namespace Tokens
         STRING,
         KEYWORD,
         BOOL,
-        ENDS // end of statement
+        SCOPE,
+        PARENTHESIS,
+        ENDS, // end of statement
     } TokenType;
 
 

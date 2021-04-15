@@ -47,7 +47,7 @@ void binarySatisfy(Token* token, TokenType leftType, TokenType rightType, syntax
     }
     else if (tokenTypeOf(token->next) != rightType)
     {
-        std::cerr << "Token " << *token << " requires token of type " << rightType << " to the right, but " << *token->prev << " was provided" << std::endl;
+        std::cerr << "Token " << *token << " requires token of type " << rightType << " to the right, but " << *token->next << " was provided" << std::endl;
         exit(1);
     }
 
@@ -94,7 +94,7 @@ void unarySatisfy(Token* token, TokenType type, char side, syntax_tree::Statemen
         }
         if (tokenTypeOf(token->next) != type)
         {
-            std::cerr << "Token " << *token << " requires token of type " << type << " to the left, but " << *token->prev << " was provided" << std::endl;
+            std::cerr << "Token " << *token << " requires token of type " << type << " to the right, but " << *token->next << " was provided" << std::endl;
             exit(1);
         }
 

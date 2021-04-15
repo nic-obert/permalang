@@ -74,6 +74,11 @@ typedef enum class OpCodes
 
     ADDRESS_OF,
 
+    PUSH_SCOPE,
+    POP_SCOPE,
+
+    CALL,
+
     FLOW_,
 
     FLOW_IF,

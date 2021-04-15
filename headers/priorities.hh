@@ -1,5 +1,7 @@
 #pragma once
 
+#define SCOPE_P 0
+
 #define LITERAL_P 0
 #define GOTO_P 1
 #define GOBACK_P 1
@@ -29,4 +31,6 @@
 #define ADDRESS_OF_P 10
 #define WHILE_P 10
 #define FOR_P 10
+
+#define PARENTHESIS_P 11
 

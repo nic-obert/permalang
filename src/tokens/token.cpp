@@ -86,6 +86,11 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
 
         break;
     } // case LITERAL
+
+    case OpCodes::CALL:
+    {
+        return stream << "<CALL: (" << token.priority << ")>";
+    } // case CALL
     
     case OpCodes::REFERENCE:
     {
@@ -141,6 +146,11 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         {
             stream << "<ADDRESS OF: & (" << token.priority << ")>";
             return stream;
+        }
+
+        if (token.type == TokenType::PARENTHESIS)
+        {
+            return stream << "<PARENTHESIS: " << (char) token.value << " (" << token.priority << ")>";
         }
 
         if (token.type == TokenType::ENDS)

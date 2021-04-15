@@ -15,6 +15,8 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
 
     Token* token = nullptr;
 
+    unsigned int currentPriority = 0;
+
 
     char c;
     for (uint i = 0; (c = script[i]) != 0; i++)
@@ -30,7 +32,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                 if (c == '&')
                 {
                     token->opCode = OpCodes::LOGICAL_AND;
-                    token->priority = AND_P;
+                    token->priority = AND_P + currentPriority;
                     AddToken;
                     continue;
                 }
@@ -115,7 +117,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                             if (Keywords::hasValue(*(std::string*) token->value, _value, _type))
                             {
                                 token->type = _type;
-                                token->priority = LITERAL_P;
+                                token->priority = LITERAL_P + currentPriority;
                                 token->opCode = OpCodes::LITERAL;
                                 token->value = _value;
                                 AddToken;
@@ -128,7 +130,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                         } else {
                             // if word is a keyword instead
                             token->type = TokenType::KEYWORD;
-                            token->priority = Keywords::keywordPriority(opCode);
+                            token->priority = Keywords::keywordPriority(opCode) + currentPriority;
                             token->opCode = opCode;
                             AddToken;
                         }
@@ -141,7 +143,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                         
                         if (token->value == '|' && c == '|')
                         {
-                            token->priority = OR_P;
+                            token->priority = OR_P + currentPriority;
                             token->opCode = OpCodes::LOGICAL_OR;
                             AddToken;
                             continue;
@@ -161,14 +163,14 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                 if (c == '=')
                 {
                     token->type = TokenType::NONE;
-                    token->priority = ASSIGNMENT_P;
+                    token->priority = ASSIGNMENT_P + currentPriority;
                     token->opCode = OpCodes::ASSIGNMENT_ADD;
                     AddToken;
                     continue;
                 } else if (c == '+')
                 {
                     token->type = TokenType::NONE;
-                    token->priority = INCREMEN_P;
+                    token->priority = INCREMEN_P + currentPriority;
                     token->opCode = OpCodes::ARITHMETICAL_INC;
                     AddToken;
                     continue;
@@ -182,14 +184,14 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                 if (c == '=')
                 {
                     token->type = TokenType::NONE;
-                    token->priority = ASSIGNMENT_P;
+                    token->priority = ASSIGNMENT_P + currentPriority;
                     token->opCode = OpCodes::ARITHMETICAL_SUB;
                     AddToken;
                     continue;
                 } else if (c == '-')
                 {
                     token->type = TokenType::NONE;
-                    token->priority = DECREMENT_P;
+                    token->priority = DECREMENT_P + currentPriority;
                     token->opCode = OpCodes::ARITHMETICAL_DEC;
                     AddToken;
                     continue;
@@ -203,7 +205,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                 if (c == '=')
                 {
                     token->type = TokenType::NONE;
-                    token->priority = ASSIGNMENT_P;
+                    token->priority = ASSIGNMENT_P + currentPriority;
                     token->opCode = OpCodes::ASSIGNMENT_MUL;
                     AddToken;
                     continue;
@@ -217,7 +219,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                 if (c == '=')
                 {
                     token->type = TokenType::NONE;
-                    token->priority = ASSIGNMENT_P;
+                    token->priority = ASSIGNMENT_P + currentPriority;
                     token->opCode = OpCodes::ASSIGNMENT_DIV;
                     AddToken;
                     continue;
@@ -231,7 +233,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                 if (c == '=')
                 {
                     token->type = TokenType::NONE;
-                    token->priority = ASSIGNMENT_P;
+                    token->priority = ASSIGNMENT_P + currentPriority;
                     token->opCode = OpCodes::ASSIGNMENT_POW;
                     AddToken;
                     continue;
@@ -248,7 +250,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                 if (c == '=')
                 {
                     token->type = TokenType::NONE;
-                    token->priority = EQUALITY_P;
+                    token->priority = EQUALITY_P + currentPriority;
                     token->opCode = OpCodes::LOGICAL_EQ;
                     AddToken;
                     continue;
@@ -266,7 +268,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                 if (c == '=')
                 {
                     token->type = TokenType::NONE;
-                    token->priority = INEQUALITY_P;
+                    token->priority = INEQUALITY_P + currentPriority;
                     token->opCode = OpCodes::LOGICAL_NOT_EQ;
                     AddToken;
                     continue;
@@ -283,87 +285,136 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
         } // if (token != nullptr)
 
 
-        if (isDigit(c))
+        switch (c)
         {
-            token = new Token(TokenType::INT, LITERAL_P, OpCodes::LITERAL, toDigit(c));
+        case '"':
+        {
+            token = new Token(TokenType::STRING, LITERAL_P + currentPriority, OpCodes::LITERAL, (Value) (new std::string("")));
             continue;
         }
 
-
-        if (c == '"')
+        case '+':
         {
-            token = new Token(TokenType::STRING, LITERAL_P, OpCodes::LITERAL, (Value) (new std::string("")));
+            token = new Token(TokenType::NONE, SUM_P + currentPriority, OpCodes::ARITHMETICAL_SUM);
+            continue;
+        }
+        
+        case '-':
+        {
+            token = new Token(TokenType::NONE, SUBTRACTION_P + currentPriority, OpCodes::ARITHMETICAL_SUB);
             continue;
         }
 
-        if (c == '+')
+        case '*':
         {
-            token = new Token(TokenType::NONE, SUM_P, OpCodes::ARITHMETICAL_SUM);
-            continue;
-        }
-        if (c == '-')
-        {
-            token = new Token(TokenType::NONE, SUBTRACTION_P, OpCodes::ARITHMETICAL_SUB);
-            continue;
-        }
-        if (c == '*')
-        {
-            token = new Token(TokenType::NONE, MULTIPLICATION_P, OpCodes::ARITHMETICAL_MUL);
-            continue;
-        }
-        if (c == '/')
-        {
-            token = new Token(TokenType::NONE, DIVISION_P, OpCodes::ARITHMETICAL_DIV);
-            continue;
-        }
-        if (c == '^')
-        {
-            token = new Token(TokenType::NONE, DIVISION_P, OpCodes::ARITHMETICAL_POW);
+            token = new Token(TokenType::NONE, MULTIPLICATION_P + currentPriority, OpCodes::ARITHMETICAL_MUL);
             continue;
         }
 
-
-        if (c == '=')
+        case '/':
         {
-            token = new Token(TokenType::NONE, ASSIGNMENT_P, OpCodes::ASSIGNMENT_ASSIGN);
+            token = new Token(TokenType::NONE, DIVISION_P + currentPriority, OpCodes::ARITHMETICAL_DIV);
+            continue;
+        }
+        
+        case '^':
+        {
+            token = new Token(TokenType::NONE, POWER_P + currentPriority, OpCodes::ARITHMETICAL_POW);
+            continue;
+        }
+        
+        case '=':
+        {
+            token = new Token(TokenType::NONE, ASSIGNMENT_P + currentPriority, OpCodes::ASSIGNMENT_ASSIGN);
             continue;
         }
 
-        if (c == '&')
+        case '&':
         {
-            token = new Token(TokenType::NONE, ADDRESS_OF_P, OpCodes::ADDRESS_OF);
+            token = new Token(TokenType::NONE, ADDRESS_OF_P + currentPriority, OpCodes::ADDRESS_OF);
             continue;
         }
-
-        if (c == '|')
+        
+        case '|':
         {
             token = new Token(TokenType::NONE, 0, OpCodes::NO_OP, '|');
             continue;
         }
-
-
-        if (isText(c))
+        
+        case ';':
         {
-            token = new Token(TokenType::TEXT, LITERAL_P, OpCodes::NO_OP, (Value) (new std::string {c}));
+            token = new Token(TokenType::ENDS, LITERAL_P + currentPriority, OpCodes::NO_OP);
+            AddToken;
             continue;
         }
-
-
-        if (c == ';')
+        
+        case '!':
         {
-            token = new Token(TokenType::ENDS, LITERAL_P, OpCodes::NO_OP);
+            token = new Token(TokenType::NONE, NOT_P + currentPriority, OpCodes::LOGICAL_NOT);
+            continue;
+        }
+        
+        case '{':
+        {
+            token = new Token(TokenType::SCOPE, SCOPE_P + currentPriority, OpCodes::PUSH_SCOPE);
+            continue;
+        }
+        
+        case '}':
+        {
+            token = new Token(TokenType::SCOPE, SCOPE_P + currentPriority, OpCodes::POP_SCOPE);
+            continue;
+        }
+        
+        case '(':
+        {
+            // increment token priority to evaluate stuff in parenthesis first
+            currentPriority += PARENTHESIS_P;
+
+            // function call
+            if (tokens->last->type == TokenType::TEXT)
+            {
+                token = new Token(TokenType::NONE, PARENTHESIS_P + currentPriority, OpCodes::CALL);
+                continue;
+            }
+
+            // ordinary parenthesis
+            token = new Token(TokenType::PARENTHESIS, PARENTHESIS_P + currentPriority, OpCodes::NO_OP);
+            
             AddToken;
             continue;
         }
 
-        if (c == '!')
+        case ')':
         {
-            token = new Token(TokenType::NONE, NOT_P, OpCodes::LOGICAL_NOT);
+            // decrement token priority
+            currentPriority -= PARENTHESIS_P;
+
+            token = new Token(TokenType::PARENTHESIS, 0, OpCodes::NO_OP, ')');
+            
+            AddToken;
             continue;
         }
 
+        default:
+        {
+            if (isDigit(c))
+            {
+                token = new Token(TokenType::INT, LITERAL_P + currentPriority, OpCodes::LITERAL, toDigit(c));
+                continue;
+            }
 
-    }
+            if (isText(c))
+            {
+                token = new Token(TokenType::TEXT, LITERAL_P + currentPriority, OpCodes::NO_OP, (Value) (new std::string {c}));
+                continue;
+            }
+
+        } // default
+            
+        } // switch (c)    
+    
+    } // for (uint i = 0; (c = script[i]) != 0; i++)
 
     return tokens;
 }

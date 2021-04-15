@@ -68,6 +68,11 @@ std::ostream& operator<<(std::ostream& stream, OpCodes const& opCode)
     
     case OpCodes::LITERAL:
         return stream << "LITERAL";
+    
+    case OpCodes::PUSH_SCOPE:
+        return stream << "PUSH SCOPE";
+    case OpCodes::POP_SCOPE:
+        return stream << "POP SCOPE";
 
     case OpCodes::FLOW_IF:
         return stream << "FLOW IF";
@@ -77,10 +82,12 @@ std::ostream& operator<<(std::ostream& stream, OpCodes const& opCode)
         return stream << "FLOW WHILE";
     case OpCodes::FLOW_FOR:
         return stream << "FLOW FOR";
+    
+    
+    default:
+        return stream << "UNDEFINED OPCODE";
 
-    }
-
-    return stream << "UNDEFINED OPCODE";
+    }    
 }
 
 
