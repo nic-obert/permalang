@@ -483,6 +483,22 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
             return result;
         }
 
+        case OpCodes::FLOW_IF:
+        {
+            /*
+                if a jump b              
+            */
+
+            add(new TacInstruction(
+                TacOp::IF,
+                new TacValue(TacValueType::ADDRESS, operands[0]->value),
+                new TacValue(TacValueType::LABEL, operands[1]->value)
+            ));
+
+            // if statements shouldn't return anything
+            return nullptr;
+        }
+
     } // switch (token->opCode)
 
 }

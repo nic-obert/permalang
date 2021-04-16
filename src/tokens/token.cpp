@@ -157,6 +157,11 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         {
             return stream;
         }
+
+        if (token.type == TokenType::SCOPE)
+        {
+            return stream << "<SCOPE: " << token.opCode << " (" << token.priority << ")>";
+        }
         
         break;
     } // default

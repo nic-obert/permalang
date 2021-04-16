@@ -22,10 +22,10 @@ namespace symbol_table
     typedef struct Scope
     {
         unsigned int scope;
-        unsigned int index;
+        size_t index;
         Scope* prev = nullptr;
 
-        Scope(unsigned int scope, unsigned int index);
+        Scope(unsigned int scope, size_t index);
 
     } Scope;
 
@@ -41,7 +41,7 @@ namespace symbol_table
         ScopeStack();
 
 
-        void push(Scope* scope);
+        void push(size_t index);
 
 
         Scope* pop();
@@ -56,7 +56,7 @@ namespace symbol_table
 
         static std::unordered_map<std::string, Symbol*> table;
 
-        static ScopeStack* scopes;
+        static ScopeStack scopes;
 
         SymbolTable() = delete;
 

@@ -74,6 +74,9 @@ std::ostream& operator<<(std::ostream& stream, OpCodes const& opCode)
     case OpCodes::POP_SCOPE:
         return stream << "POP SCOPE";
 
+    case OpCodes::PARENTHESIS:
+        return stream << "PARENTHESIS";
+
     case OpCodes::FLOW_IF:
         return stream << "FLOW IF";
     case OpCodes::FLOW_ELSE:
@@ -114,6 +117,7 @@ OpType operatorType(OpCodes op)
     case OpCodes::ASSIGNMENT_MUL:
     case OpCodes::ASSIGNMENT_POW:
     case OpCodes::ASSIGNMENT_SUB:
+    case OpCodes::FLOW_IF:
         return OpType::BINARY;
     
     case OpCodes::LOGICAL_NOT:
@@ -123,6 +127,8 @@ OpType operatorType(OpCodes op)
     case OpCodes::DECLARATION_FLOAT:
     case OpCodes::DECLARATION_INT:
     case OpCodes::DECLARATION_STRING:
+    case OpCodes::PARENTHESIS:
+    case OpCodes::PUSH_SCOPE:
         return OpType::UNARY;
     
     default:

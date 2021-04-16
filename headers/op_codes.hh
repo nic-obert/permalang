@@ -18,6 +18,8 @@
 
 #define isOperator(x) (!isValue(x) && x != OpCodes::NO_OP)
 
+#define isScope(x) (x == OpCodes::PUSH_SCOPE || x == OpCodes::POP_SCOPE)
+
 
 typedef enum class OpType
 {
@@ -78,6 +80,8 @@ typedef enum class OpCodes
     POP_SCOPE,
 
     CALL,
+
+    PARENTHESIS,
 
     FLOW_,
 

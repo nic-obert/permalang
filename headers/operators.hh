@@ -31,3 +31,10 @@ namespace operators::assignment
 
 };
 
+
+namespace operators::scope
+{
+
+    
+
+};

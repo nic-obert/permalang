@@ -355,14 +355,21 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
         }
         
         case '{':
-        {
+        {   
+            // increment token priority to evaluate stuff in scope first
+            currentPriority += PARENTHESIS_P;
+
             token = new Token(TokenType::SCOPE, SCOPE_P + currentPriority, OpCodes::PUSH_SCOPE);
+            AddToken;
             continue;
         }
         
         case '}':
-        {
+        {   
+            currentPriority -= PARENTHESIS_P;
+
             token = new Token(TokenType::SCOPE, SCOPE_P + currentPriority, OpCodes::POP_SCOPE);
+            AddToken;
             continue;
         }
         
@@ -374,12 +381,12 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
             // function call
             if (tokens->last->type == TokenType::TEXT)
             {
-                token = new Token(TokenType::NONE, PARENTHESIS_P + currentPriority, OpCodes::CALL);
+                token = new Token(TokenType::NONE, currentPriority, OpCodes::CALL);
                 continue;
             }
 
             // ordinary parenthesis
-            token = new Token(TokenType::PARENTHESIS, PARENTHESIS_P + currentPriority, OpCodes::NO_OP);
+            token = new Token(TokenType::PARENTHESIS, currentPriority, OpCodes::PARENTHESIS);
             
             AddToken;
             continue;
@@ -390,7 +397,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
             // decrement token priority
             currentPriority -= PARENTHESIS_P;
 
-            token = new Token(TokenType::PARENTHESIS, 0, OpCodes::NO_OP, ')');
+            token = new Token(TokenType::PARENTHESIS, 0, OpCodes::PARENTHESIS, ')');
             
             AddToken;
             continue;

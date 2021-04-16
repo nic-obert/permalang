@@ -8,6 +8,13 @@
 using namespace syntax_tree;
 
 
+SyntaxTree::SyntaxTree(Statements& statements)
+: statements(statements)
+{
+
+}
+
+
 
 SyntaxTree::SyntaxTree(Tokens::TokenList* tokens)
 {
@@ -21,10 +28,11 @@ SyntaxTree::SyntaxTree(Tokens::TokenList* tokens)
     }
 
     // start of script
-    statements = Statements();
+    statements = Statements(); // linked list of Statement
     Statement* statement = nullptr;
     Token* token;
 
+    // transform the TokenList to a list of Statement
     for (Token* tok = tokens->first; tok != nullptr; tok = tok->next)
     {
 
@@ -56,6 +64,7 @@ SyntaxTree::SyntaxTree(Tokens::TokenList* tokens)
 }
 
 
+// returns the token with the highest priority in the statement
 Tokens::Token* SyntaxTree::getHighestPriority(Tokens::Token* root) 
 {
     using namespace Tokens;
@@ -67,13 +76,20 @@ Tokens::Token* SyntaxTree::getHighestPriority(Tokens::Token* root)
     }
 
     for (Tokens::Token* token = root; token != nullptr; token = token->next)
-    {
+    {   
+        // do not go past the current scope
+        if (isScope(token->opCode))
+        {
+            break;
+        }
+
         if (token->priority > root->priority)
         {
             root = token;
         }
     }
 
+    // return token with highest priority
     return root;
 }
 
@@ -108,6 +124,7 @@ void SyntaxTree::parse()
                 break;
             }
 
+            // satisfy token's requirements
             statement->satisfy(root);
             
         }

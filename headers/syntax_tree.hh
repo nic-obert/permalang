@@ -54,6 +54,7 @@ namespace syntax_tree
         
 
         SyntaxTree(Tokens::TokenList* tokens);
+        SyntaxTree(Statements& statements);
        
 
         Tokens::Token* getHighestPriority(Tokens::Token* root);
