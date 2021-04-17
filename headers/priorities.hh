@@ -1,8 +1,9 @@
 #pragma once
 
-#define SCOPE_P 0
 
 #define LITERAL_P 0
+
+#define SCOPE_P 1
 #define IF_P 1
 #define GOTO_P 1
 #define GOBACK_P 1

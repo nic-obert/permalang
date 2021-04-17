@@ -5,6 +5,7 @@
 #include "utils.hh"
 
 #include <string>
+#include <iostream>
 
 
 #define RIGHT 0
@@ -319,20 +320,31 @@ void syntax_tree::Statement::satisfy(Token* token)
         // transfer the part of the statement which is in the new scope
         // to another statement
         Statement* scopeStatement = new Statement(token->next);
+        scopeStatement->next = next;
+        
+        // set previous token to null since this is the beginning of the statement
+        scopeStatement->root->prev = nullptr;
+
         // create a new statement list for the new syntax tree
         Statements* scopeStatements = new Statements(scopeStatement);        
 
-        Statement* statement = this;
-
         // search for closing scope
         unsigned int depth = 1;
-        for (Token* tok = token->next; true; tok = tok->next)
+        for (Token* tok = scopeStatement->root; true; tok = tok->next)
         {
             // jump to next statement if current statement is finished
-            if (token == nullptr)
+            if (tok == nullptr)
             {
-                scopeStatements->add(scopeStatement);
-                scopeStatement = statement->next;
+                // search for closing scope in next statement
+                scopeStatement = scopeStatement->next;
+
+                // check if the statement actually exists
+                if (scopeStatement == nullptr)
+                {
+                    std::cerr << "Missing closing scope because next statement is missing" << std::endl;
+                    exit(1);
+                }
+
                 tok = scopeStatement->root;
             }
 
@@ -348,13 +360,18 @@ void syntax_tree::Statement::satisfy(Token* token)
                 // if depth is 0 --> found end of scope
                 if (depth == 0)
                 {
-                    // make the statement continue from this token
+                    // make the statement (the one before the scope) continue from this token
+                    if (tok->next != nullptr)
+                    {
+                        tok->next->prev = token;
+                    }
                     token->next = tok->next;
 
-                    // break the statement on closing scope
-                    tok->prev->next = nullptr; 
-                    // add the statement ending on this token to the list
-                    scopeStatements->add(scopeStatement);
+                    // delete closing scope token since it won't be used anymore
+                    delete tok;
+                    
+                    // break the linked list on end of scope
+                    scopeStatement->next = nullptr;
 
                     break;
                 }
@@ -364,10 +381,16 @@ void syntax_tree::Statement::satisfy(Token* token)
         // create a new SyntaxTree for the scope
         SyntaxTree* scopeTree = new SyntaxTree(*scopeStatements);
 
-        // parse the new tree recursively
+        // parse the new SyntaxTree recursively
         scopeTree->parse();
 
+        // pop the Scope once parsed its SyntaxTree
+        symbol_table::SymbolTable::popScope();
+
+        // set the token's value to the Scope's content
         token->value = toValue(scopeTree);
+
+        break;
     }
     
 
@@ -381,6 +404,15 @@ void syntax_tree::Statement::satisfy(Token* token)
             exit(1);
         }
 
+        // check for closing parenthesis
+        Token* closing = content->next;
+        if (closing == nullptr || 
+            (closing->opCode != OpCodes::PARENTHESIS && closing->value != ')'))
+        {
+            std::cerr << "Missing closing parenthesis" << std::endl;
+            exit(1);
+        }
+
         // parenthesis' value is it's content's
         token->value = toValue(new Token*[1] { content });
 
@@ -388,6 +420,7 @@ void syntax_tree::Statement::satisfy(Token* token)
         token->type = tokenTypeOf(content);
 
         remove(content);
+        remove(closing, DELETE);
 
         break;
     }
@@ -422,9 +455,6 @@ void syntax_tree::Statement::satisfy(Token* token)
 
         // set if token's value to an array of its boolean condition and its body
         token->value = toValue((new Token*[2] { condition, body }));
-
-        // set token's type to NONE since an if statement has no type
-        token->type = TokenType::NONE;
 
         // remove operands from the statement (this)
         remove(condition);

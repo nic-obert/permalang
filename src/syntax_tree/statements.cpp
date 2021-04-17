@@ -20,6 +20,18 @@ Statement::Statement()
 }
 
 
+Tokens::Token* Statement::getLast() const
+{
+    using namespace Tokens;
+    
+    // loop until last token of the statement
+    Token* token;
+    for (token = root; token->next != nullptr; token = token->next);
+
+    return token;
+}
+
+
 void Statement::remove(Tokens::Token* token, bool del)
 {
     // check first if token is root

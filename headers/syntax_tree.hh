@@ -16,6 +16,7 @@ namespace syntax_tree
         Statement* next = nullptr;
         Tokens::Token* root = nullptr;
 
+
         Statement(Tokens::Token* root, Statement* next);
         Statement(Tokens::Token* root);
         Statement();
@@ -25,6 +26,9 @@ namespace syntax_tree
 
 
         void remove(Tokens::Token* token, bool del = false);
+
+
+        Tokens::Token* getLast() const;
 
     };
 

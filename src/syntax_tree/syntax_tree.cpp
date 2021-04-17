@@ -77,10 +77,10 @@ Tokens::Token* SyntaxTree::getHighestPriority(Tokens::Token* root)
 
     for (Tokens::Token* token = root; token != nullptr; token = token->next)
     {   
-        // do not go past the current scope
-        if (isScope(token->opCode))
+        // evaluate the scope first
+        if (isScope(token->opCode) && token->priority != 0)
         {
-            break;
+            return token;
         }
 
         if (token->priority > root->priority)
@@ -110,11 +110,6 @@ void SyntaxTree::parse()
             while (root->prev != nullptr)
             {
                 root = root->prev;
-            }
-
-            if (root->next == nullptr)
-            {
-                break;
             }
 
             root = getHighestPriority(root);

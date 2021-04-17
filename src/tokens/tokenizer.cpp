@@ -117,8 +117,12 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                             if (Keywords::hasValue(*(std::string*) token->value, _value, _type))
                             {
                                 token->type = _type;
-                                token->priority = LITERAL_P + currentPriority;
+                                token->priority = LITERAL_P;
                                 token->opCode = OpCodes::LITERAL;
+
+                                // delete the string value since it won't be used anymore
+                                delete (std::string*) token->value;
+
                                 token->value = _value;
                                 AddToken;
                                 break;
@@ -132,6 +136,10 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
                             token->type = TokenType::KEYWORD;
                             token->priority = Keywords::keywordPriority(opCode) + currentPriority;
                             token->opCode = opCode;
+
+                            // delete the string value since it won't be used anymore
+                            delete (std::string*) token->value;
+
                             AddToken;
                         }
 
@@ -289,7 +297,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
         {
         case '"':
         {
-            token = new Token(TokenType::STRING, LITERAL_P + currentPriority, OpCodes::LITERAL, (Value) (new std::string("")));
+            token = new Token(TokenType::STRING, LITERAL_P, OpCodes::LITERAL, (Value) (new std::string("")));
             continue;
         }
 
@@ -343,7 +351,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
         
         case ';':
         {
-            token = new Token(TokenType::ENDS, LITERAL_P + currentPriority, OpCodes::NO_OP);
+            token = new Token(TokenType::ENDS, LITERAL_P, OpCodes::NO_OP);
             AddToken;
             continue;
         }
@@ -366,9 +374,10 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
         
         case '}':
         {   
+            token = new Token(TokenType::SCOPE, SCOPE_P + currentPriority, OpCodes::POP_SCOPE);
+
             currentPriority -= PARENTHESIS_P;
 
-            token = new Token(TokenType::SCOPE, SCOPE_P + currentPriority, OpCodes::POP_SCOPE);
             AddToken;
             continue;
         }
@@ -386,7 +395,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
             }
 
             // ordinary parenthesis
-            token = new Token(TokenType::PARENTHESIS, currentPriority, OpCodes::PARENTHESIS);
+            token = new Token(TokenType::PARENTHESIS, currentPriority, OpCodes::PARENTHESIS, '(');
             
             AddToken;
             continue;
@@ -407,13 +416,13 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
         {
             if (isDigit(c))
             {
-                token = new Token(TokenType::INT, LITERAL_P + currentPriority, OpCodes::LITERAL, toDigit(c));
+                token = new Token(TokenType::INT, LITERAL_P, OpCodes::LITERAL, toDigit(c));
                 continue;
             }
 
             if (isText(c))
             {
-                token = new Token(TokenType::TEXT, LITERAL_P + currentPriority, OpCodes::NO_OP, (Value) (new std::string {c}));
+                token = new Token(TokenType::TEXT, LITERAL_P, OpCodes::NO_OP, (Value) (new std::string {c}));
                 continue;
             }
 
@@ -422,6 +431,9 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
         } // switch (c)    
     
     } // for (uint i = 0; (c = script[i]) != 0; i++)
+
+    // add a closing end of statement token
+    tokens->add(new Token(TokenType::ENDS, LITERAL_P, OpCodes::NO_OP));
 
     return tokens;
 }
