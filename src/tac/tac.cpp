@@ -10,7 +10,11 @@ using namespace tac;
 
 Tac::Tac()
 {
-    // initialize with the zeroth instruction
+    /*
+        initialize with the zeroth instruction so not 
+        to have to check for null pointers when adding
+        a new instruction
+    */
     start = new TacInstruction(TacOp::NO_OP);
     instructions = start;
 }
@@ -18,6 +22,11 @@ Tac::Tac()
 
 void Tac::add(TacInstruction* in)
 {
+    /*
+        just add the instruction without checking for
+        null pointers because the first element of the list
+        is always initialized in the constructor
+    */
     instructions->next = in;
     in->prev = instructions;
     instructions = in;

@@ -105,3 +105,23 @@ void Statements::add(Statement* statement)
 }
 
 
+void Statements::removeLast()
+{   
+    // if there is only 1 statement remove it right away
+    if (start == end)
+    {
+        start = nullptr;
+        end = nullptr;
+        return;
+    }
+
+    Statement* statement;
+    // iterate until the second last statement
+    for (statement = start; statement->next != end; statement = statement->next);
+
+    // break the linked list
+    statement->next = nullptr;
+    end = statement;
+}
+
+

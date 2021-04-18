@@ -2,6 +2,7 @@
 #include "utils.hh"
 #include "op_codes.hh"
 #include "token.hh"
+#include "syntax_tree.hh"
 
 
 // converts a token->value (real reference) to a const Address*
@@ -11,14 +12,18 @@
 
 
 using namespace tac;
-using namespace Tokens;
 
 
-
-void Tac::parseTree(syntax_tree::SyntaxTree& tree)
+TacInstruction* Tac::parseTree(syntax_tree::SyntaxTree& tree)
 {
     using namespace syntax_tree;
     using namespace Tokens;
+
+    // the first instruction for the SyntaxTree is a label 
+    // pointing to the start of the instructions for said SyntaxTree
+    TacInstruction* label = new TacInstruction(TacOp::LABEL);
+    // add the label to the three address code
+    add(label);
 
     for (Statement* statement = tree.statements.start; statement != nullptr; statement = statement->next)
     {
@@ -31,19 +36,38 @@ void Tac::parseTree(syntax_tree::SyntaxTree& tree)
 
     }
 
+    // return label pointing to the first instruction for the parsed SyntaxTree
+    return label;
 }
 
 
-void Tac::parseOperator(Tokens::Token* token)
+TacInstruction* Tac::parseOperator(Tokens::Token* token)
 {
     using namespace Tokens;
+
+    // check if token is a scope and handle it differently from regular tokens
+    if (token->opCode == OpCodes::PUSH_SCOPE)
+    {
+        using namespace syntax_tree;
+
+        // Scope Token's value is a SyntaxTree* of its content
+        SyntaxTree* tree = (SyntaxTree*) token->value;
+
+        // return a label to the TAC of the scope's SyntaxTree
+        return parseTree(*tree);
+    }
+
 
     // treat token's value as a pointer to an array of token pointers
     Token** operands = (Token**) token->value; 
     
-    // loop over operands and evaluate those first
-    // OpType is compatible with integers 0, 1, 2 which are
-    // respectively STANDALONE, UNARY, BINARY
+    /*
+        loop over operands and evaluate those first
+        OpType is compatible with integers 0, 1, 2 which are
+        respectively STANDALONE, UNARY, BINARY
+        
+        unsigned char is used because is the smallest data type (1 byte)
+    */
     for (unsigned char i = 0; i != (unsigned char) operatorType(token->opCode); i++)
     {
         Token* operand = operands[i];
@@ -55,15 +79,22 @@ void Tac::parseOperator(Tokens::Token* token)
 
     }
 
+    // save last TacInstruction to be returned later
+    TacInstruction* first = instructions;
+
     // generate three address code for the operator
     token->value = toValue(tacFor(token->opCode, operands));
     token->opCode = OpCodes::REFERENCE;
 
+    // return the first TacInstruction generated for the operator Token
+    return first->next;
 }
 
 
-const Address* Tac::tacFor(OpCodes opCode, Token** operands)
+const Address* Tac::tacFor(OpCodes opCode, Tokens::Token** operands)
 {
+    using namespace Tokens;
+
     switch (opCode)
     {   
 
@@ -196,6 +227,16 @@ const Address* Tac::tacFor(OpCodes opCode, Token** operands)
 
 // COMPLEX OPERATIONS
 
+
+        case OpCodes::PARENTHESIS:
+        {
+            /*
+                # just the content of parenthesis
+                a
+            */
+
+            return toAddress(operands[0]->value);
+        }
 
         case OpCodes::ASSIGNMENT_ADD:
         {

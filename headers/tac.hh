@@ -9,12 +9,10 @@
 #include <unordered_map>
 
 
-#define BASE_ADDRESSES 8
-
-
 namespace tac
 {   
 
+    // basic operations from which to generate TAC
     typedef enum class TacOp
     {
         LABEL,
@@ -38,7 +36,8 @@ namespace tac
         LABEL    // 2
     } TacValueType;
 
-
+    
+    // a class representing both temporary and real memory addresses
     class Address
     {
     private:
@@ -46,10 +45,13 @@ namespace tac
         // Addresses can only be obtained via getAddress()
         Address();
 
+        // map that keeps track of temporary memory addresses
         static std::unordered_map<Value, unsigned int> addresses;
 
     public:
 
+        // returns whether the given memory address is a temporary address
+        // aka instantiated with getAddress()
         static bool isTempAddress(Value address);
 
         // TODO implement a more efficient way of getting addresses
@@ -75,11 +77,13 @@ namespace tac
     {
     public:
 
+        // next and prev for doubly linked list
         TacInstruction* next = nullptr;
         TacInstruction* prev = nullptr;
 
         TacOp operation;
 
+        // the 3 addresses of three address code
         TacValue* addr1 = nullptr;
         TacValue* addr2 = nullptr;
         TacValue* addr3 = nullptr;
@@ -93,6 +97,7 @@ namespace tac
     };
 
 
+    // Three Address Code
     class Tac
     {
     private:
@@ -102,8 +107,9 @@ namespace tac
 
         void add(TacInstruction* in);
 
-        // recursive function that parses a single operator token
-        void parseOperator(Tokens::Token* token);
+        // recursive function that parses recursively an operator Token
+        // returns a pointer to the its first TacInstruction
+        TacInstruction* parseOperator(Tokens::Token* token);
 
         // recursive function that generates TAC for a complex operation
         // returns a reference to the result of the operation
@@ -111,12 +117,14 @@ namespace tac
 
     public:
 
+        // first element of the TacInstruction doubly linked list
         TacInstruction* start = nullptr;
 
         Tac();
 
         // transforms a syntax tree to a tac instructions linked list
-        void parseTree(syntax_tree::SyntaxTree& tree);
+        // returns a label to the TAC generated for the given SyntaxTree
+        TacInstruction* parseTree(syntax_tree::SyntaxTree& tree);
 
     };
 

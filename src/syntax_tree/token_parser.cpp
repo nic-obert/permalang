@@ -360,19 +360,43 @@ void syntax_tree::Statement::satisfy(Token* token)
                 // if depth is 0 --> found end of scope
                 if (depth == 0)
                 {
-                    // make the statement (the one before the scope) continue from this token
+                    // this is the last statement of the scope
+                    scopeStatements->end = scopeStatement;
+
+                    // make the statement (the one before the scope) 
+                    // continue from this token's next
                     if (tok->next != nullptr)
                     {
                         tok->next->prev = token;
                     }
                     token->next = tok->next;
 
+                    // make the scopeStatement end right before the closing scope Token
+                    if (tok->prev != nullptr)
+                    {
+                        tok->prev->next = nullptr;
+                    }
+
                     // delete closing scope token since it won't be used anymore
                     delete tok;
-                    
-                    // break the linked list on end of scope
-                    scopeStatement->next = nullptr;
 
+                    // make the outer Statement linked list (Statements)
+                    // continue from the next statement
+                    next = scopeStatement->next;
+
+                    // if statement's root is the newly deleted token --> delete it
+                    if (scopeStatement->root == tok)
+                    {
+                        scopeStatements->removeLast();
+                        delete scopeStatement;
+                    }
+                    // whereas if the statement isn't empty
+                    else
+                    {
+                        // break the linked list on end of scope
+                        scopeStatement->next = nullptr;
+                    }
+                    
                     break;
                 }
             }

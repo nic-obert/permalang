@@ -96,9 +96,14 @@ Tokens::Token* SyntaxTree::getHighestPriority(Tokens::Token* root)
 
 void SyntaxTree::parse()
 {
-
-    // loop through every statement --> for every statement, parse it and build a tree out of it
-    for (Statement* statement = statements.start; statement != nullptr; statement = statement->next)
+    /*
+        loop through every statement
+        for every statement, parse it and build a tree out of it
+        keep statement in outer scope to set Statements (linked list)'s
+        last element to the last evaluated statement
+    */
+    Statement* statement;
+    for (statement = statements.start; statement != nullptr; statement = statement->next)
     {
         Tokens::Token* root = statement->root;
 
@@ -125,6 +130,9 @@ void SyntaxTree::parse()
         }
 
     }
+
+    // set linked list's last element to the last evaluated statement
+    statements.end = statement;
 
 }
 

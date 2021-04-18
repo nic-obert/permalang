@@ -44,6 +44,9 @@ namespace syntax_tree
         Statements(Statement* statement);
         Statements();
 
+        // removes the last statement of the linked list
+        // does not delete it
+        void removeLast();
 
         void add(Statement* statement);
     
