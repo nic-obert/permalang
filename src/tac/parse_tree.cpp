@@ -14,16 +14,21 @@
 using namespace tac;
 
 
-TacInstruction* Tac::parseTree(syntax_tree::SyntaxTree& tree)
+TacInstruction* Tac::parseTree(syntax_tree::SyntaxTree& tree, bool addLabel)
 {
     using namespace syntax_tree;
     using namespace Tokens;
 
-    // the first instruction for the SyntaxTree is a label 
-    // pointing to the start of the instructions for said SyntaxTree
-    TacInstruction* label = new TacInstruction(TacOp::LABEL);
-    // add the label to the three address code
-    add(label);
+    TacInstruction* label = nullptr;
+
+    if (addLabel)
+    {
+        // the first instruction for the SyntaxTree is a label 
+        // pointing to the start of the instructions for said SyntaxTree
+        label = new TacInstruction(TacOp::LABEL);
+        // add the label to the three address code
+        add(label);
+    }
 
     for (Statement* statement = tree.statements.start; statement != nullptr; statement = statement->next)
     {
@@ -36,8 +41,12 @@ TacInstruction* Tac::parseTree(syntax_tree::SyntaxTree& tree)
 
     }
 
-    // return label pointing to the first instruction for the parsed SyntaxTree
+    /*
+        return label pointing to the first instruction for the parsed SyntaxTree
+        or nullptr if parameter addLabel is false
+    */
     return label;
+    
 }
 
 
@@ -45,7 +54,13 @@ TacInstruction* Tac::parseOperator(Tokens::Token* token)
 {
     using namespace Tokens;
 
-    // check if token is a scope and handle it differently from regular tokens
+    /*
+        check if token is a scope and handle it differently 
+        from regular tokens
+        this scope is independent from any operator, since
+        operators that require scopes should parse the scopes they
+        require in the tacFor() function when and how they need it
+    */
     if (token->opCode == OpCodes::PUSH_SCOPE)
     {
         using namespace syntax_tree;
@@ -72,7 +87,12 @@ TacInstruction* Tac::parseOperator(Tokens::Token* token)
     {
         Token* operand = operands[i];
 
-        if (isOperator(operand->opCode))
+        /*
+            do not parse an operand if it's not an operator itself
+            or if it's a scope, since it will be parsed by 
+            the operator the scope is required by
+        */
+        if (isOperator(operand->opCode) && operand->opCode != OpCodes::PUSH_SCOPE)
         {
             parseOperator(operand);
         }
@@ -231,11 +251,19 @@ const Address* Tac::tacFor(OpCodes opCode, Tokens::Token** operands)
         case OpCodes::PARENTHESIS:
         {
             /*
-                # just the content of parenthesis
-                a
+                // just the content of parenthesis
+                r = a
             */
 
-            return toAddress(operands[0]->value);
+            const Address* result = Address::getAddress();
+
+            add(new TacInstruction(
+                TacOp::ASSIGN,
+                new TacValue(TacValueType::ADDRESS, toValue(result)),
+                new TacValue(isReference(operands[0]), operands[0]->value)
+            ));
+
+            return result;
         }
 
         case OpCodes::ASSIGNMENT_ADD:
@@ -359,7 +387,7 @@ const Address* Tac::tacFor(OpCodes opCode, Tokens::Token** operands)
             /*
                 r = a == 1
                 if r jump l1:  
-                jump l2         # first is false --> whole statement is false
+                jump l2         // first is false --> whole statement is false
             l1:
                 r = b == 1
             l2:
@@ -443,7 +471,7 @@ const Address* Tac::tacFor(OpCodes opCode, Tokens::Token** operands)
         case OpCodes::LOGICAL_GREATER:
         {
             /*
-                just flip the operands
+                // just flip the operands
 
                 r = b < a
             */
@@ -527,15 +555,37 @@ const Address* Tac::tacFor(OpCodes opCode, Tokens::Token** operands)
         case OpCodes::FLOW_IF:
         {
             /*
-                if a jump b              
+                a = !a          // invert condition
+                if a jump b     // b is label to the end of the scope     
             */
+
+            using namespace syntax_tree;
+
+            // create a label to jump to if condition is false
+            TacInstruction* l1 = new TacInstruction(TacOp::LABEL);
+            
+            // instructions for the actual if statement
+
+            Token* ops[1] = { operands[0] };
 
             add(new TacInstruction(
                 TacOp::IF,
-                new TacValue(TacValueType::ADDRESS, operands[0]->value),
-                new TacValue(TacValueType::LABEL, operands[1]->value)
+                new TacValue(
+                    TacValueType::ADDRESS, 
+                    toValue(tacFor(OpCodes::LOGICAL_NOT, ops))),
+                new TacValue(TacValueType::LABEL, toValue(l1))
             ));
 
+            
+            // retrieve scope operand (which is always a pointer --> 8 bytes long in x86_64 machines)
+            SyntaxTree* scopeTree = (SyntaxTree*) operands[1]->value;
+
+            // parse the scope SyntaxTree and do not generate any label
+            parseTree(*scopeTree, NO_LABEL);
+            
+            // finally add the label instruction to jump to if condition is false
+            add(l1);
+            
             // if statements shouldn't return anything
             return nullptr;
         }

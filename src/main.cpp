@@ -52,7 +52,7 @@ int main(int argc, const char** argv)
     std::cout << syntaxTree << "\n" << std::endl;
 
     Tac tac = Tac();
-    tac.parseTree(syntaxTree);
+    tac.parseTree(syntaxTree, Tac::NO_LABEL);
 
     std::cout << tac << "\n" << std::endl;
 

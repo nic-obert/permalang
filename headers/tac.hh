@@ -102,7 +102,7 @@ namespace tac
     {
     private:
 
-        // linked list of instructions
+        // last element of doubly linked list of TacInstructions
         TacInstruction* instructions;
 
         void add(TacInstruction* in);
@@ -117,6 +117,8 @@ namespace tac
 
     public:
 
+        static const bool NO_LABEL = false;
+
         // first element of the TacInstruction doubly linked list
         TacInstruction* start = nullptr;
 
@@ -124,7 +126,7 @@ namespace tac
 
         // transforms a syntax tree to a tac instructions linked list
         // returns a label to the TAC generated for the given SyntaxTree
-        TacInstruction* parseTree(syntax_tree::SyntaxTree& tree);
+        TacInstruction* parseTree(syntax_tree::SyntaxTree& tree, bool addLabel = true);
 
     };
 
