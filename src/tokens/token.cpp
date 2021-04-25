@@ -176,6 +176,20 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
 }
 
 
+void Token::removeToken(Token* token)
+{
+    if (token->prev != nullptr)
+    {
+        token->prev->next = token->next;
+    }
+
+    if (token->next != nullptr)
+    {
+        token->next->prev = token->prev;
+    }
+}
+
+
 TokenList::TokenList() {};
 
 
@@ -195,8 +209,7 @@ void TokenList::add(Token* token)
 
 void TokenList::remove(Token* token)
 {
-    token->prev->next = token->next;
-    token->next->prev = token->prev;
+    Token::removeToken(token);
 
     delete token;
 }

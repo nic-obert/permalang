@@ -9,7 +9,7 @@
 #include "tac.hh"
 
 
-std::string loadFile(const char* path)
+void loadFile(const char* path, std::string& output)
 {
     std::ifstream file(path);
 
@@ -24,7 +24,7 @@ std::string loadFile(const char* path)
 
     file.close();
 
-    return buffer.str();
+    output = buffer.str();
 }
 
 
@@ -40,7 +40,8 @@ int main(int argc, const char** argv)
     }
     const char* filename = argv[1];
 
-    std::string file = loadFile(filename);
+    std::string file;
+    loadFile(filename, file);
 
     TokenList* tokens = tokenize(file);
 

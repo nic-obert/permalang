@@ -103,7 +103,7 @@ TacInstruction* Tac::parseOperator(Tokens::Token* token)
     TacInstruction* first = instructions;
 
     // generate three address code for the operator
-    token->value = toValue(tacFor(token->opCode, operands));
+    token->value = toValue(tacFor(token, operands));
     token->opCode = OpCodes::REFERENCE;
 
     // return the first TacInstruction generated for the operator Token
@@ -114,6 +114,19 @@ TacInstruction* Tac::parseOperator(Tokens::Token* token)
 const Address* Tac::tacFor(OpCodes opCode, Tokens::Token** operands)
 {
     using namespace Tokens;
+
+    // instantiate a temporary token to feed into the function
+    Token token = Token(TokenType::NONE, 0, opCode);
+    // return the result of the other tacFor() which takes the token as argument
+    return tacFor(&token, operands);
+}
+
+
+const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
+{
+    using namespace Tokens;
+
+    OpCodes opCode = token->opCode;
 
     switch (opCode)
     {   
@@ -386,11 +399,11 @@ const Address* Tac::tacFor(OpCodes opCode, Tokens::Token** operands)
         {
             /*
                 r = a == 1
-                if r jump l1:  
-                jump l2         // first is false --> whole statement is false
-            l1:
+                if r jump @l1:  
+                jump @l2         // first is false --> whole statement is false
+            @l1:
                 r = b == 1
-            l2:
+            @l2:
 
             */
                 
@@ -428,9 +441,9 @@ const Address* Tac::tacFor(OpCodes opCode, Tokens::Token** operands)
         {
             /*
                 r = a == 1
-                if r jump l2
+                if r jump @l1
                 r = b == 1
-            l1:
+            @l1:
 
             */
 
@@ -554,35 +567,93 @@ const Address* Tac::tacFor(OpCodes opCode, Tokens::Token** operands)
 
         case OpCodes::FLOW_IF:
         {
+            // if-else statement
+            /*
+                a = !a
+                if a jump @l1
+                ...             // TAC for if body
+                jump @l2
+            @l1:
+                ...             // TAC for else body
+            @l2:
+
+            */
+            // if statement
             /*
                 a = !a          // invert condition
-                if a jump b     // b is label to the end of the scope     
+                if a jump @l1   // @l1 is label to the end of the scope     
+                ...             // TAC for if body
+            @l1:
+                
             */
 
             using namespace syntax_tree;
 
             // create a label to jump to if condition is false
             TacInstruction* l1 = new TacInstruction(TacOp::LABEL);
-            
-            // instructions for the actual if statement
 
+            // operands for LOGICAL_NOT to invert boolean condition
             Token* ops[1] = { operands[0] };
 
             add(new TacInstruction(
                 TacOp::IF,
-                new TacValue(
-                    TacValueType::ADDRESS, 
+                new TacValue(TacValueType::ADDRESS,
                     toValue(tacFor(OpCodes::LOGICAL_NOT, ops))),
                 new TacValue(TacValueType::LABEL, toValue(l1))
             ));
 
-            
             // retrieve scope operand (which is always a pointer --> 8 bytes long in x86_64 machines)
             SyntaxTree* scopeTree = (SyntaxTree*) operands[1]->value;
 
             // parse the scope SyntaxTree and do not generate any label
             parseTree(*scopeTree, NO_LABEL);
-            
+
+            // delete the SyntaxTree since it won't be used anymore
+            delete scopeTree;
+
+            // differenciate between if and if-else statement
+            Token* elseToken = token->next;
+            if (elseToken != nullptr && elseToken->opCode == OpCodes::FLOW_ELSE)       
+            {
+                // label for after the else body
+                TacInstruction* l2 = new TacInstruction(TacOp::LABEL);
+
+                // jump @l2
+                add(new TacInstruction(
+                    TacOp::JUMP,
+                    new TacValue(TacValueType::LABEL, toValue(l2))
+                ));
+
+                // label for else body
+                add(l1);
+
+                // TAC for else body
+
+                // treat elseToken's value as an array of Token*
+                Token** elseOperands = (Token**) elseToken->value;
+                // treat the first operand of elseToekn as a SyntaxTree* (since it is)
+                SyntaxTree* elseBody = (SyntaxTree*) elseOperands[0]->value;
+                // parse the body of the else statement (adding the resulting TAC instructions)
+                parseTree(*elseBody, NO_LABEL);
+                
+                // delete the SyntaxTree since it won't be used anymore
+                delete elseBody;
+
+                // remove else token from Statement (Token doubly-linked list)
+                Token::removeToken(elseToken);
+                
+                // delete else since it won't be evaluated on its own
+                delete elseToken;
+
+                // label for exiting the statement
+                add(l2);
+
+                // if statements shouldn't return anything
+                return nullptr;
+            }
+
+            // whereas if statement is just a bare if
+       
             // finally add the label instruction to jump to if condition is false
             add(l1);
             

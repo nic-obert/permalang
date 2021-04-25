@@ -8,6 +8,9 @@
 using namespace tac;
 
 
+const bool Tac::NO_LABEL = false;
+
+
 Tac::Tac()
 {
     /*

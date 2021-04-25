@@ -1,4 +1,6 @@
 if (true)
 {
     int i = 0;
+} else {
+    int b = 2;
 }

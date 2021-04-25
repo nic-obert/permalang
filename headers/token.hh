@@ -46,6 +46,10 @@ namespace Tokens
         Token(TokenType type, int priority, OpCodes opCode, Value value);
         Token(TokenType type, int priority, OpCodes opCode);
 
+        // removes the token from where it is located
+        // data-structure specific methods are preferred to this
+        static void removeToken(Token* token);
+
     };
 
 

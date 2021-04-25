@@ -113,11 +113,13 @@ namespace tac
 
         // recursive function that generates TAC for a complex operation
         // returns a reference to the result of the operation
+        const Address* tacFor(Tokens::Token* token, Tokens::Token** operands);
         const Address* tacFor(OpCodes opCode, Tokens::Token** operands);
 
     public:
 
-        static const bool NO_LABEL = false;
+        // boolean false
+        static const bool NO_LABEL;
 
         // first element of the TacInstruction doubly linked list
         TacInstruction* start = nullptr;

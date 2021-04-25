@@ -103,7 +103,7 @@ void SyntaxTree::parse()
         last element to the last evaluated statement
     */
     Statement* statement;
-    for (statement = statements.start; statement != nullptr; statement = statement->next)
+    for (statement = statements.start; true; statement = statement->next)
     {
         Tokens::Token* root = statement->root;
 
@@ -127,6 +127,13 @@ void SyntaxTree::parse()
             // satisfy token's requirements
             statement->satisfy(root);
             
+        }
+
+        // check if next statement is nullptr and break
+        // so not to set statements.end to nullptr (aka. cause segfault)
+        if (statement->next == nullptr)
+        {
+            break;
         }
 
     }

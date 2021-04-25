@@ -5,6 +5,7 @@
 
 #define SCOPE_P 1
 #define IF_P 1
+#define ELSE_P 1
 #define GOTO_P 1
 #define GOBACK_P 1
 #define RETURN_P 1
@@ -28,7 +29,6 @@
 #define INCREMEN_P 8
 #define DECREMENT_P 8
 #define NOT_P 9
-#define ELSE_P 10
 #define ADDRESS_OF_P 10
 #define WHILE_P 10
 #define FOR_P 10

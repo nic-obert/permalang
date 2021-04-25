@@ -489,6 +489,24 @@ void syntax_tree::Statement::satisfy(Token* token)
 
 
     case OpCodes::FLOW_ELSE:
+    {
+        Token* body = token->next;
+
+        // check if body exists
+        if (body == nullptr)
+        {
+            std::cerr << "Missing else statement's body" << std::endl;
+            exit(1);
+        }
+
+        token->value = toValue(new Token*[1] { body });
+
+        remove(body);
+
+        break;
+    }
+
+
     case OpCodes::FLOW_WHILE:
     case OpCodes::FLOW_FOR:
     {
