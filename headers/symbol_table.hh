@@ -2,13 +2,20 @@
 
 #include <unordered_map>
 #include <string>
+#include <optional>
 
 #include "token.hh"
 
 
 namespace symbol_table
 {
+    // do inherit from outer scope
+    #define DO_INHERIT true
+    // do not inherit from outer scope
+    #define DONT_INHERIT false
 
+
+    // holds a Value along with its TokenType
     typedef struct Symbol
     {
         Value value;
@@ -19,34 +26,31 @@ namespace symbol_table
     } Symbol;
 
 
+    // an unordered map mapping a string (symbol name) to a Symbol
+    typedef std::unordered_map<std::string, Symbol*> Table;
+
+
+    // keeps track of the symbols in scope
     typedef struct Scope
     {
-        unsigned int scope;
-        size_t index;
+        // outer table is optional since it can be undefined
+        std::optional<Table> outer;
+        Table local;
+
         Scope* prev = nullptr;
 
-        Scope(unsigned int scope, size_t index);
+        // initialize a completely new Scope
+        // that doesn't inherit from outer scopes
+        Scope();
+
+        // initialize a new Scope that inherits from
+        // the previous Scope
+        Scope(Table& _local, std::optional<Table>& _outer);
+
+        // scope destructor, deletes symbols in local scope
+        ~Scope();
 
     } Scope;
-
-
-    class ScopeStack
-    {
-    private:
-
-        Scope* last;
-
-    public:
-
-        ScopeStack();
-
-
-        void push(size_t index);
-
-
-        Scope* pop();
-
-    };
 
 
     // Singleton
@@ -54,9 +58,9 @@ namespace symbol_table
     {
     private:
 
-        static std::unordered_map<std::string, Symbol*> table;
+        static Table globalScope;
 
-        static ScopeStack scopes;
+        static Scope* scopeStack;
 
         SymbolTable() = delete;
 
@@ -68,7 +72,7 @@ namespace symbol_table
         static void declare(std::string* identifier, Symbol* symbol);
 
 
-        static void pushScope();
+        static void pushScope(bool inherits);
 
 
         static void popScope();

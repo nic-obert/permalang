@@ -315,7 +315,7 @@ void syntax_tree::Statement::satisfy(Token* token)
         using namespace syntax_tree;
 
         // first push the scope to the SymbolTable
-        symbol_table::SymbolTable::pushScope();
+        symbol_table::SymbolTable::pushScope(DO_INHERIT);
 
         // transfer the part of the statement which is in the new scope
         // to another statement

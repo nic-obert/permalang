@@ -9,33 +9,50 @@
 using namespace symbol_table;
 
 
-// initialize Symbol Table
-std::unordered_map<std::string, Symbol*> SymbolTable::table = std::unordered_map<std::string, Symbol*>();
+// initialize SymbolTable
+Table SymbolTable::globalScope = Table();
 
-ScopeStack SymbolTable::scopes = ScopeStack();
+Scope* SymbolTable::scopeStack = new Scope();
 
 
 void SymbolTable::assign(std::string* identifier, Symbol* symbol)
-{
-    // check if token was not declared
-    if (table.find(*identifier) == table.end())
+{   
+    // TODO implement type checking
+    // search in local scope first    
+    if (scopeStack->local.find(*identifier) != scopeStack->local.end())
     {
-        // TODO implement error handling
-        std::cerr << "\"" << *identifier << "\" was not declared" << std::endl;
-        exit(1);
+        // dereference table since identifier is allocated on the heap
+        scopeStack->local[*identifier] = symbol;
+        return;
     }
 
-    // TODO implement type checking
+    // check then in outer scope
+    if (scopeStack->outer.has_value()
+        && scopeStack->outer.value().find(*identifier) != scopeStack->outer.value().end())
+    {
+        scopeStack->outer.value()[*identifier] = symbol;
+        return;
+    }
 
-    // dereference table since it's allocated on the heap
-    table[*identifier] = symbol;
+    // lastly check in global scope
+    if (globalScope.find(*identifier) != globalScope.end())
+    {
+        globalScope[*identifier] = symbol;
+        return;
+    }
+
+    // if symbol has not been found, it wasn't declared in 
+    // any reachable scope, thus throw exception
+    // TODO implement error handling
+    std::cerr << "\"" << *identifier << "\" was not declared" << std::endl;
+    exit(1);
 }
 
 
 void SymbolTable::declare(std::string* identifier, Symbol* symbol)
 {
-    // check if token was already declared
-    if (table.find(*identifier) != table.end())
+    // check if token was already declared in local scope
+    if (scopeStack->local.find(*identifier) != scopeStack->local.end())
     {
         // TODO implement error handling
         // TODO implement scope specific checking
@@ -43,41 +60,45 @@ void SymbolTable::declare(std::string* identifier, Symbol* symbol)
         exit(1);
     }
 
-    table[*identifier] = symbol;
+    // insert symbol 
+    scopeStack->local[*identifier] = symbol;
 }
 
 
 // gets a Symbol given its name
 Symbol* SymbolTable::get(std::string* identifier)
 {
-    std::unordered_map<std::string, Symbol*>::iterator iterator;
-    iterator = table.find(*identifier);
+    // check in local scope first
+    Table::const_iterator iterator = scopeStack->local.find(*identifier);
 
-    // if Symbold does not exist
-    if (iterator == table.end())
+    if (iterator != scopeStack->local.cend())
     {
-        std::cerr << "\"" << *identifier << "\" was not declared" << std::endl;
-        exit(1);
+        return iterator->second;
     }
 
-    // return the symbol
-    return iterator->second;
-}
+    // then in outer scope
+    if (scopeStack->outer.has_value())
+    {
+        iterator = scopeStack->outer.value().find(*identifier);
 
+        if (iterator != scopeStack->outer.value().cend())
+        {
+            return iterator->second;
+        }
+    }
+    
 
-// pushes a new Scope to the SymbolTable
-void SymbolTable::pushScope()
-{
-    // the new Scope should point to where it begins in the SymbolTable
-    scopes.push(table.size());
-}
+    // lastly in global scope
+    iterator = globalScope.find(*identifier);
 
-
-// pops the last Scope form the SymbolTable
-void SymbolTable::popScope()
-{
-    // first pop the scope
-    Scope* scope = scopes.pop();
-    // TODO notify the table that the scope has been popped
+    if (iterator != globalScope.find(*identifier))
+    {
+        return iterator->second;
+    }
+    
+    // if symbol has not been found, it wasn't declared in 
+    // any reachable scope, thus throw exception
+    std::cerr << "\"" << *identifier << "\" was not declared" << std::endl;
+    exit(1);
 }
 

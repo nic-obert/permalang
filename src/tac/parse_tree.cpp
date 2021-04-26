@@ -31,14 +31,15 @@ TacInstruction* Tac::parseTree(syntax_tree::SyntaxTree& tree, bool addLabel)
     }
 
     for (Statement* statement = tree.statements.start; statement != nullptr; statement = statement->next)
-    {
-        Token* root = statement->root;
-
-        if (isOperator(root->opCode))
+    {   
+        // iterate over operators in the statement
+        for (Token* root = statement->root; root != nullptr; root = root->next)
         {
-            parseOperator(root);
+            if (isOperator(root->opCode))
+            {
+                parseOperator(root);
+            }
         }
-
     }
 
     /*
@@ -68,8 +69,7 @@ TacInstruction* Tac::parseOperator(Tokens::Token* token)
         // Scope Token's value is a SyntaxTree* of its content
         SyntaxTree* tree = (SyntaxTree*) token->value;
 
-        // return a label to the TAC of the scope's SyntaxTree
-        return parseTree(*tree);
+        return parseTree(*tree, NO_LABEL);
     }
 
 

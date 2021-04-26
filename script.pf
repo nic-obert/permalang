@@ -1,6 +1,5 @@
-if (true)
+int d = 0;
 {
-    int i = 0;
-} else {
-    int b = 2;
+    d = 2;
 }
+int c = 0;

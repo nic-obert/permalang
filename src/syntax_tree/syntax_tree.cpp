@@ -9,7 +9,7 @@ using namespace syntax_tree;
 
 
 SyntaxTree::SyntaxTree(Statements& statements)
-: statements(statements)
+: statements(std::move(statements))
 {
 
 }
@@ -40,7 +40,7 @@ SyntaxTree::SyntaxTree(Tokens::TokenList* tokens)
         if (tok->type == TokenType::ENDS)
         {
             // don't add empty statements
-            if (statement->root != nullptr)
+            if (statement != nullptr && statement->root != nullptr)
             {
                 token->next = nullptr;
                 statements.add(statement);
