@@ -1,5 +1,9 @@
 #include "pch.hh"
 
+#include "token.hh"
+#include "syntax_tree.hh"
+#include "tac.hh"
+
 
 void loadFile(const char* path, std::string& output)
 {
@@ -7,7 +11,7 @@ void loadFile(const char* path, std::string& output)
 
     if (file.bad()) 
     {
-        std::cerr << "Couldn't read file " << path << std::endl;
+        std::cerr << "Couldn't read file: " << path << std::endl;
         exit(EXIT_FAILURE);
     }
 
@@ -26,21 +30,21 @@ int main(int argc, const char** argv)
     using namespace syntax_tree;
     using namespace tac;
 
-
     if (argc < 2) {
         std::cerr << "No file specified" << std::endl;
         exit(EXIT_FAILURE);
     }
+
     const char* filename = argv[1];
 
     std::string file;
     loadFile(filename, file);
 
-    TokenList* tokens = tokenize(file);
+    TokenList tokens = TokenList(file);
 
-    std::cout << *tokens << "\n" << std::endl;
+    std::cout << tokens << "\n" << std::endl;
 
-    SyntaxTree syntaxTree = SyntaxTree(tokens);
+    SyntaxTree syntaxTree = SyntaxTree(&tokens);
     syntaxTree.parse();
 
     std::cout << syntaxTree << "\n" << std::endl;

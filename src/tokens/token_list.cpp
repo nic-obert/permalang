@@ -1,15 +1,57 @@
 #include "pch.hh"
 
+#include "token.hh"
+#include "op_codes.hh"
+#include "priorities.hh"
+#include "keywords.hh"
 
-#define AddToken tokens->add(token); token = nullptr;
+
+using namespace Tokens;
 
 
-Tokens::TokenList* Tokens::tokenize(std::string& script) 
+#define AddToken add(token); token = nullptr;
+
+
+
+void TokenList::add(Token* token) 
+{   
+    if (first == nullptr)
+    {
+        first = token;
+        last = first;
+        return;
+    }
+    last->next = token;
+    token->prev = last;
+    last = token;
+}
+
+
+void TokenList::remove(Token* token)
 {
-    using namespace Tokens;
+    Token::removeToken(token);
 
-    TokenList* tokens = new TokenList();
+    delete token;
+}
 
+
+std::ostream& operator<<(std::ostream& stream, TokenList const& list)
+{
+    stream << "Token List: {\n";
+    if (list.first == nullptr)
+        stream << "\tEmpty token line\n";
+
+    for (Tokens::Token* token = list.first; token != nullptr; token = token->next)
+    {
+        stream << "\t" << *token << "\n";
+    }
+
+    stream << "}";
+}
+
+
+TokenList::TokenList(std::string& script) 
+{
     Token* token = nullptr;
 
     unsigned int currentPriority = 0;
@@ -385,7 +427,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
             currentPriority += PARENTHESIS_P;
 
             // function call
-            if (tokens->last->type == TokenType::TEXT)
+            if (last->type == TokenType::TEXT)
             {
                 token = new Token(TokenType::NONE, currentPriority, OpCodes::CALL);
                 continue;
@@ -430,8 +472,7 @@ Tokens::TokenList* Tokens::tokenize(std::string& script)
     } // for (uint i = 0; (c = script[i]) != 0; i++)
 
     // add a closing end of statement token
-    tokens->add(new Token(TokenType::ENDS, LITERAL_P, OpCodes::NO_OP));
+    add(new Token(TokenType::ENDS, LITERAL_P, OpCodes::NO_OP));
 
-    return tokens;
 }
 

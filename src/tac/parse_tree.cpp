@@ -1,5 +1,7 @@
 #include "pch.hh"
 
+#include "tac.hh"
+
 
 // converts a token->value (real reference) to a const Address*
 #define toAddress(reference) ((const Address*) reference)

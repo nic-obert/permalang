@@ -1,7 +1,6 @@
 #pragma once
 
-#include <string>
-#include <iostream>
+#include "pch.hh"
 
 #include "utils.hh"
 #include "op_codes.hh"
@@ -60,7 +59,7 @@ namespace Tokens
         Token* last = nullptr;
         
 
-        TokenList();
+        TokenList(std::string& script);
 
 
         void add(Token* token);
@@ -69,10 +68,6 @@ namespace Tokens
         void remove(Token* token);
 
     };
-
-
-    TokenList* tokenize(std::string& script);
-    
 
 };
 

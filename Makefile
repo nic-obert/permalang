@@ -4,7 +4,9 @@ STD=c++17
 
 SOURCES=$(shell find src -name "*.cpp")
 HEADERS=$(shell find headers -name "*.hh")
-PCH=headers/pch.hh
+
+HH=headers/pch.hh
+PCH=$(HH).pch
 
 BUILD_DIR=build
 
@@ -12,15 +14,15 @@ BUILD_DIR=build
 all: build
 
 
-build: precompile_headers $(SOURCES)
+build: $(PCH) $(SOURCES)
 	$(CC) -std=$(STD) -I headers $(SOURCES) -o $(BUILD_DIR)/perma
 
-builddb: $(HEADERS) precompile_headers $(SOURCES)
+builddb: $(PCH) $(SOURCES)
 	$(CC) -std=$(STD) -g -I headers $(SOURCES) -o $(BUILD_DIR)/perma
 
 
-precompile_headers: $(HEADERS)
-	$(CC) -std=$(STD) -I headers $(PCH) -o $(PCH).pch
+$(PCH): $(HEADERS)
+	$(CC) -std=$(STD) -I headers $(HH) -o $(PCH)
 
 
 clean:

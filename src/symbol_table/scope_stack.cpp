@@ -1,5 +1,7 @@
 #include "pch.hh"
 
+#include "symbol_table.hh"
+
 
 using namespace symbol_table;
 

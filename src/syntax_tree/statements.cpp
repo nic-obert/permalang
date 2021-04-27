@@ -1,5 +1,7 @@
 #include "pch.hh"
 
+#include "syntax_tree.hh"
+
 
 using namespace syntax_tree;
 

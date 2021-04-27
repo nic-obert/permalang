@@ -1,5 +1,9 @@
 #include "pch.hh"
 
+#include "token.hh"
+#include "operators.hh"
+#include "keywords.hh"
+
 
 using namespace Tokens;
 
@@ -180,45 +184,5 @@ void Token::removeToken(Token* token)
     {
         token->next->prev = token->prev;
     }
-}
-
-
-TokenList::TokenList() {};
-
-
-void TokenList::add(Token* token) 
-{   
-    if (first == nullptr)
-    {
-        first = token;
-        last = first;
-        return;
-    }
-    last->next = token;
-    token->prev = last;
-    last = token;
-}
-
-
-void TokenList::remove(Token* token)
-{
-    Token::removeToken(token);
-
-    delete token;
-}
-
-
-std::ostream& operator<<(std::ostream& stream, TokenList const& list)
-{
-    stream << "Token List: {\n";
-    if (list.first == nullptr)
-        stream << "\tEmpty token line\n";
-
-    for (Tokens::Token* token = list.first; token != nullptr; token = token->next)
-    {
-        stream << "\t" << *token << "\n";
-    }
-
-    stream << "}";
 }
 

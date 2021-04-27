@@ -1,5 +1,4 @@
-#include "pch.hh"
-
+#include "operators.hh"
 
 
 const char* operators::arithmetical::arithmeticalOperatorName(OpCodes op)

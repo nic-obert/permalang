@@ -1,5 +1,7 @@
 #include "pch.hh"
 
+#include "syntax_tree.hh"
+
 
 #define RIGHT 0
 #define LEFT 1
