@@ -109,6 +109,8 @@ namespace tac
 
         // recursive function that parses recursively an operator Token
         // returns a pointer to the its first TacInstruction
+        // sets the token's value to an Address* which stores
+        // the result of the operation
         TacInstruction* parseOperator(Tokens::Token* token);
 
         // recursive function that generates TAC for a complex operation

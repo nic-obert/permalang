@@ -1,9 +1,4 @@
-
-#include <unordered_map>
-
-#include "priorities.hh"
-#include "keywords.hh"
-#include "op_codes.hh"
+#include "pch.hh"
 
 
 using namespace Keywords;

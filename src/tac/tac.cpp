@@ -1,8 +1,4 @@
-#include "tac.hh"
-#include "token.hh"
-#include "syntax_tree.hh"
-#include "op_codes.hh"
-#include "utils.hh"
+#include "pch.hh"
 
 
 using namespace tac;

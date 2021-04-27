@@ -6,7 +6,8 @@
             "label": "Build",
             "command": "/usr/bin/make",
             "args": [
-               "builddb" 
+                "-j$(nproc)",
+                "builddb" 
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

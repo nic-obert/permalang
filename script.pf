@@ -1,5 +1,13 @@
-int d = 0;
+bool cond = false;
+int result;
+
+if (cond)
 {
-    d = 2;
+    result = 0;
 }
-int c = 0;
+else if (cond == true)
+{
+    result = 2;
+}
+
+int res = result;

@@ -1,8 +1,4 @@
-#include "tac.hh"
-#include "utils.hh"
-#include "op_codes.hh"
-#include "token.hh"
-#include "syntax_tree.hh"
+#include "pch.hh"
 
 
 // converts a token->value (real reference) to a const Address*
@@ -102,8 +98,10 @@ TacInstruction* Tac::parseOperator(Tokens::Token* token)
     // save last TacInstruction to be returned later
     TacInstruction* first = instructions;
 
-    // generate three address code for the operator
+    // generate three address code for the operator and
+    // store it as the token's value
     token->value = toValue(tacFor(token, operands));
+    // token is now a reference to its operation's result
     token->opCode = OpCodes::REFERENCE;
 
     // return the first TacInstruction generated for the operator Token
@@ -400,10 +398,10 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
             /*
                 r = a == 1
                 if r jump @l1:  
-                jump @l2         // first is false --> whole statement is false
+                jump @Lexit         // first is false --> whole statement is false
             @l1:
                 r = b == 1
-            @l2:
+            @Lexit:
 
             */
                 
@@ -412,7 +410,7 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
             Token* ops[2] = { operands[0], &op2 };
 
             TacInstruction* l1 = new TacInstruction(TacOp::LABEL);
-            TacInstruction* l2 = new TacInstruction(TacOp::LABEL);
+            TacInstruction* exitLabel = new TacInstruction(TacOp::LABEL);
 
             const Address* result = tacFor(OpCodes::LOGICAL_EQ, ops);
 
@@ -423,7 +421,7 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
             ));
             add(new TacInstruction(
                 TacOp::JUMP,
-                new TacValue(TacValueType::LABEL, toValue(l2))
+                new TacValue(TacValueType::LABEL, toValue(exitLabel))
             ));
 
             add(l1);
@@ -432,7 +430,7 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
             
             result = tacFor(OpCodes::LOGICAL_EQ, ops);
 
-            add(l2);
+            add(exitLabel);
 
             return result;
         }
@@ -441,13 +439,13 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
         {
             /*
                 r = a == 1
-                if r jump @l1
+                if r jump @Lexit
                 r = b == 1
-            @l1:
+            @Lexit:
 
             */
 
-            TacInstruction* l1 = new TacInstruction(TacOp::LABEL);
+            TacInstruction* exitLabel = new TacInstruction(TacOp::LABEL);
 
             Token op2 = Token(TokenType::INT, 0, OpCodes::LITERAL, 1);
             Token* ops[2] = { operands[0], &op2 };
@@ -457,14 +455,14 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
             add(new TacInstruction(
                 TacOp::IF,
                 new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(TacValueType::LABEL, toValue(l1))
+                new TacValue(TacValueType::LABEL, toValue(exitLabel))
             ));
 
             ops[0] = operands[1];
 
             result = tacFor(OpCodes::LOGICAL_EQ, ops);
 
-            add(l1);
+            add(exitLabel);
 
             return result;
         }
@@ -498,25 +496,25 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
         {
             /*
                 r = a < b
-                if r jump l1
+                if r jump @Lexit
                 r = a == b
-            l1:
+            @Lexit:
 
             */
 
-            TacInstruction* l1 = new TacInstruction(TacOp::LABEL);
+            TacInstruction* exitLabel = new TacInstruction(TacOp::LABEL);
 
             const Address* result = tacFor(OpCodes::LOGICAL_LESS, operands);
 
             add(new TacInstruction(
                 TacOp::IF,
                 new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(TacValueType::LABEL, toValue(l1))
+                new TacValue(TacValueType::LABEL, toValue(exitLabel))
             ));
 
             result = tacFor(OpCodes::LOGICAL_EQ, operands);
 
-            add(l1);
+            add(exitLabel);
 
             return result;
         }
@@ -525,25 +523,25 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
         {
             /*
                 r = a > b
-                if r jump l1
+                if r jump @Lexit
                 r = a == b
-            l1:
+            @Lexit:
 
             */
 
-            TacInstruction* l1 = new TacInstruction(TacOp::LABEL);
+            TacInstruction* exitLabel = new TacInstruction(TacOp::LABEL);
 
             const Address* result = tacFor(OpCodes::LOGICAL_GREATER, operands);
 
             add(new TacInstruction(
                 TacOp::IF,
                 new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(TacValueType::LABEL, toValue(l1))
+                new TacValue(TacValueType::LABEL, toValue(exitLabel))
             ));
 
             result = tacFor(OpCodes::LOGICAL_EQ, operands);
 
-            add(l1);
+            add(exitLabel);
 
             return result;            
         }
@@ -567,99 +565,170 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
         case OpCodes::FLOW_IF:
         {
-            // if-else statement
             /*
-                a = !a
-                if a jump @l1
-                ...             // TAC for if body
-                jump @l2
-            @l1:
-                ...             // TAC for else body
-            @l2:
+                - check for any following if statement
+                - add if statements along with their condition
+                  to a queue of statements to be evaluated
+                - generate TAC for the just gathered statements
+                - finally add the trailing else statement, if present
+            */
+
+            /*
+                c1 = !c1            // c1 is the condition of first if
+                if c1 jump @if2
+                ...                 // TAC for first if body
+                jump @Lexit
+
+            @if2:
+                c2 = !c2
+                if c2 jump @if3
+                ...                 // TAC for second if body       
+                jump @Lexit
+            
+            @if3:
+                ...                 // and so on...
+
+            @Lelse:
+                ...
+
+            @Lexit:
 
             */
-            // if statement
-            /*
-                a = !a          // invert condition
-                if a jump @l1   // @l1 is label to the end of the scope     
-                ...             // TAC for if body
-            @l1:
-                
-            */
+            
 
             using namespace syntax_tree;
 
-            // create a label to jump to if condition is false
-            TacInstruction* l1 = new TacInstruction(TacOp::LABEL);
-
-            // operands for LOGICAL_NOT to invert boolean condition
-            Token* ops[1] = { operands[0] };
-
-            add(new TacInstruction(
-                TacOp::IF,
-                new TacValue(TacValueType::ADDRESS,
-                    toValue(tacFor(OpCodes::LOGICAL_NOT, ops))),
-                new TacValue(TacValueType::LABEL, toValue(l1))
-            ));
-
-            // retrieve scope operand (which is always a pointer --> 8 bytes long in x86_64 machines)
-            SyntaxTree* scopeTree = (SyntaxTree*) operands[1]->value;
-
-            // parse the scope SyntaxTree and do not generate any label
-            parseTree(*scopeTree, NO_LABEL);
-
-            // delete the SyntaxTree since it won't be used anymore
-            delete scopeTree;
-
-            // differenciate between if and if-else statement
-            Token* elseToken = token->next;
-            if (elseToken != nullptr && elseToken->opCode == OpCodes::FLOW_ELSE)       
+            // FIFO queue of if statements
+            std::queue<std::pair<Token*, SyntaxTree*>> ifQueue = 
+                std::queue<std::pair<Token*, SyntaxTree*>>();
+            
+            // declare in outer scope since this will be the trailing "else" token, if present
+            Token* tok = token;
+            while (true)
             {
-                // label for after the else body
-                TacInstruction* l2 = new TacInstruction(TacOp::LABEL);
+                if (tok->opCode == OpCodes::FLOW_ELSE)
+                {   
+                    // check for an "if" following the "else"
+                    if (tok->next->opCode == OpCodes::FLOW_IF)
+                    {
+                        tok = tok->next;
+                        continue;
+                    }
 
-                // jump @l2
+                    // if there is no further "if", break the loop
+                    // tok is now a pointer to the trailing else statement token
+                    break;
+                }
+
+                // only add if statements
+                if (tok->opCode != OpCodes::FLOW_IF)
+                {
+                    break;
+                }
+            
+                // if this code is reached tok is always an "if"
+
+                // take operands
+                Token** ops = (Token**) tok->value;
+                // enqueue pair of condition-body
+                ifQueue.emplace(std::pair<Token*, SyntaxTree*>(ops[0], (SyntaxTree*) ops[1]->value));
+                
+                // go to next token
+                tok = tok->next;
+                
+            } // loop for enqueueing the condidion-body pairs
+
+
+            // generate exit label to be added later
+            TacInstruction* exitLabel = new TacInstruction(TacOp::LABEL);
+            // "@if*" labels for reference
+            TacInstruction* lastLabel;
+
+            while (!ifQueue.empty())
+            {
+                // create a new label for the next statement
+                lastLabel = new TacInstruction(TacOp::LABEL);
+
+                // retrieve the condition-body pair from the queue
+                std::pair<Token*, SyntaxTree*> statement = ifQueue.front();
+                // pop it out
+                ifQueue.pop();
+                
+                Token** ops = (Token**) statement.first->value;
+
+                // add TAC for condition if it's an operator itself
+                if (isOperator(ops[0]->opCode))
+                {
+                    parseOperator(ops[0]);
+                }
+
+                // differenciate between reference and literal for optimization purposes
+                const Address* condition;
+                if (ops[0]->opCode == OpCodes::REFERENCE)
+                {
+                    condition = toAddress(ops[0]->value);
+
+                    // invert the statement's condition
+                    add(new TacInstruction(
+                        TacOp::EQ,
+                        new TacValue(TacValueType::ADDRESS, ops[0]->value),
+                        new TacValue(TacValueType::ADDRESS, ops[0]->value),
+                        new TacValue(TacValueType::LITERAL, 0)
+                    ));                    
+                }
+                else // if (ops[0]->opCode != OpCodes::REFERENCE)
+                {
+                    condition = Address::getAddress();
+
+                    // invert the statement's condition
+                    add(new TacInstruction(
+                        TacOp::EQ,
+                        new TacValue(TacValueType::ADDRESS, toValue(condition)),
+                        new TacValue(TacValueType::LITERAL, ops[0]->value),
+                        new TacValue(TacValueType::LITERAL, 0)
+                    ));
+                }
+
+                // add conditional jump to the next if
                 add(new TacInstruction(
-                    TacOp::JUMP,
-                    new TacValue(TacValueType::LABEL, toValue(l2))
+                    TacOp::IF,
+                    new TacValue(TacValueType::ADDRESS, toValue(condition)),
+                    new TacValue(TacValueType::LABEL, toValue(lastLabel))
                 ));
 
-                // label for else body
-                add(l1);
+                // add the statement's body
+                parseTree(*statement.second, NO_LABEL);
 
-                // TAC for else body
+                // add an unconditional jump to the exit label
+                add(new TacInstruction(
+                    TacOp::JUMP,
+                    new TacValue(TacValueType::LABEL, toValue(exitLabel))
+                ));
+                
+                // add the next statement's label
+                add(lastLabel);
 
-                // treat elseToken's value as an array of Token*
-                Token** elseOperands = (Token**) elseToken->value;
-                // treat the first operand of elseToekn as a SyntaxTree* (since it is)
-                SyntaxTree* elseBody = (SyntaxTree*) elseOperands[0]->value;
-                // parse the body of the else statement (adding the resulting TAC instructions)
+            } // while (!ifQueue.empty())
+
+            // check if a trailing "else" is present
+            if (tok->opCode == OpCodes::FLOW_ELSE)
+            {
+                // label for else is already in place
+                // extract the SyntaxTree* from else token
+                SyntaxTree* elseBody = (SyntaxTree*) ((Token**) tok->value)[0]->value;
+
+                // add else body
                 parseTree(*elseBody, NO_LABEL);
-                
-                // delete the SyntaxTree since it won't be used anymore
-                delete elseBody;
 
-                // remove else token from Statement (Token doubly-linked list)
-                Token::removeToken(elseToken);
-                
-                // delete else since it won't be evaluated on its own
-                delete elseToken;
-
-                // label for exiting the statement
-                add(l2);
-
-                // if statements shouldn't return anything
-                return nullptr;
             }
 
-            // whereas if statement is just a bare if
-       
-            // finally add the label instruction to jump to if condition is false
-            add(l1);
+            // finally add the exit label
+            add(exitLabel);
             
-            // if statements shouldn't return anything
+
+            // if statements do not have a return value
             return nullptr;
-        }
+        }   
 
     } // switch (token->opCode)
 

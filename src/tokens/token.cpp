@@ -1,11 +1,4 @@
-
-#include <iostream>
-
-#include "token.hh"
-#include "operators.hh"
-#include "keywords.hh"
-#include "utils.hh"
-#include "op_codes.hh"
+#include "pch.hh"
 
 
 using namespace Tokens;

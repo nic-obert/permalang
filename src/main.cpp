@@ -1,12 +1,4 @@
-#include <stdlib.h>
-#include <iostream>
-#include <fstream>
-#include <sstream>
-
-#include "token.hh"
-#include "syntax_tree.hh"
-#include "symbol_table.hh"
-#include "tac.hh"
+#include "pch.hh"
 
 
 void loadFile(const char* path, std::string& output)
@@ -33,6 +25,7 @@ int main(int argc, const char** argv)
     using namespace Tokens;
     using namespace syntax_tree;
     using namespace tac;
+
 
     if (argc < 2) {
         std::cerr << "No file specified" << std::endl;

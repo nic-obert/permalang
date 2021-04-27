@@ -1,7 +1,4 @@
-#include "op_codes.hh"
-#include "token.hh"
-#include "keywords.hh"
-#include "utils.hh"
+#include "pch.hh"
 
 
 #define AddToken tokens->add(token); token = nullptr;

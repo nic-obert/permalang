@@ -1,9 +1,4 @@
-#include "symbol_table.hh"
-#include "token.hh"
-#include "utils.hh"
-#include "unordered_map"
-
-#include <iostream>
+#include "pch.hh"
 
 
 using namespace symbol_table;

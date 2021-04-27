@@ -4,21 +4,21 @@
 #include <iostream>
 
 
-#define isLogicalOp(x) (OpCodes::LOGICAL_ < x && x < OpCodes::ARITHMETICAL_)
+#define isLogicalOp(opCode) (OpCodes::LOGICAL_ < opCode && opCode < OpCodes::ARITHMETICAL_)
 
-#define isArithmeticalOp(x) (OpCodes::ARITHMETICAL_ < x && x < OpCodes::ASSIGNMENT_)
+#define isArithmeticalOp(opCode) (OpCodes::ARITHMETICAL_ < opCode && opCode < OpCodes::ASSIGNMENT_)
 
-#define isAssignmentOp(x) (OpCodes::ASSIGNMENT_ < x && x < OpCodes::DECLARATION_)
+#define isAssignmentOp(opCode) (OpCodes::ASSIGNMENT_ < opCode && opCode < OpCodes::DECLARATION_)
 
-#define isDeclarationOp(x) (OpCodes::DECLARATION_ < x && x < OpCodes::LITERAL_)
+#define isDeclarationOp(opCode) (OpCodes::DECLARATION_ < opCode && opCode < OpCodes::LITERAL_)
 
-#define isFlowOp(x) (OpCodes::FLOW_ < x && x < OpCodes::NO_OP)
+#define isFlowOp(opCode) (OpCodes::FLOW_ < opCode && opCode < OpCodes::NO_OP)
 
-#define isValue(x) (OpCodes::LITERAL == x || OpCodes::REFERENCE == x)
+#define isValue(opCode) (OpCodes::LITERAL == opCode || OpCodes::REFERENCE == opCode)
 
-#define isOperator(x) (!isValue(x) && x != OpCodes::NO_OP)
+#define isOperator(opCode) (!isValue(opCode) && opCode != OpCodes::NO_OP)
 
-#define isScope(x) (x == OpCodes::PUSH_SCOPE || x == OpCodes::POP_SCOPE)
+#define isScope(opCode) (opCode == OpCodes::PUSH_SCOPE || opCode == OpCodes::POP_SCOPE)
 
 
 typedef enum class OpType

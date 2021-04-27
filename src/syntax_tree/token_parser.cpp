@@ -1,11 +1,4 @@
-#include "token.hh"
-#include "syntax_tree.hh"
-#include "symbol_table.hh"
-#include "op_codes.hh"
-#include "utils.hh"
-
-#include <string>
-#include <iostream>
+#include "pch.hh"
 
 
 #define RIGHT 0
@@ -497,6 +490,12 @@ void syntax_tree::Statement::satisfy(Token* token)
         {
             std::cerr << "Missing else statement's body" << std::endl;
             exit(1);
+        }
+
+        // do not add "if" statements as leaves
+        if (body->opCode == OpCodes::FLOW_IF)
+        {
+            break;
         }
 
         token->value = toValue(new Token*[1] { body });

@@ -2,19 +2,28 @@
 CC=g++
 STD=c++17
 
-sources=$(shell find src -name "*.cpp")
+SOURCES=$(shell find src -name "*.cpp")
+HEADERS=$(shell find headers -name "*.hh")
+PCH=headers/pch.hh
+
+BUILD_DIR=build
+
 
 all: build
 
-build: $(sources)
-	$(CC) -std=$(STD) -I headers $(sources) -o perma
 
-builddb: $(sources)
-	$(CC) -std=$(STD) -g -I headers $(sources) -o perma
+build: precompile_headers $(SOURCES)
+	$(CC) -std=$(STD) -I headers $(SOURCES) -o $(BUILD_DIR)/perma
 
-clang: $(sources)
-	clang++ -std=$(STD) -I headers $(sources) -o perma
+builddb: $(HEADERS) precompile_headers $(SOURCES)
+	$(CC) -std=$(STD) -g -I headers $(SOURCES) -o $(BUILD_DIR)/perma
 
-clangdb: $(sources)
-	clang++ -std=$(STD) -g -I headers $(sources) -o perma
+
+precompile_headers: $(HEADERS)
+	$(CC) -std=$(STD) -I headers $(PCH) -o $(PCH).pch
+
+
+clean:
+	rm -f headers/*.pch 
+	rm -f $(BUILD_DIR)/*
 
