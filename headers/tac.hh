@@ -105,13 +105,13 @@ namespace tac
         // last element of doubly linked list of TacInstructions
         TacInstruction* instructions;
 
+
         void add(TacInstruction* in);
 
         // recursive function that parses recursively an operator Token
-        // returns a pointer to the its first TacInstruction
         // sets the token's value to an Address* which stores
         // the result of the operation
-        TacInstruction* parseOperator(Tokens::Token* token);
+        void parseOperator(Tokens::Token* token);
 
         // recursive function that generates TAC for a complex operation
         // returns a reference to the result of the operation

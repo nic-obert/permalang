@@ -5,9 +5,5 @@ if (cond)
 {
     result = 0;
 }
-else if (cond == true)
-{
-    result = 2;
-}
 
 int res = result;

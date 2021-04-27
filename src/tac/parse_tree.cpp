@@ -49,7 +49,7 @@ TacInstruction* Tac::parseTree(syntax_tree::SyntaxTree& tree, bool addLabel)
 }
 
 
-TacInstruction* Tac::parseOperator(Tokens::Token* token)
+void Tac::parseOperator(Tokens::Token* token)
 {
     using namespace Tokens;
 
@@ -67,38 +67,42 @@ TacInstruction* Tac::parseOperator(Tokens::Token* token)
         // Scope Token's value is a SyntaxTree* of its content
         SyntaxTree* tree = (SyntaxTree*) token->value;
 
-        return parseTree(*tree, NO_LABEL);
+        parseTree(*tree, NO_LABEL);
+        return;
     }
 
 
     // treat token's value as a pointer to an array of token pointers
     Token** operands = (Token**) token->value; 
     
-    /*
-        loop over operands and evaluate those first
-        OpType is compatible with integers 0, 1, 2 which are
-        respectively STANDALONE, UNARY, BINARY
-        
-        unsigned char is used because is the smallest data type (1 byte)
-    */
-    for (unsigned char i = 0; i != (unsigned char) operatorType(token->opCode); i++)
+    // if statements parse themselves their own operands
+    if (token->opCode != OpCodes::FLOW_IF)
     {
-        Token* operand = operands[i];
-
         /*
-            do not parse an operand if it's not an operator itself
-            or if it's a scope, since it will be parsed by 
-            the operator the scope is required by
+            loop over operands and evaluate those first
+            OpType is compatible with integers 0, 1, 2 which are
+            respectively STANDALONE, UNARY, BINARY
+            
+            unsigned char is used because is the smallest data type (1 byte)
         */
-        if (isOperator(operand->opCode) && operand->opCode != OpCodes::PUSH_SCOPE)
+        for (unsigned char i = 0; i != (unsigned char) operatorType(token->opCode); i++)
         {
-            parseOperator(operand);
+            Token* operand = operands[i];
+
+            /*
+                do not parse an operand if it's not an operator itself
+                or if it's a scope, since it will be parsed by 
+                the operator the scope is required by
+            */
+            if (isOperator(operand->opCode) && operand->opCode != OpCodes::PUSH_SCOPE)
+            {
+                parseOperator(operand);
+            }
+
         }
 
-    }
+    } // if (token->opCode != OpCodes::FLOW_IF)
 
-    // save last TacInstruction to be returned later
-    TacInstruction* first = instructions;
 
     // generate three address code for the operator and
     // store it as the token's value
@@ -106,8 +110,6 @@ TacInstruction* Tac::parseOperator(Tokens::Token* token)
     // token is now a reference to its operation's result
     token->opCode = OpCodes::REFERENCE;
 
-    // return the first TacInstruction generated for the operator Token
-    return first->next;
 }
 
 
@@ -610,9 +612,15 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
             {
                 if (tok->opCode == OpCodes::FLOW_ELSE)
                 {   
+                    
                     // check for an "if" following the "else"
                     if (tok->next->opCode == OpCodes::FLOW_IF)
                     {
+                        // set tok's opCode to NO_OP so it doesn't get evaluated
+                        // do this only for "else" followed by another "if"
+                        // trailing "else"s will be NO_OPped later
+                        tok->opCode = OpCodes::NO_OP;
+
                         tok = tok->next;
                         continue;
                     }
@@ -635,6 +643,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
                 // enqueue pair of condition-body
                 ifQueue.emplace(std::pair<Token*, SyntaxTree*>(ops[0], (SyntaxTree*) ops[1]->value));
                 
+                // set tok's opCode to NO_OP so it doesn't get evaluated
+                tok->opCode = OpCodes::NO_OP;
+
                 // go to next token
                 tok = tok->next;
                 
@@ -722,13 +733,16 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
                 // add else body
                 parseTree(*elseBody, NO_LABEL);
 
+                // set tok's opCode to NO_OP so it doesn't get evaluated later
+                tok->opCode = OpCodes::NO_OP;
             }
+
 
             // finally add the exit label
             add(exitLabel);
             
 
-            // if statements do not have a return value
+            // "if" statements do not have a return value
             return nullptr;
         }   
 
