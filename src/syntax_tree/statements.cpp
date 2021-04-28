@@ -1,5 +1,3 @@
-#include "pch.hh"
-
 #include "syntax_tree.hh"
 
 

@@ -1,5 +1,3 @@
-#include "pch.hh"
-
 #include "keywords.hh"
 
 
@@ -15,6 +13,12 @@ const char* Keywords::keywordName(OpCodes keyword)
     
     case OpCodes::FLOW_ELSE:
         return "else";
+    
+    case OpCodes::FLOW_FOR:
+        return "for";
+    
+    case OpCodes::FLOW_WHILE:
+        return "while";
             
     case OpCodes::DECLARATION_INT:
         return "int";
@@ -54,6 +58,12 @@ int Keywords::keywordPriority(OpCodes keyword)
     
     case OpCodes::FLOW_ELSE:
         return ELSE_P;
+    
+    case OpCodes::FLOW_FOR:
+        return FOR_P;
+    
+    case OpCodes::FLOW_WHILE:
+        return WHILE_P;
     
     case OpCodes::DECLARATION_INT:
         return DECLARATION_P;

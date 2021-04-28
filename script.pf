@@ -1,9 +1,5 @@
-bool cond = false;
-int result;
-
-if (cond)
+int i = 0;
+while (true)
 {
-    result = 0;
+    i++:
 }
-
-int res = result;

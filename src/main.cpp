@@ -1,5 +1,3 @@
-#include "pch.hh"
-
 #include "token.hh"
 #include "syntax_tree.hh"
 #include "tac.hh"

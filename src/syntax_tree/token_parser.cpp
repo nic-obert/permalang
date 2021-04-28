@@ -1,5 +1,3 @@
-#include "pch.hh"
-
 #include "syntax_tree.hh"
 
 
@@ -444,8 +442,9 @@ void syntax_tree::Statement::satisfy(Token* token)
         break;
     }
 
-
+    
     case OpCodes::FLOW_IF:
+    case OpCodes::FLOW_WHILE:
     {
         Token* condition = token->next;
 
@@ -459,8 +458,8 @@ void syntax_tree::Statement::satisfy(Token* token)
         // check if condition is actually a boolean statement
         if (condition->type != TokenType::BOOL)
         {
-            std::cerr << "Expected token of type " << TokenType::BOOL << " after if keyword, but " << condition << " was provided" << std::endl;
-            exit(1);
+            std::cerr << "Expected token of type " << TokenType::BOOL << " after " << token->opCode << " keyword, but " << condition << " was provided" << std::endl;
+            exit(EXIT_FAILURE);
         }
 
         Token* body = condition->next;
@@ -468,8 +467,8 @@ void syntax_tree::Statement::satisfy(Token* token)
         // check if body exists
         if (body == nullptr)
         {
-            std::cerr << "Missing if statement's body after condition" << std::endl;
-            exit(1);
+            std::cerr << "Missing " << token->opCode << " statement's body after condition" << std::endl;
+            exit(EXIT_FAILURE);
         }
 
         // set if token's value to an array of its boolean condition and its body
@@ -508,11 +507,10 @@ void syntax_tree::Statement::satisfy(Token* token)
     }
 
 
-    case OpCodes::FLOW_WHILE:
     case OpCodes::FLOW_FOR:
     {
         std::cerr << "not implemented" << std::endl;
-        exit(1);
+        exit(EXIT_FAILURE);
         break;
     }
 

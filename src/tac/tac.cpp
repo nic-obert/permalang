@@ -1,5 +1,3 @@
-#include "pch.hh"
-
 #include "tac.hh"
 
 
@@ -40,7 +38,12 @@ std::ostream& operator<<(std::ostream& stream, tac::Tac const& tac)
 
     for (const TacInstruction* instruction = tac.start; instruction != nullptr; instruction = instruction->next)
     {
-        stream << "\t" << *instruction << "\n";
+        // do not add a tab if instruction is a label for readability
+        if (instruction->operation != TacOp::LABEL)
+        {
+            stream << '\t';
+        }
+        stream << *instruction << "\n";
     }
 
     return stream << "}";

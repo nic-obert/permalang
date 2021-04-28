@@ -1,12 +1,10 @@
 #pragma once
 
+#include "pch.hh"
 
 #include "utils.hh"
 #include "syntax_tree.hh"
 #include "token.hh"
-
-#include <iostream>
-#include <unordered_map>
 
 
 namespace tac

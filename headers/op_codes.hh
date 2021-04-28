@@ -1,7 +1,6 @@
 #pragma once
 
-
-#include <iostream>
+#include "pch.hh"
 
 
 #define isLogicalOp(opCode) (OpCodes::LOGICAL_ < opCode && opCode < OpCodes::ARITHMETICAL_)

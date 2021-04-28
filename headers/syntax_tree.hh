@@ -5,7 +5,6 @@
 #include "utils.hh"
 
 
-
 namespace syntax_tree
 {   
 

@@ -1,5 +1,3 @@
-#include "pch.hh"
-
 #include "token.hh"
 #include "operators.hh"
 #include "keywords.hh"

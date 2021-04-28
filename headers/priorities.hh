@@ -7,6 +7,7 @@
 
 #define ELSE_P 2
 #define IF_P 2
+#define WHILE_P 2
 #define GOTO_P 2
 #define GOBACK_P 2
 #define RETURN_P 2
@@ -31,7 +32,6 @@
 #define DECREMENT_P 9
 #define NOT_P 10
 #define ADDRESS_OF_P 11
-#define WHILE_P 11
 #define FOR_P 11
 
 #define PARENTHESIS_P 12

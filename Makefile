@@ -10,19 +10,21 @@ PCH=$(HH).pch
 
 BUILD_DIR=build
 
+C_FLAGS=-std=$(STD) -I headers
+
 
 all: build
 
 
 build: $(PCH) $(SOURCES)
-	$(CC) -std=$(STD) -I headers $(SOURCES) -o $(BUILD_DIR)/perma
+	$(CC) $(C_FLAGS) $(SOURCES) -o $(BUILD_DIR)/perma
 
 builddb: $(PCH) $(SOURCES)
-	$(CC) -std=$(STD) -g -I headers $(SOURCES) -o $(BUILD_DIR)/perma
+	$(CC) -g $(C_FLAGS) $(SOURCES) -o $(BUILD_DIR)/perma
 
 
-$(PCH): $(HEADERS)
-	$(CC) -std=$(STD) -I headers $(HH) -o $(PCH)
+$(PCH): $(HH)
+	$(CC) $(C_FLAGS) $(HH) -o $(PCH)
 
 
 clean:

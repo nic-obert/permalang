@@ -1,5 +1,3 @@
-#include "pch.hh"
-
 #include "tac.hh"
 
 
@@ -75,8 +73,8 @@ void Tac::parseOperator(Tokens::Token* token)
     // treat token's value as a pointer to an array of token pointers
     Token** operands = (Token**) token->value; 
     
-    // if statements parse themselves their own operands
-    if (token->opCode != OpCodes::FLOW_IF)
+    // control flow statements parse themselves their own operands
+    if (!isFlowOp(token->opCode))
     {
         /*
             loop over operands and evaluate those first
@@ -101,7 +99,7 @@ void Tac::parseOperator(Tokens::Token* token)
 
         }
 
-    } // if (token->opCode != OpCodes::FLOW_IF)
+    } // if (isFLowOp(token->opCode))
 
 
     // generate three address code for the operator and
@@ -744,7 +742,89 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             // "if" statements do not have a return value
             return nullptr;
-        }   
+        }
+
+
+        case OpCodes::FLOW_WHILE:
+        {
+            /*
+            @Lcondition:
+                ...                 // TAC for condition
+                c = !c              // invert the condition
+                if c jump @Lexit
+                ...                 // TAC for "while" body
+                jump @Lcondition    // loop back to the condition
+
+            @Lexit:
+
+            */
+
+            using namespace syntax_tree;
+
+            TacInstruction* conditionLabel = new TacInstruction(TacOp::LABEL);
+            TacInstruction* exitLabel = new TacInstruction(TacOp::LABEL);
+
+            add(conditionLabel);
+
+            // add TAC for condition if it's an operator itself
+            if (isOperator(operands[0]->opCode))
+            {
+                parseOperator(operands[0]);
+            }
+
+            // differenciate between reference and literal for optimization purposes
+            const Address* condition;
+            if (operands[0]->opCode == OpCodes::REFERENCE)
+            {
+                condition = toAddress(operands[0]->value);
+
+                // invert the statement's condition
+                add(new TacInstruction(
+                    TacOp::EQ,
+                    new TacValue(TacValueType::ADDRESS, operands[0]->value),
+                    new TacValue(TacValueType::ADDRESS, operands[0]->value),
+                    new TacValue(TacValueType::LITERAL, 0)
+                ));                    
+            }
+            else // if (operands[0]->opCode != OpCodes::REFERENCE)
+            {
+                condition = Address::getAddress();
+
+                // invert the statement's condition
+                add(new TacInstruction(
+                    TacOp::EQ,
+                    new TacValue(TacValueType::ADDRESS, toValue(condition)),
+                    new TacValue(TacValueType::LITERAL, operands[0]->value),
+                    new TacValue(TacValueType::LITERAL, 0)
+                ));
+            }
+
+            // add conditional jump to exit label
+            add(new TacInstruction(
+                TacOp::IF,
+                new TacValue(TacValueType::ADDRESS, toValue(condition)),
+                new TacValue(TacValueType::LABEL, toValue(exitLabel))
+            ));
+
+            
+            // extract SyntaxTree from operands
+            SyntaxTree* bodyTree = (SyntaxTree*) operands[1]->value;
+
+            // add TAC for body
+            parseTree(*bodyTree, NO_LABEL);
+
+            // add unconditional jump to condition
+            add(new TacInstruction(
+                TacOp::JUMP,
+                new TacValue(TacValueType::LABEL, toValue(conditionLabel))
+            ));
+
+            // finally add exit label
+            add(exitLabel);
+
+            // "while" statements do not have a return value
+            return nullptr;
+        }
 
     } // switch (token->opCode)
 
