@@ -56,11 +56,11 @@ namespace syntax_tree
     {
     public:
         
-        Statements statements = nullptr;
+        Statements statements;
         
 
-        SyntaxTree(Tokens::TokenList* tokens);
-        SyntaxTree(Statements& statements);
+        SyntaxTree(Tokens::TokenList& tokens);
+        SyntaxTree(Statements&& statements);
        
 
         Tokens::Token* getHighestPriority(Tokens::Token* root);

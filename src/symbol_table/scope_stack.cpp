@@ -19,12 +19,10 @@ Scope::Scope(Table& _local, std::optional<Table>& _outer)
     // create a new local scope
     local = Table();
 
-    outer = Table();
-    
-    // insert the previous local scope first
+    // copy previous local scope first
     // local symbols have precedence over outer ones
-    outer.value().insert(_local.begin(), _local.end());
-
+    outer = Table(_local);
+    
     // check if the given outer scope exists
     if (_outer.has_value())
     {

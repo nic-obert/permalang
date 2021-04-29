@@ -42,7 +42,7 @@ int main(int argc, const char** argv)
 
     std::cout << tokens << "\n" << std::endl;
 
-    SyntaxTree syntaxTree = SyntaxTree(&tokens);
+    SyntaxTree syntaxTree = SyntaxTree(tokens);
     syntaxTree.parse();
 
     std::cout << syntaxTree << "\n" << std::endl;

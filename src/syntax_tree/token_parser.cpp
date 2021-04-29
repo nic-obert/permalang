@@ -1,8 +1,13 @@
 #include "syntax_tree.hh"
 
 
-#define RIGHT 0
-#define LEFT 1
+// for unary operators
+typedef enum Side
+{
+    RIGHT,
+    LEFT
+} Side;
+
 #define DELETE true
 
 using namespace Tokens;
@@ -61,7 +66,7 @@ void binarySatisfy(Token* token, TokenType leftType, TokenType rightType, syntax
 }
 
 
-void unarySatisfy(Token* token, TokenType type, char side, syntax_tree::Statement* statement)
+void unarySatisfy(Token* token, TokenType type, Side side, syntax_tree::Statement* statement)
 {
 
     if (side == LEFT)
@@ -326,7 +331,7 @@ void syntax_tree::Statement::satisfy(Token* token)
         scopeStatement->root->prev = nullptr;
 
         // create a new statement list for the new syntax tree
-        Statements* scopeStatements = new Statements(scopeStatement);        
+        Statements scopeStatements = Statements(scopeStatement);        
 
         // search for closing scope
         unsigned int depth = 1;
@@ -361,7 +366,7 @@ void syntax_tree::Statement::satisfy(Token* token)
                 if (depth == 0)
                 {
                     // this is the last statement of the scope
-                    scopeStatements->end = scopeStatement;
+                    scopeStatements.end = scopeStatement;
 
                     // make the statement (the one before the scope) 
                     // continue from this token's next
@@ -387,7 +392,7 @@ void syntax_tree::Statement::satisfy(Token* token)
                     // if statement's root is the newly deleted token --> delete it
                     if (scopeStatement->root == tok)
                     {
-                        scopeStatements->removeLast();
+                        scopeStatements.removeLast();
                         delete scopeStatement;
                     }
                     // whereas if the statement isn't empty
@@ -402,8 +407,8 @@ void syntax_tree::Statement::satisfy(Token* token)
             }
         }
         
-        // create a new SyntaxTree for the scope
-        SyntaxTree* scopeTree = new SyntaxTree(*scopeStatements);
+        // create a new SyntaxTree for the scope and move it to the SyntaxTree
+        SyntaxTree* scopeTree = new SyntaxTree(std::move(scopeStatements));
 
         // parse the new SyntaxTree recursively
         scopeTree->parse();

@@ -4,7 +4,7 @@
 using namespace syntax_tree;
 
 
-SyntaxTree::SyntaxTree(Statements& statements)
+SyntaxTree::SyntaxTree(Statements&& statements)
 : statements(std::move(statements))
 {
 
@@ -12,11 +12,11 @@ SyntaxTree::SyntaxTree(Statements& statements)
 
 
 
-SyntaxTree::SyntaxTree(Tokens::TokenList* tokens)
+SyntaxTree::SyntaxTree(Tokens::TokenList& tokens)
 {
     using namespace Tokens;
 
-    if (tokens->first == nullptr)
+    if (tokens.first == nullptr)
     {
         // TODO implement errors
 
@@ -29,7 +29,7 @@ SyntaxTree::SyntaxTree(Tokens::TokenList* tokens)
     Token* token;
 
     // transform the TokenList to a list of Statement
-    for (Token* tok = tokens->first; tok != nullptr; tok = tok->next)
+    for (Token* tok = tokens.first; tok != nullptr; tok = tok->next)
     {
 
         // end of statement --> add statement to list of statements
