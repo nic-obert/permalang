@@ -27,6 +27,7 @@ namespace tac
     } TacOp;
 
 
+    // the type of a TacValue, either LITERAL, ADDRESS or LABEL
     typedef enum class TacValueType
     {
         LITERAL, // 0 --> false
@@ -50,22 +51,26 @@ namespace tac
 
         // returns whether the given memory address is a temporary address
         // aka instantiated with getAddress()
-        static bool isTempAddress(Value address);
+        static bool isTempAddress(const Value address);
 
         // TODO implement a more efficient way of getting addresses
         static const Address* getAddress();
 
         // TODO free addresses based on scope to avoid memory leaks
-        static void free(const Address* address);
+        static void free(const Address* const address);
 
     };
 
 
+    // holds a Value and a TacValueType
     typedef struct TacValue 
     {
         TacValueType type;
         Value value;
 
+        // unused constructor
+        TacValue();
+        // actually used constructor
         TacValue(TacValueType type, Value value);
 
     } TacValue;
@@ -75,22 +80,26 @@ namespace tac
     {
     public:
 
-        // next and prev for doubly linked list
+        // next element in doubly-linked list
         TacInstruction* next = nullptr;
+        // previous element in doubly-linked list
         TacInstruction* prev = nullptr;
 
+        // the basic operation performed by the instruction
         TacOp operation;
 
         // the 3 addresses of three address code
-        TacValue* addr1 = nullptr;
-        TacValue* addr2 = nullptr;
-        TacValue* addr3 = nullptr;
 
+        TacValue addr1;
+        TacValue addr2;
+        TacValue addr3;
+
+        // constructors differenciated by number of operands (0,1,2,3)
 
         TacInstruction(TacOp operation);
-        TacInstruction(TacOp operation, TacValue* addr1);
-        TacInstruction(TacOp operation, TacValue* addr1, TacValue* addr2);
-        TacInstruction(TacOp operation, TacValue* addr1, TacValue* addr2, TacValue* addr3);
+        TacInstruction(TacOp operation, TacValue&& addr1);
+        TacInstruction(TacOp operation, TacValue&& addr1, TacValue&& addr2);
+        TacInstruction(TacOp operation, TacValue&& addr1, TacValue&& addr2, TacValue&& addr3);
 
     };
 
@@ -103,7 +112,7 @@ namespace tac
         // last element of doubly linked list of TacInstructions
         TacInstruction* instructions;
 
-
+        // add an instruction to the TacInstruction doubly-linked list
         void add(TacInstruction* in);
 
         // recursive function that parses recursively an operator Token
@@ -136,16 +145,13 @@ namespace tac
 
 
 std::ostream& operator<<(std::ostream& stream, tac::Tac const& tac);
-std::ostream& operator<<(std::ostream& stream, tac::Tac const* tac);
 
 std::ostream& operator<<(std::ostream& stream, tac::TacInstruction const& instruction);
-std::ostream& operator<<(std::ostream& stream, tac::TacInstruction const* instruction);
 
 std::ostream& operator<<(std::ostream& stream, tac::TacValue const& value);
-std::ostream& operator<<(std::ostream& stream, tac::TacValue const* value);
 
 std::ostream& operator<<(std::ostream& stream, tac::TacOp const& op);
 
-std::ostream& operator<<(std::ostream& stream, tac::Address const* address);
+std::ostream& operator<<(std::ostream& stream, const tac::Address* const address);
 
 

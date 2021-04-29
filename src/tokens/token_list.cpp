@@ -334,7 +334,7 @@ TokenList::TokenList(std::string& script)
         {
         case '"':
         {
-            token = new Token(TokenType::STRING, LITERAL_P, OpCodes::LITERAL, (Value) (new std::string("")));
+            token = new Token(TokenType::STRING, LITERAL_P, OpCodes::LITERAL, toValue(new std::string("")));
             continue;
         }
 
@@ -459,7 +459,7 @@ TokenList::TokenList(std::string& script)
 
             if (isText(c))
             {
-                token = new Token(TokenType::TEXT, LITERAL_P, OpCodes::NO_OP, (Value) (new std::string {c}));
+                token = new Token(TokenType::TEXT, LITERAL_P, OpCodes::NO_OP, toValue(new std::string {c}));
                 continue;
             }
 

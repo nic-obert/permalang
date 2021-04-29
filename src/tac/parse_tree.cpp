@@ -145,9 +145,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::SUM,
-                new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(isReference(operands[0]), operands[0]->value),
-                new TacValue(isReference(operands[1]), operands[1]->value)
+                TacValue(TacValueType::ADDRESS, toValue(result)),
+                TacValue(isReference(operands[0]), operands[0]->value),
+                TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
             return result;
@@ -163,9 +163,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::SUB,
-                new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(isReference(operands[0]), operands[0]->value),
-                new TacValue(isReference(operands[1]), operands[1]->value)
+                TacValue(TacValueType::ADDRESS, toValue(result)),
+                TacValue(isReference(operands[0]), operands[0]->value),
+                TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
             return result;
@@ -181,9 +181,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::MUL,
-                new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(isReference(operands[0]), operands[0]->value),
-                new TacValue(isReference(operands[1]), operands[1]->value)
+                TacValue(TacValueType::ADDRESS, toValue(result)),
+                TacValue(isReference(operands[0]), operands[0]->value),
+                TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
             return result;
@@ -199,9 +199,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::DIV,
-                new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(isReference(operands[0]), operands[0]->value),
-                new TacValue(isReference(operands[1]), operands[1]->value)
+                TacValue(TacValueType::ADDRESS, toValue(result)),
+                TacValue(isReference(operands[0]), operands[0]->value),
+                TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
             return result;
@@ -215,8 +215,8 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::ASSIGN,
-                new TacValue(TacValueType::ADDRESS, operands[0]->value),
-                new TacValue(isReference(operands[1]), operands[1]->value)
+                TacValue(TacValueType::ADDRESS, operands[0]->value),
+                TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
             return toAddress(operands[0]->value);
@@ -232,9 +232,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::EQ,
-                new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(isReference(operands[0]), operands[0]->value),
-                new TacValue(isReference(operands[1]), operands[1]->value)
+                TacValue(TacValueType::ADDRESS, toValue(result)),
+                TacValue(isReference(operands[0]), operands[0]->value),
+                TacValue(isReference(operands[1]), operands[1]->value)
             ));
         
             return result;
@@ -250,9 +250,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::LESS,
-                new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(isReference(operands[0]), operands[0]->value),
-                new TacValue(isReference(operands[1]), operands[1]->value)
+                TacValue(TacValueType::ADDRESS, toValue(result)),
+                TacValue(isReference(operands[0]), operands[0]->value),
+                TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
             return result;
@@ -272,8 +272,8 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::ASSIGN,
-                new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(isReference(operands[0]), operands[0]->value)
+                TacValue(TacValueType::ADDRESS, toValue(result)),
+                TacValue(isReference(operands[0]), operands[0]->value)
             ));
 
             return result;
@@ -287,9 +287,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::SUM,
-                new TacValue(TacValueType::ADDRESS, operands[0]->value),
-                new TacValue(isReference(operands[0]), operands[0]->value),
-                new TacValue(isReference(operands[1]), operands[1]->value)
+                TacValue(TacValueType::ADDRESS, operands[0]->value),
+                TacValue(isReference(operands[0]), operands[0]->value),
+                TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
             return toAddress(operands[0]->value);
@@ -303,9 +303,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::SUB,
-                new TacValue(TacValueType::ADDRESS, operands[0]->value),
-                new TacValue(isReference(operands[0]), operands[0]->value),
-                new TacValue(isReference(operands[1]), operands[1]->value)
+                TacValue(TacValueType::ADDRESS, operands[0]->value),
+                TacValue(isReference(operands[0]), operands[0]->value),
+                TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
             return toAddress(operands[0]->value);
@@ -319,9 +319,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::MUL,
-                new TacValue(TacValueType::ADDRESS, operands[0]->value),
-                new TacValue(isReference(operands[0]), operands[0]->value),
-                new TacValue(isReference(operands[1]), operands[1]->value)
+                TacValue(TacValueType::ADDRESS, operands[0]->value),
+                TacValue(isReference(operands[0]), operands[0]->value),
+                TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
             return toAddress(operands[0]->value);
@@ -336,9 +336,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::DIV,
-                new TacValue(TacValueType::ADDRESS, operands[0]->value),
-                new TacValue(isReference(operands[0]), operands[0]->value),
-                new TacValue(isReference(operands[1]), operands[1]->value)
+                TacValue(TacValueType::ADDRESS, operands[0]->value),
+                TacValue(isReference(operands[0]), operands[0]->value),
+                TacValue(isReference(operands[1]), operands[1]->value)
             ));
 
             return toAddress(operands[0]->value);
@@ -354,9 +354,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::SUM,
-                new TacValue(TacValueType::ADDRESS, operands[0]->value),
-                new TacValue(TacValueType::ADDRESS, operands[0]->value),
-                new TacValue(TacValueType::LITERAL, 1)
+                TacValue(TacValueType::ADDRESS, operands[0]->value),
+                TacValue(TacValueType::ADDRESS, operands[0]->value),
+                TacValue(TacValueType::LITERAL, 1)
             ));
 
             break;
@@ -370,9 +370,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::SUB,
-                new TacValue(TacValueType::ADDRESS, operands[0]->value),
-                new TacValue(TacValueType::ADDRESS, operands[0]->value),
-                new TacValue(TacValueType::LITERAL, 1)
+                TacValue(TacValueType::ADDRESS, operands[0]->value),
+                TacValue(TacValueType::ADDRESS, operands[0]->value),
+                TacValue(TacValueType::LITERAL, 1)
             ));
 
             break;
@@ -418,12 +418,12 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::IF,
-                new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(TacValueType::LABEL, toValue(l1))
+                TacValue(TacValueType::ADDRESS, toValue(result)),
+                TacValue(TacValueType::LABEL, toValue(l1))
             ));
             add(new TacInstruction(
                 TacOp::JUMP,
-                new TacValue(TacValueType::LABEL, toValue(exitLabel))
+                TacValue(TacValueType::LABEL, toValue(exitLabel))
             ));
 
             add(l1);
@@ -456,8 +456,8 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::IF,
-                new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(TacValueType::LABEL, toValue(exitLabel))
+                TacValue(TacValueType::ADDRESS, toValue(result)),
+                TacValue(TacValueType::LABEL, toValue(exitLabel))
             ));
 
             ops[0] = operands[1];
@@ -510,8 +510,8 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::IF,
-                new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(TacValueType::LABEL, toValue(exitLabel))
+                TacValue(TacValueType::ADDRESS, toValue(result)),
+                TacValue(TacValueType::LABEL, toValue(exitLabel))
             ));
 
             result = tacFor(OpCodes::LOGICAL_EQ, operands);
@@ -537,8 +537,8 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::IF,
-                new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(TacValueType::LABEL, toValue(exitLabel))
+                TacValue(TacValueType::ADDRESS, toValue(result)),
+                TacValue(TacValueType::LABEL, toValue(exitLabel))
             ));
 
             result = tacFor(OpCodes::LOGICAL_EQ, operands);
@@ -558,8 +558,8 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
             add(new TacInstruction(
                 TacOp::ASSIGN,
-                new TacValue(TacValueType::ADDRESS, toValue(result)),
-                new TacValue(TacValueType::LITERAL, operands[0]->value)
+                TacValue(TacValueType::ADDRESS, toValue(result)),
+                TacValue(TacValueType::LITERAL, operands[0]->value)
             ));
 
             return result;
@@ -682,9 +682,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
                     // invert the statement's condition
                     add(new TacInstruction(
                         TacOp::EQ,
-                        new TacValue(TacValueType::ADDRESS, ops[0]->value),
-                        new TacValue(TacValueType::ADDRESS, ops[0]->value),
-                        new TacValue(TacValueType::LITERAL, 0)
+                        TacValue(TacValueType::ADDRESS, ops[0]->value),
+                        TacValue(TacValueType::ADDRESS, ops[0]->value),
+                        TacValue(TacValueType::LITERAL, 0)
                     ));                    
                 }
                 else // if (ops[0]->opCode != OpCodes::REFERENCE)
@@ -694,17 +694,17 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
                     // invert the statement's condition
                     add(new TacInstruction(
                         TacOp::EQ,
-                        new TacValue(TacValueType::ADDRESS, toValue(condition)),
-                        new TacValue(TacValueType::LITERAL, ops[0]->value),
-                        new TacValue(TacValueType::LITERAL, 0)
+                        TacValue(TacValueType::ADDRESS, toValue(condition)),
+                        TacValue(TacValueType::LITERAL, ops[0]->value),
+                        TacValue(TacValueType::LITERAL, 0)
                     ));
                 }
 
                 // add conditional jump to the next if
                 add(new TacInstruction(
                     TacOp::IF,
-                    new TacValue(TacValueType::ADDRESS, toValue(condition)),
-                    new TacValue(TacValueType::LABEL, toValue(lastLabel))
+                    TacValue(TacValueType::ADDRESS, toValue(condition)),
+                    TacValue(TacValueType::LABEL, toValue(lastLabel))
                 ));
 
                 // add the statement's body
@@ -713,7 +713,7 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
                 // add an unconditional jump to the exit label
                 add(new TacInstruction(
                     TacOp::JUMP,
-                    new TacValue(TacValueType::LABEL, toValue(exitLabel))
+                    TacValue(TacValueType::LABEL, toValue(exitLabel))
                 ));
                 
                 // add the next statement's label
@@ -781,9 +781,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
                 // invert the statement's condition
                 add(new TacInstruction(
                     TacOp::EQ,
-                    new TacValue(TacValueType::ADDRESS, operands[0]->value),
-                    new TacValue(TacValueType::ADDRESS, operands[0]->value),
-                    new TacValue(TacValueType::LITERAL, 0)
+                    TacValue(TacValueType::ADDRESS, operands[0]->value),
+                    TacValue(TacValueType::ADDRESS, operands[0]->value),
+                    TacValue(TacValueType::LITERAL, 0)
                 ));                    
             }
             else // if (operands[0]->opCode != OpCodes::REFERENCE)
@@ -793,17 +793,17 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
                 // invert the statement's condition
                 add(new TacInstruction(
                     TacOp::EQ,
-                    new TacValue(TacValueType::ADDRESS, toValue(condition)),
-                    new TacValue(TacValueType::LITERAL, operands[0]->value),
-                    new TacValue(TacValueType::LITERAL, 0)
+                    TacValue(TacValueType::ADDRESS, toValue(condition)),
+                    TacValue(TacValueType::LITERAL, operands[0]->value),
+                    TacValue(TacValueType::LITERAL, 0)
                 ));
             }
 
             // add conditional jump to exit label
             add(new TacInstruction(
                 TacOp::IF,
-                new TacValue(TacValueType::ADDRESS, toValue(condition)),
-                new TacValue(TacValueType::LABEL, toValue(exitLabel))
+                TacValue(TacValueType::ADDRESS, toValue(condition)),
+                TacValue(TacValueType::LABEL, toValue(exitLabel))
             ));
 
             
@@ -816,7 +816,7 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
             // add unconditional jump to condition
             add(new TacInstruction(
                 TacOp::JUMP,
-                new TacValue(TacValueType::LABEL, toValue(conditionLabel))
+                TacValue(TacValueType::LABEL, toValue(conditionLabel))
             ));
 
             // finally add exit label

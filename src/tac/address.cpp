@@ -14,7 +14,7 @@ Address::Address()
 
 
 // returns whether tha address is a temporary address or not
-bool Address::isTempAddress(Value address)
+bool Address::isTempAddress(const Value address)
 {
     return addresses.find(address) != addresses.end();
 }
@@ -28,13 +28,13 @@ const Address* Address::getAddress()
 }
 
 
-void Address::free(const Address* address)
+void Address::free(const Address* const address)
 {
     delete address;
 }
 
 
-std::ostream& operator<<(std::ostream& stream, Address const* address)
+std::ostream& operator<<(std::ostream& stream, const Address* const address)
 {
     /* 
         if the address is a temporary address created by Address::getAddress()

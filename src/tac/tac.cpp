@@ -49,9 +49,3 @@ std::ostream& operator<<(std::ostream& stream, tac::Tac const& tac)
     return stream << "}";
 }
 
-
-std::ostream& operator<<(std::ostream& stream, tac::Tac const* tac)
-{
-    return stream << *tac;
-}
-
