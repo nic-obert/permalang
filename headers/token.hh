@@ -14,27 +14,29 @@
 namespace Tokens 
 {
 
+    // syntactical type of a Token
     typedef enum class TokenType
     {
-        NONE,
-        TEXT,
+        NONE,           // a Token of no type
+        TEXT,           // any reference (e.g. variable or function name)
         INT,
         FLOAT,
         STRING,
         KEYWORD,
         BOOL,
-        SCOPE,
+        SCOPE,          // {}
         PARENTHESIS,
-        ENDS, // end of statement
+        ENDS,           // end of statement
     } TokenType;
 
 
+    // syntactical element of a program
     class Token
     {
     public:
 
         TokenType type;
-        int priority;
+        unsigned int priority;
         Value value;
 
         OpCodes opCode;
@@ -42,8 +44,11 @@ namespace Tokens
         Token* prev = nullptr;
         Token* next = nullptr;
 
-        Token(TokenType type, int priority, OpCodes opCode, Value value);
-        Token(TokenType type, int priority, OpCodes opCode);
+        Token(TokenType type, unsigned int priority, OpCodes opCode, Value value);
+        Token(TokenType type, unsigned int priority, OpCodes opCode);
+
+        // token destructor
+        ~Token();
 
         // removes the token from where it is located
         // data-structure specific methods are preferred to this
@@ -52,6 +57,7 @@ namespace Tokens
     };
 
 
+    // doubly-linked list of Tokens
     class TokenList
     {
     public:
@@ -61,10 +67,11 @@ namespace Tokens
 
         TokenList(std::string& script);
 
-
+        // adds the Token to the doubly-linked list 
         void add(Token* token);
 
-
+        // removes the specified Token from the doubly-linked list
+        // does not check if token is actually in list
         void remove(Token* token);
 
     };

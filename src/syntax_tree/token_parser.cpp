@@ -121,9 +121,16 @@ void declarationSatisfy(Token* token, TokenType type, syntax_tree::Statement* st
         exit(1);
     }
 
+    // inherit value form next Token
     token->value = token->next->value;
+    // type is the TokenType that has been declared
     token->type = type;
 
+    // set next Token's value to nullptr no the std::string value
+    // does not get deleted when the Token does
+    token->next->value = toValue(nullptr);
+
+    // remove and delete the next Token since it won't be used anymore
     statement->remove(token->next, DELETE);
 
     token->opCode = OpCodes::REFERENCE;
