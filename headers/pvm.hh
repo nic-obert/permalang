@@ -1,6 +1,9 @@
 #pragma once
 
 
+#define size_t unsigned long
+
+
 // Perma Virtual Machine
 namespace pvm
 {
@@ -17,26 +20,55 @@ namespace pvm
     // array of Bytes
     typedef const Byte* ByteCode;
 
+    // address in the Memory class
+    typedef unsigned long Address;
+
 
     // PVM instruction set, similar to x86 assembly
     typedef enum class OpCode
     {
-        NO_OP,  // no operation
+        NO_OP,    // no operation
 
-        EXIT,   // end of the program
+        EXIT,     // end of the program
 
-        I_ADD,  // long integer add from registers A and B
-        I_SUB,  // long integer subtract from registers A and B
-        I_MUL,  // long integer multiply from registers A and B
-        I_DIV,  // long integer divide from registers A and B
+        ADD,      // long integer add from registers A and B
+        SUB,      // long integer subtract from registers A and B
+        MUL,      // long integer multiply from registers A and B
+        DIV,      // long integer divide from registers A and B
 
-        CMP,    // compare registers A and B
+        CMP,      // compare registers A and B
 
-        LD_IL,   // load long integer
+        LD,       // load long integer literal into register
+        MEM_LD,   // load long integer from memory
 
-        MOV,    // copy a value
+        MEM_MOV,  // copy a value from a memory address to another
+        REG_MOV,  // copy a value from a register into a memory address
+
 
     } OpCode;
+
+
+    class Memory
+    {
+    private:
+
+        Byte* memory;
+
+    public:
+
+        Memory(size_t size);
+
+        ~Memory();
+
+
+        void set(Address address, long value);
+        void set(Address address, Byte value);
+        
+        Byte getByte(Address address) const;
+        long getLong(Address address) const;
+
+
+    };
 
     
     // Perma Virtual Machine
@@ -44,11 +76,16 @@ namespace pvm
     {
     private:
 
+        Memory memory;
+
         // REGISTERS
 
         // general purpose registers
         // accessed via the subscript operator []
         long rgp[2];
+
+        // division remainder register
+        long rdr;
         
         // zero flag register (see x86 assembly for reference)
         bool rzf;
@@ -58,7 +95,7 @@ namespace pvm
 
     public:
 
-        Pvm();
+        Pvm(size_t memSize);
 
         ~Pvm();
 

@@ -5,7 +5,8 @@ using namespace pvm;
 
 
 
-Pvm::Pvm()
+Pvm::Pvm(size_t memSize)
+: memory(memSize)
 {
 
 }
@@ -21,7 +22,7 @@ Byte Pvm::execute(ByteCode byteCode)
 {
 
     // index of execution (offset from byteCode)
-    unsigned int offset = 0;
+    size_t offset = 0;
 
     // exit code
     Byte exitCode;
@@ -32,13 +33,15 @@ Byte Pvm::execute(ByteCode byteCode)
     {
         Byte byte = byteCode[offset];
 
+        // increase offset by 1 byte so not having to write it inside every case
+        offset ++;
+
         // handle operations
         switch ((OpCode) byte)
         {
 
         case OpCode::EXIT:
         {
-            offset ++;
             exitCode = byteCode[offset];
             
             executing = false;
@@ -47,8 +50,6 @@ Byte Pvm::execute(ByteCode byteCode)
         
 
         case OpCode::NO_OP:
-            // just increment the offset
-            offset ++;
             break;
         
 
@@ -62,10 +63,48 @@ Byte Pvm::execute(ByteCode byteCode)
         }
 
         
-        case OpCode::LD_IL:
+        case OpCode::ADD:
         {
-            // increment offset to get the first operator
-            offset ++;
+            // add value stored in B to A
+            rgp[GP_A] += rgp[GP_B];
+
+            // set the sign flag (true if result is negative, else false)
+            rsf = rgp[GP_A] < 0;
+
+            break;
+        }
+
+        case OpCode::SUB:
+        {
+            rgp[GP_A] -= rgp[GP_B];
+
+            rsf = rgp[GP_A] < 0;
+
+            break;
+        }
+
+        case OpCode::MUL:
+        {
+            rgp[GP_A] *= rgp[GP_B];
+
+            rsf = rgp[GP_A] < 0;
+
+            break;
+        }
+
+        case OpCode::DIV:
+        {
+            rgp[GP_A] /= rgp[GP_B];
+
+            // set the remainder
+            rdr = rgp[GP_A] % rgp[GP_B];
+
+            break;
+        }
+
+        
+        case OpCode::LD:
+        {
             Byte reg = byteCode[offset];
 
             // incremet offset to get the second operator
@@ -84,39 +123,52 @@ Byte Pvm::execute(ByteCode byteCode)
         }
 
 
-        case OpCode::I_ADD:
+        case OpCode::MEM_LD:
         {
-            // pass execution to the next instruction
+            Byte reg = byteCode[offset];
+
             offset ++;
-            // add value stored in B to A
-            rgp[GP_A] += rgp[GP_B];
 
-            // set the sign flag (true if result is negative, else false)
-            rsf = rgp[GP_A] < 0;
+            Address address = *((long*) (byteCode + offset));
 
-            break;
-        }
+            offset += sizeof(long);
 
-        case OpCode::I_SUB:
-        {
-            offset ++;
-            rgp[GP_A] -= rgp[GP_B];
+            rgp[reg] = memory.getLong(address);
 
-            rsf = rgp[GP_A] < 0;
-
-            break;
-        }
-
-        case OpCode::I_MUL:
-        {
-            offset ++;
-            rgp[GP_A] *= rgp[GP_B];
-
-            rsf = rgp[GP_A] < 0;
-
-            break;
+            break;            
         }
         
+
+        case OpCode::MEM_MOV:
+        {
+            Address addr1 = *((long*) (byteCode + offset));
+            
+            offset += sizeof(long);
+
+            Address addr2 = *((long*) (byteCode + offset));
+            
+            offset += sizeof(long);
+
+            memory.set(addr1, memory.getLong(addr2));
+
+            break;
+        }
+
+
+        case OpCode::REG_MOV:
+        {
+            Address address = *((long*) (byteCode + offset));
+
+            offset += sizeof(long);
+
+            Byte reg = byteCode[offset];
+
+            offset ++;
+
+            rgp[reg] = memory.getLong(address);
+
+            break;
+        }
 
         } // switch ((OpCode) byte)
 

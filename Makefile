@@ -10,7 +10,7 @@ PCH=$(HH).pch
 
 BUILD_DIR=build
 
-C_FLAGS=-std=$(STD) -I headers
+C_FLAGS=-std=$(STD) -I headers -Wall
 
 
 all: build
