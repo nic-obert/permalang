@@ -26,10 +26,15 @@ std::ostream& operator<<(std::ostream& stream, TacOp const& op)
         return stream << '/';
     case TacOp::EQ:
         return stream << "==";
+    case TacOp::LESS:
+        return stream << "<";
     case TacOp::NO_OP:
         return stream << "NO OP";
     
     }
+
+    // this code never gets reached
+    return stream;
 }
 
 

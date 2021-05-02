@@ -3,7 +3,7 @@ CC=g++
 STD=c++17
 
 SOURCES=$(shell find src -name "*.cpp")
-HEADERS=$(shell find headers -name "*.hh")
+HEADERS=$(shell find headers -type f \( -name "*.hh" ! -name "pch.hh" \))
 
 HH=headers/pch.hh
 PCH=$(HH).pch
@@ -16,10 +16,10 @@ C_FLAGS=-std=$(STD) -I headers -Wall
 all: build
 
 
-build: $(PCH) $(SOURCES)
+build: $(PCH) $(SOURCES) $(HEADERS)
 	$(CC) $(C_FLAGS) $(SOURCES) -o $(BUILD_DIR)/perma
 
-builddb: $(PCH) $(SOURCES)
+builddb: $(PCH) $(SOURCES) $(HEADERS)
 	$(CC) -g $(C_FLAGS) $(SOURCES) -o $(BUILD_DIR)/perma
 
 

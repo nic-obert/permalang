@@ -8,6 +8,7 @@ const bool Tac::NO_LABEL = false;
 
 
 Tac::Tac()
+: size(1)
 {
     /*
         initialize with the zeroth instruction so not 
@@ -16,6 +17,7 @@ Tac::Tac()
     */
     start = new TacInstruction(TacOp::NO_OP);
     instructions = start;
+    start->prev = nullptr;
 }
 
 
@@ -29,6 +31,8 @@ void Tac::add(TacInstruction* in)
     instructions->next = in;
     in->prev = instructions;
     instructions = in;
+    // increment size
+    size ++;
 }
 
 

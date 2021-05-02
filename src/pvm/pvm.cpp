@@ -1,6 +1,9 @@
 #include "pvm.hh"
 
 
+#define fetchLong() (*((long*) (byteCode + offset)))
+
+
 using namespace pvm;
 
 
@@ -47,10 +50,6 @@ Byte Pvm::execute(ByteCode byteCode)
             executing = false;
             break;
         }
-        
-
-        case OpCode::NO_OP:
-            break;
         
 
         case OpCode::CMP:
@@ -111,7 +110,7 @@ Byte Pvm::execute(ByteCode byteCode)
             offset ++;
 
             // get the long value from the byteCode
-            long value = *((long*) (byteCode + offset));
+            long value = fetchLong();
 
             // since a long has been read, increment offset by sizeof(long)
             // to pass to the next instruction
@@ -129,7 +128,7 @@ Byte Pvm::execute(ByteCode byteCode)
 
             offset ++;
 
-            Address address = *((long*) (byteCode + offset));
+            Address address = fetchLong();
 
             offset += sizeof(long);
 
@@ -141,11 +140,11 @@ Byte Pvm::execute(ByteCode byteCode)
 
         case OpCode::MEM_MOV:
         {
-            Address addr1 = *((long*) (byteCode + offset));
+            Address addr1 = fetchLong();
             
             offset += sizeof(long);
 
-            Address addr2 = *((long*) (byteCode + offset));
+            Address addr2 = fetchLong();
             
             offset += sizeof(long);
 
@@ -157,8 +156,7 @@ Byte Pvm::execute(ByteCode byteCode)
 
         case OpCode::REG_MOV:
         {
-            Address address = *((long*) (byteCode + offset));
-
+            Address address = fetchLong();
             offset += sizeof(long);
 
             Byte reg = byteCode[offset];
@@ -169,6 +167,29 @@ Byte Pvm::execute(ByteCode byteCode)
 
             break;
         }
+
+
+        case OpCode::MEM_SET:
+        {
+            Address address = fetchLong();
+            offset += sizeof(long);
+
+            long value = fetchLong();
+            offset += sizeof(long);
+
+            memory.set(address, value);
+
+            break;
+        }
+
+
+        case OpCode::JMP:
+        {
+            // set offset to the instruction to jump to
+            offset = fetchLong();
+            break;
+        }
+
 
         } // switch ((OpCode) byte)
 

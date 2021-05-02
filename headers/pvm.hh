@@ -9,9 +9,9 @@ namespace pvm
 {
 
     // general purpose register A
-    #define GP_A 0
+    #define GP_A ((Byte) 0)
     // general purpose register B
-    #define GP_B 1
+    #define GP_B ((Byte) 1)
 
 
     // a byte which ByteCode consists of
@@ -25,10 +25,8 @@ namespace pvm
 
 
     // PVM instruction set, similar to x86 assembly
-    typedef enum class OpCode
+    typedef enum class OpCode : Byte
     {
-        NO_OP,    // no operation
-
         EXIT,     // end of the program
 
         ADD,      // long integer add from registers A and B
@@ -43,6 +41,10 @@ namespace pvm
 
         MEM_MOV,  // copy a value from a memory address to another
         REG_MOV,  // copy a value from a register into a memory address
+
+        MEM_SET,  // sets a memory address to a value
+
+        JMP,      // unconditional jump to index        
 
 
     } OpCode;

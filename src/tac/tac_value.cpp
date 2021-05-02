@@ -31,5 +31,8 @@ std::ostream& operator<<(std::ostream& stream, TacValue const& value)
             // cast to a void* because the Value of a label is a pointer
             return stream << "@[" << (void*) value.value << ']';
     }
+
+    // this code never gets reached
+    return stream;
 }
 

@@ -44,7 +44,7 @@ std::ostream& operator<<(std::ostream& stream, TokenList const& list)
         stream << "\t" << *token << "\n";
     }
 
-    stream << "}";
+    return stream << "}";
 }
 
 

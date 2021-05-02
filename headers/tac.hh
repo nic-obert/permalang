@@ -5,6 +5,7 @@
 #include "utils.hh"
 #include "syntax_tree.hh"
 #include "token.hh"
+#include "pvm.hh"
 
 
 namespace tac
@@ -24,15 +25,20 @@ namespace tac
         EQ,
         LESS,
         NO_OP
+
     } TacOp;
 
 
-    // the type of a TacValue, either LITERAL, ADDRESS or LABEL
+    // the type of a TacValue, either:
+    //  - LITERAL = 0
+    //  - ADDRESS = 1
+    //  - LABEL = 2
     typedef enum class TacValueType
     {
-        LITERAL, // 0 --> false
-        ADDRESS, // 1 --> true
-        LABEL    // 2
+        LITERAL = 0, // 0 --> false
+        ADDRESS = 1, // 1 --> true
+        LABEL = 2    // 2
+
     } TacValueType;
 
     
@@ -83,7 +89,8 @@ namespace tac
         // next element in doubly-linked list
         TacInstruction* next = nullptr;
         // previous element in doubly-linked list
-        TacInstruction* prev = nullptr;
+        // not initialized since it will be by the Tac::add() function
+        TacInstruction* prev;
 
         // the basic operation performed by the instruction
         TacOp operation;
@@ -109,10 +116,13 @@ namespace tac
     {
     private:
 
+        size_t size;
+
         // last element of doubly linked list of TacInstructions
         TacInstruction* instructions;
 
         // add an instruction to the TacInstruction doubly-linked list
+        // increments the size counter
         void add(TacInstruction* in);
 
         // recursive function that parses recursively an operator Token
@@ -138,6 +148,9 @@ namespace tac
         // transforms a syntax tree to a tac instructions linked list
         // returns a label to the TAC generated for the given SyntaxTree
         TacInstruction* parseTree(syntax_tree::SyntaxTree& tree, bool addLabel = true);
+
+        // returns the ByteCode for the generated TAC instructions
+        pvm::ByteCode toByteCode() const; 
 
     };
 

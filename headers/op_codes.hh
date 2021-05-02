@@ -3,15 +3,15 @@
 #include "pch.hh"
 
 
-#define isLogicalOp(opCode) (OpCodes::LOGICAL_ < opCode && opCode < OpCodes::ARITHMETICAL_)
+#define isLogicalOp(opCode) (OpCodes::LOGICAL_AND < opCode && opCode < OpCodes::ARITHMETICAL_SUM)
 
-#define isArithmeticalOp(opCode) (OpCodes::ARITHMETICAL_ < opCode && opCode < OpCodes::ASSIGNMENT_)
+#define isArithmeticalOp(opCode) (OpCodes::LOGICAL_NOT < opCode && opCode < OpCodes::ASSIGNMENT_ASSIGN)
 
-#define isAssignmentOp(opCode) (OpCodes::ASSIGNMENT_ < opCode && opCode < OpCodes::DECLARATION_)
+#define isAssignmentOp(opCode) (OpCodes::ARITHMETICAL_DEC < opCode && opCode < OpCodes::DECLARATION_INT)
 
-#define isDeclarationOp(opCode) (OpCodes::DECLARATION_ < opCode && opCode < OpCodes::LITERAL_)
+#define isDeclarationOp(opCode) (OpCodes::ASSIGNMENT_POW < opCode && opCode < OpCodes::LITERAL)
 
-#define isFlowOp(opCode) (OpCodes::FLOW_ < opCode && opCode < OpCodes::NO_OP)
+#define isFlowOp(opCode) (OpCodes::PARENTHESIS < opCode && opCode < OpCodes::NO_OP)
 
 #define isValue(opCode) (OpCodes::LITERAL == opCode || OpCodes::REFERENCE == opCode)
 
@@ -20,18 +20,21 @@
 #define isScope(opCode) (opCode == OpCodes::PUSH_SCOPE || opCode == OpCodes::POP_SCOPE)
 
 
+// operator type, compatible with integers since it represents
+// the number of operands an operator requires:
+// - STANDALONE = 0
+// - UNARY = 1
+// - BINARY = 2
 typedef enum class OpType
 {
-    STANDALONE, // 0
-    UNARY,      // 1
-    BINARY      // 2
+    STANDALONE = 0, // 0, requires zero operands
+    UNARY = 1,      // 1, requires one operand
+    BINARY = 2      // 2, requires two operands
 } OpType;
 
 
 typedef enum class OpCodes
 {
-    LOGICAL_,
-
     LOGICAL_AND,
     LOGICAL_OR,
     LOGICAL_EQ,
@@ -42,8 +45,6 @@ typedef enum class OpCodes
     LOGICAL_GREATER_EQ,
     LOGICAL_NOT,
 
-    ARITHMETICAL_,
-
     ARITHMETICAL_SUM,
     ARITHMETICAL_SUB,
     ARITHMETICAL_MUL,
@@ -53,16 +54,12 @@ typedef enum class OpCodes
     ARITHMETICAL_INC,
     ARITHMETICAL_DEC,
 
-    ASSIGNMENT_,
-
     ASSIGNMENT_ASSIGN,
     ASSIGNMENT_ADD,
     ASSIGNMENT_SUB,
     ASSIGNMENT_MUL,
     ASSIGNMENT_DIV,
     ASSIGNMENT_POW,
-
-    DECLARATION_,
 
     DECLARATION_INT,
     DECLARATION_FLOAT,
@@ -81,8 +78,6 @@ typedef enum class OpCodes
     CALL,
 
     PARENTHESIS,
-
-    FLOW_,
 
     FLOW_IF,
     FLOW_ELSE,
