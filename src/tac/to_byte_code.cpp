@@ -15,6 +15,71 @@
 using namespace tac;
 
 
+void compileBinaryOperation(pvm::OpCode operation, const TacInstruction* instruction, pvm::Byte* bytes, size_t& index)
+{
+    using namespace pvm;
+
+// load values inside registers
+
+// first operand
+
+    if (instruction->addr2.type == TacValueType::ADDRESS)
+    {
+        // load from memory instruction
+        bytes[index] = (Byte) OpCode::LDA;
+    }
+    else // if (instruction->addr2.type == TacValueType::LITERAL)
+    {
+        // load constant literal
+        bytes[index] = (Byte) OpCode::LDCA;
+    }
+    index ++;
+
+    // the first operand
+    longArray = instruction->addr2.value;
+    index += sizeof(long);
+
+// second operand
+
+    if (instruction->addr3.type == TacValueType::ADDRESS)
+    {
+        // load from memory instruction
+        bytes[index] = (Byte) OpCode::LDB;
+    }
+    else // if (instruction->addr3.type == TacValueType::LITERAL)
+    {
+        // load constant literal
+        bytes[index] = (Byte) OpCode::LDCB;
+    }
+    index ++;
+
+    // the first operand
+    longArray = instruction->addr3.value;
+    index += sizeof(long);
+
+
+// perform the actual operation
+
+    bytes[index] = (Byte) operation;
+    index ++;
+
+// copy the result into the destination address
+
+    // copy value from register to memory address
+    bytes[index] = (Byte) OpCode::REG_MOV;
+    index ++;
+
+    // the memory address to copy the result to
+    longArray = instruction->addr1.value;
+    index += sizeof(long);
+
+    // the register where to copy the result from
+    bytes[index] = (Byte) Registers::RGA;
+    index ++;
+
+}
+
+
 pvm::ByteCode Tac::toByteCode() const
 {
     using namespace pvm;
@@ -50,7 +115,7 @@ pvm::ByteCode Tac::toByteCode() const
         }
 
         
-        // instruction size: 1 + 8 = 9 bytes
+        // instruction size: 9 bytes
         case TacOp::JUMP:
         {
             // add unconditional jump instruction
@@ -64,7 +129,7 @@ pvm::ByteCode Tac::toByteCode() const
         }
 
         
-        // instruction size: 1 + 8 + 8 = 17 bytes
+        // instruction size: 17 bytes
         case TacOp::ASSIGN:
         {
             if (instruction->addr2.type == TacValueType::ADDRESS)
@@ -89,9 +154,38 @@ pvm::ByteCode Tac::toByteCode() const
         }
         
         
-        // instruction size: 1 + 8 + 1 + 8 + 1 + 1 + 8 + 1 = 29 bytes
+        // instruction size: 29 bytes
         case TacOp::SUM:
         {   
+            compileBinaryOperation(OpCode::ADD, instruction, bytes, index);
+            break;
+        }
+        
+
+        case TacOp::SUB:
+        {
+            compileBinaryOperation(OpCode::SUB, instruction, bytes, index);
+            break;
+        }
+        
+
+        case TacOp::MUL:
+        {
+            compileBinaryOperation(OpCode::MUL, instruction, bytes, index);
+            break;
+        }
+
+
+        case TacOp::DIV:
+        {
+            compileBinaryOperation(OpCode::DIV, instruction, bytes, index);
+            break;
+        }
+
+        
+        case TacOp::EQ:
+        {
+            
             // load values inside registers
 
         // first operand
@@ -99,17 +193,13 @@ pvm::ByteCode Tac::toByteCode() const
             if (instruction->addr2.type == TacValueType::ADDRESS)
             {
                 // load from memory instruction
-                bytes[index] = (Byte) OpCode::MEM_LD;
+                bytes[index] = (Byte) OpCode::LDA;
             }
             else // if (instruction->addr2.type == TacValueType::LITERAL)
             {
                 // load constant literal
-                bytes[index] = (Byte) OpCode::LD;
+                bytes[index] = (Byte) OpCode::LDCA;
             }
-            index ++;
-
-            // the register to load the value in
-            bytes[index] = GP_A;
             index ++;
 
             // the first operand
@@ -121,17 +211,13 @@ pvm::ByteCode Tac::toByteCode() const
             if (instruction->addr3.type == TacValueType::ADDRESS)
             {
                 // load from memory instruction
-                bytes[index] = (Byte) OpCode::MEM_LD;
+                bytes[index] = (Byte) OpCode::LDB;
             }
             else // if (instruction->addr3.type == TacValueType::LITERAL)
             {
                 // load constant literal
-                bytes[index] = (Byte) OpCode::LD;
+                bytes[index] = (Byte) OpCode::LDCB;
             }
-            index ++;
-
-            // the register to load the value in
-            bytes[index] = GP_B;
             index ++;
 
             // the first operand
@@ -139,28 +225,31 @@ pvm::ByteCode Tac::toByteCode() const
             index += sizeof(long);
 
 
-        // perform the actual sum operation
+        // perform the actual operation
 
-            bytes[index] = (Byte) OpCode::ADD;
+            bytes[index] = (Byte) OpCode::CMP;
             index ++;
 
         // copy the result into the destination address
 
             // copy value from register to memory address
-            bytes[index] = (Byte) OpCode::REG_MOV;
+            bytes[index] = (Byte) OpCode::REG_MOV_BIT;
             index ++;
 
             // the memory address to copy the result to
             longArray = instruction->addr1.value;
             index += sizeof(long);
 
-            // the register where to copy the result from
-            bytes[index] = GP_A;
+            // the register where to copy the result from (zero flag)
+            bytes[index] = (Byte) Registers::RZF;
             index ++;
 
             break;
         }
+
         
+    // END OF case TacOp::*:
+
 
         // check if bytes' capacity is near limit
         // if so, increase its capacity
@@ -176,7 +265,7 @@ pvm::ByteCode Tac::toByteCode() const
 
             // delete the old array and set bytes to point to the new one
             delete bytes;
-            bytes = newArray;            
+            bytes = newArray;
         }
 
         

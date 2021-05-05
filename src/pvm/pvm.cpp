@@ -21,6 +21,27 @@ Pvm::~Pvm()
 }
 
 
+void* Pvm::getRegister(Registers reg) const
+{
+    switch (reg)
+    {
+    case Registers::RGA:
+        return (void*) &rga;
+    case Registers::RGB:
+        return (void*) &rgb;
+    case Registers::RDR:
+        return (void*) &rdr;
+    case Registers::RZF:
+        return (void*) &rzf;
+    case Registers::RSF:
+        return (void*) &rsf;    
+    }
+
+    // this code never gets reached
+    return nullptr;
+}
+
+
 Byte Pvm::execute(ByteCode byteCode)
 {
 
@@ -55,7 +76,7 @@ Byte Pvm::execute(ByteCode byteCode)
         case OpCode::CMP:
         {
             // set zero flag register to the result of comparison
-            rzf = rgp[GP_A] == rgp[GP_B];
+            rzf = rga == rgb;
             // increment offset to pass to the next instruction
             offset ++;
             break;
@@ -65,78 +86,90 @@ Byte Pvm::execute(ByteCode byteCode)
         case OpCode::ADD:
         {
             // add value stored in B to A
-            rgp[GP_A] += rgp[GP_B];
+            rga += rgb;
 
             // set the sign flag (true if result is negative, else false)
-            rsf = rgp[GP_A] < 0;
+            rsf = rga < 0;
+
+            // set the zero flag
+            rzf = rga == 0;
 
             break;
         }
 
         case OpCode::SUB:
         {
-            rgp[GP_A] -= rgp[GP_B];
+            rga -= rgb;
 
-            rsf = rgp[GP_A] < 0;
+            rsf = rga < 0;
+
+            rzf = rga == 0;
 
             break;
         }
 
         case OpCode::MUL:
         {
-            rgp[GP_A] *= rgp[GP_B];
+            rga *= rgb;
 
-            rsf = rgp[GP_A] < 0;
+            rsf = rga < 0;
+
+            rzf = rga == 0;
 
             break;
         }
 
         case OpCode::DIV:
         {
-            rgp[GP_A] /= rgp[GP_B];
+            rga /= rgb;
 
             // set the remainder
-            rdr = rgp[GP_A] % rgp[GP_B];
+            rdr = rga % rgb;
+
+            rzf = rga == 0;
 
             break;
         }
 
         
-        case OpCode::LD:
+        case OpCode::LDCA:
         {
-            Byte reg = byteCode[offset];
-
-            // incremet offset to get the second operator
-            offset ++;
-
-            // get the long value from the byteCode
-            long value = fetchLong();
+            // get the long constant value from the byteCode
+            const long value = fetchLong();
 
             // since a long has been read, increment offset by sizeof(long)
             // to pass to the next instruction
             offset += sizeof(long);
 
             // load value into register
-            rgp[reg] = value;
+            rga = value;
             break;
         }
 
 
-        case OpCode::MEM_LD:
+        case OpCode::LDA:
         {
-            Byte reg = byteCode[offset];
-
-            offset ++;
-
             Address address = fetchLong();
 
             offset += sizeof(long);
 
-            rgp[reg] = memory.getLong(address);
+            rga = memory.getLong(address);
 
             break;            
         }
-        
+
+
+        case OpCode::LDB:
+        {
+            Address address = fetchLong();
+
+            offset += sizeof(long);
+
+            rgb = memory.getLong(address);
+
+            break;            
+        }
+
 
         case OpCode::MEM_MOV:
         {
@@ -159,11 +192,26 @@ Byte Pvm::execute(ByteCode byteCode)
             Address address = fetchLong();
             offset += sizeof(long);
 
-            Byte reg = byteCode[offset];
+            Registers reg = (Registers) byteCode[offset];
 
             offset ++;
 
-            rgp[reg] = memory.getLong(address);
+            memory.set(address, *((long*) getRegister(reg)));
+            
+            break;
+        }   
+
+
+        case OpCode::REG_MOV_BIT:
+        {
+            Address address = fetchLong();
+            offset += sizeof(long);
+
+            Registers reg = (Registers) byteCode[offset];
+
+            offset ++;
+
+            memory.set(address, *((bool*) getRegister(reg)));
 
             break;
         }

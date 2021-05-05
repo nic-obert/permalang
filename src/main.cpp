@@ -27,6 +27,7 @@ int main(int argc, const char** argv)
     using namespace Tokens;
     using namespace syntax_tree;
     using namespace tac;
+    using namespace pvm;
 
     if (argc < 2) {
         std::cerr << "No file specified" << std::endl;
@@ -52,5 +53,12 @@ int main(int argc, const char** argv)
 
     std::cout << tac << "\n" << std::endl;
 
+    ByteCode byteCode = tac.toByteCode();
+
+    Pvm pvm = Pvm(1024);
+    Byte exitCode = pvm.execute(byteCode);
+
+    std::cout << "Exit code: " << exitCode << std::endl;
+    
 }
 

@@ -8,12 +8,6 @@
 namespace pvm
 {
 
-    // general purpose register A
-    #define GP_A ((Byte) 0)
-    // general purpose register B
-    #define GP_B ((Byte) 1)
-
-
     // a byte which ByteCode consists of
     typedef unsigned char Byte;
 
@@ -27,20 +21,24 @@ namespace pvm
     // PVM instruction set, similar to x86 assembly
     typedef enum class OpCode : Byte
     {
-        EXIT,     // end of the program
+        EXIT,           // end of the program
 
-        ADD,      // long integer add from registers A and B
+        ADD,        // long integer add from registers A and B
         SUB,      // long integer subtract from registers A and B
         MUL,      // long integer multiply from registers A and B
         DIV,      // long integer divide from registers A and B
 
         CMP,      // compare registers A and B
 
-        LD,       // load long integer literal into register
-        MEM_LD,   // load long integer from memory
+        LDCA,     // load long integer constant into register A
+        LDCB,     // load long integer constant into register A
 
-        MEM_MOV,  // copy a value from a memory address to another
-        REG_MOV,  // copy a value from a register into a memory address
+        LDA,      // load long integer from memory into register A
+        LDB,      // load long intefer from memory into register B
+
+        MEM_MOV,        // copy a long value from a memory address to another
+        REG_MOV,        // copy a long value from a register into a memory address
+        REG_MOV_BIT,   // copy a bit value from a register into a memory address
 
         MEM_SET,  // sets a memory address to a value
 
@@ -65,12 +63,27 @@ namespace pvm
 
         void set(Address address, long value);
         void set(Address address, Byte value);
+        void set(Address address, bool value);
         
         Byte getByte(Address address) const;
         long getLong(Address address) const;
-
+        bool getBit(Address address) const;
 
     };
+
+
+    typedef enum class Registers : Byte
+    {
+        RGA,
+        RGB,
+        RDR,
+        RZF,
+        RSF
+
+    } Registers;
+
+
+    #define isBitRegister(reg) (reg == Registers::RZF || reg == Registers::RSF)    
 
     
     // Perma Virtual Machine
@@ -83,8 +96,10 @@ namespace pvm
         // REGISTERS
 
         // general purpose registers
-        // accessed via the subscript operator []
-        long rgp[2];
+        // general purpose register A
+        long rga;
+        // general purpose register B
+        long rgb;
 
         // division remainder register
         long rdr;
@@ -94,6 +109,9 @@ namespace pvm
 
         // sign flag register (see x86 assembly for reference)
         bool rsf;
+
+
+        void* getRegister(Registers reg) const;
 
     public:
 
