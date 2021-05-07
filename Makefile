@@ -11,6 +11,7 @@ PCH=$(HH).pch
 BUILD_DIR=build
 
 C_FLAGS=-std=$(STD) -I headers -Wall
+C_FLAGS_NW=-std=$(STD) -I headers
 
 
 all: build
@@ -21,6 +22,9 @@ build: $(PCH) $(SOURCES) $(HEADERS)
 
 builddb: $(PCH) $(SOURCES) $(HEADERS)
 	$(CC) -g $(C_FLAGS) $(SOURCES) -o $(BUILD_DIR)/perma
+
+builddb-nw:
+	$(CC) -g $(C_FLAGS_NW) $(SOURCES) -o $(BUILD_DIR)/perma
 
 
 $(PCH): $(HH)

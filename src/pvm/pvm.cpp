@@ -15,12 +15,6 @@ Pvm::Pvm(size_t memSize)
 }
 
 
-Pvm::~Pvm()
-{
-
-}
-
-
 void* Pvm::getRegister(Registers reg) const
 {
     switch (reg)
@@ -42,7 +36,7 @@ void* Pvm::getRegister(Registers reg) const
 }
 
 
-Byte Pvm::execute(ByteCode byteCode)
+Byte Pvm::execute(const Byte* byteCode)
 {
 
     // index of execution (offset from byteCode)
@@ -147,6 +141,21 @@ Byte Pvm::execute(ByteCode byteCode)
         }
 
 
+        case OpCode::LDCB:
+        {
+            // get the long constant value from the byteCode
+            const long value = fetchLong();
+
+            // since a long has been read, increment offset by sizeof(long)
+            // to pass to the next instruction
+            offset += sizeof(long);
+
+            // load value into register
+            rgb = value;
+            break;
+        }
+
+
         case OpCode::LDA:
         {
             Address address = fetchLong();
@@ -235,6 +244,23 @@ Byte Pvm::execute(ByteCode byteCode)
         {
             // set offset to the instruction to jump to
             offset = fetchLong();
+            break;
+        }
+
+
+        case OpCode::IF_JUMP:
+        {
+            // if zero flag register is set to 1 perform the jump
+            if (rzf)
+            {
+                offset = fetchLong();
+                break;
+            }
+
+            // else pass to the next instruction
+
+            offset += sizeof(long);
+
             break;
         }
 

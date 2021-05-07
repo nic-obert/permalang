@@ -11,9 +11,6 @@ namespace pvm
     // a byte which ByteCode consists of
     typedef unsigned char Byte;
 
-    // array of Bytes
-    typedef const Byte* ByteCode;
-
     // address in the Memory class
     typedef unsigned long Address;
 
@@ -42,7 +39,8 @@ namespace pvm
 
         MEM_SET,  // sets a memory address to a value
 
-        JMP,      // unconditional jump to index        
+        JMP,      // unconditional jump to index   
+        IF_JUMP,  // conditional jump based on zero flag register's value (1 = true, 0 = false)     
 
 
     } OpCode;
@@ -52,7 +50,10 @@ namespace pvm
     {
     private:
 
-        Byte* memory;
+        // memory size in bytes
+        size_t size;
+
+        Byte* memory = nullptr;
 
     public:
 
@@ -117,11 +118,9 @@ namespace pvm
 
         Pvm(size_t memSize);
 
-        ~Pvm();
-
         // execute the given ByteCode in the PVM
         // returns an exit code
-        Byte execute(ByteCode bytecode);
+        Byte execute(const Byte* bytecode);
 
     };
 

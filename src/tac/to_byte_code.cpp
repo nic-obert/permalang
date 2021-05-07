@@ -6,7 +6,7 @@
 
 // the left capacity in bytes that triggers Byte array resize
 // this is the size of the largest TAC instruction translated to ByteCode
-#define TRIGGER_CAPACITY 27
+#define TRIGGER_CAPACITY 30
 
 // the amount to increase the Byte array by when resizing
 #define RESIZE_AMOUNT size
@@ -80,7 +80,7 @@ void compileBinaryOperation(pvm::OpCode operation, const TacInstruction* instruc
 }
 
 
-pvm::ByteCode Tac::toByteCode() const
+pvm::Byte* Tac::toByteCode() const
 {
     using namespace pvm;
 
@@ -88,10 +88,10 @@ pvm::ByteCode Tac::toByteCode() const
 
     // reserve at least the size of TAC instructions * 3
     // most operators require 2 operands (min 3 bytes per instruction)
-    size_t capacity = size * 3;
+    size_t capacity = size * TRIGGER_CAPACITY;
     Byte* bytes = new Byte[capacity];
 
-    size_t index;
+    size_t index = 0;
 
     for (TacInstruction* instruction = start; instruction != nullptr; instruction = instruction->next)
     {
@@ -247,13 +247,45 @@ pvm::ByteCode Tac::toByteCode() const
             break;
         }
 
+
+        case TacOp::IF:
+        {
+            // load condition
+            bytes[index] = (Byte) OpCode::LDA;
+            index ++;
+
+            // condition's address
+            longArray = instruction->addr1.value;
+            index += sizeof(long);
+
+            // load const 0 to be compared with the condition (invert condition)
+            bytes[index] = (Byte) OpCode::LDCB;
+            index ++;
+            bytes[index] = 0;
+            index ++;
+
+            // evaluate condition
+            bytes[index] = (Byte) OpCode::CMP;
+            index ++;
+
+            // actual if instruction
+            bytes[index] = (Byte) OpCode::IF_JUMP;
+            index ++;
+
+            // add label to jump to
+            longArray = instruction->addr2.value; 
+            index += sizeof(Value); 
+
+            break;
+        }
+
         
     // END OF case TacOp::*:
 
 
         // check if bytes' capacity is near limit
         // if so, increase its capacity
-        if (capacity <= TRIGGER_CAPACITY)
+        if (capacity - index <= TRIGGER_CAPACITY)
         {
             // save old size and increase capacity by TAC size (arbitrary)
             size_t oldSize = capacity;
@@ -264,7 +296,7 @@ pvm::ByteCode Tac::toByteCode() const
             memcpy(newArray, bytes, oldSize);
 
             // delete the old array and set bytes to point to the new one
-            delete bytes;
+            delete[] bytes;
             bytes = newArray;
         }
 
@@ -275,12 +307,25 @@ pvm::ByteCode Tac::toByteCode() const
     } // for (instruction in instructions)
 
 
-    // TODO transform bytes into ByteCode, remove redundant bytes and fill in labels 
+    // TODO fill in labels 
 
-    bytes[index] = (Byte) OpCode::EXIT;
+    // allocate a new ByteCode with the size of index + 1
+    // to leave place for the final EXIT instruction
+    Byte* bytecode = new Byte[index + 1];
+
+    // copy the byte array into a ByteCode to be returned
+    // TODO fill in labels here with a for loop instead of memcpying 
+    memcpy(bytecode, bytes, index - 1);
+
+    // set the last Byte of ByteCode to the EXIT OpCode
+    bytecode[index] = (Byte) OpCode::EXIT;
+    index ++;
+    // exit code should be 0 if program terminated successfully
+    bytecode[index] = 0;
 
     // finally delete bytes array
-    delete bytes;
+    delete[] bytes;
 
+    return bytecode;
 }
 

@@ -53,10 +53,12 @@ int main(int argc, const char** argv)
 
     std::cout << tac << "\n" << std::endl;
 
-    ByteCode byteCode = tac.toByteCode();
+    const Byte* byteCode = tac.toByteCode();
 
     Pvm pvm = Pvm(1024);
     Byte exitCode = pvm.execute(byteCode);
+
+    delete[] byteCode;
 
     std::cout << "Exit code: " << exitCode << std::endl;
     

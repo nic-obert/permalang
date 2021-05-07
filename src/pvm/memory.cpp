@@ -5,6 +5,7 @@ using namespace pvm;
 
 
 Memory::Memory(size_t size)
+: size(size)
 {
     memory = new Byte[size];
 }
@@ -12,7 +13,7 @@ Memory::Memory(size_t size)
 
 Memory::~Memory()
 {
-    delete memory;
+    delete[] memory;
 }
 
 

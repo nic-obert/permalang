@@ -150,7 +150,7 @@ namespace tac
         TacInstruction* parseTree(syntax_tree::SyntaxTree& tree, bool addLabel = true);
 
         // returns the ByteCode for the generated TAC instructions
-        pvm::ByteCode toByteCode() const; 
+        pvm::Byte* toByteCode() const; 
 
     };
 
