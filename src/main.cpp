@@ -58,8 +58,6 @@ int main(int argc, const char** argv)
     Pvm pvm = Pvm(1024);
     Byte exitCode = pvm.execute(byteCode);
 
-    delete[] byteCode;
-
     std::cout << "Exit code: " << exitCode << std::endl;
     
 }

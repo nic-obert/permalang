@@ -25,13 +25,13 @@ Byte Memory::getByte(Address address) const
 
 long Memory::getLong(Address address) const
 {
-    return ((long*) memory)[address];
+    return *((long*) (memory + address));
 }
 
 
 bool Memory::getBit(Address address) const
 {
-    return ((bool*) memory)[address];
+    return *((bool*) (memory + address));
 }
 
 
@@ -43,12 +43,12 @@ void Memory::set(Address address, Byte value)
 
 void Memory::set(Address address, long value)
 {
-    ((long*) memory)[address] = value;
+    *((long*) (memory + address)) = value;
 }
 
 
 void Memory::set(Address address, bool value)
 {
-    ((bool*) memory)[address] = value;
+    *((bool*) (memory + address)) = value;
 }
 

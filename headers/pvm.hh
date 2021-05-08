@@ -18,29 +18,29 @@ namespace pvm
     // PVM instruction set, similar to x86 assembly
     typedef enum class OpCode : Byte
     {
-        EXIT,           // end of the program
+        EXIT,       // end of the program
 
         ADD,        // long integer add from registers A and B
-        SUB,      // long integer subtract from registers A and B
-        MUL,      // long integer multiply from registers A and B
-        DIV,      // long integer divide from registers A and B
+        SUB,        // long integer subtract from registers A and B
+        MUL,        // long integer multiply from registers A and B
+        DIV,        // long integer divide from registers A and B
 
-        CMP,      // compare registers A and B
+        CMP,        // compare registers A and B
 
-        LDCA,     // load long integer constant into register A
-        LDCB,     // load long integer constant into register A
+        LDCA,       // load long integer constant into register A
+        LDCB,       // load long integer constant into register A
 
-        LDA,      // load long integer from memory into register A
-        LDB,      // load long intefer from memory into register B
+        LDA,        // load long integer from memory into register A
+        LDB,        // load long intefer from memory into register B
 
-        MEM_MOV,        // copy a long value from a memory address to another
-        REG_MOV,        // copy a long value from a register into a memory address
-        REG_MOV_BIT,   // copy a bit value from a register into a memory address
+        MEM_MOV,    // copy a long value from a memory address to another
+        REG_MOV,    // copy a long value from a register into a memory address
+        REG_MOV_BIT,// copy a bit value from a register into a memory address
 
-        MEM_SET,  // sets a memory address to a value
+        MEM_SET,    // sets a memory address to a value
 
-        JMP,      // unconditional jump to index   
-        IF_JUMP,  // conditional jump based on zero flag register's value (1 = true, 0 = false)     
+        JMP,        // unconditional jump to index   
+        IF_JUMP,    // conditional jump based on zero flag register's value (1 = true, 0 = false)     
 
 
     } OpCode;
