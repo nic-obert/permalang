@@ -1,30 +1,21 @@
 #pragma once
 
-#include "pch.hh"
-
 #include "priorities.hh"
 #include "token.hh"
-#include "op_codes.hh"
 
 
-namespace Keywords
+namespace keywords
 {
 
+    // returns a keyword's name given its opCode
     const char* keywordName(OpCodes keyword);
 
 
-    const std::unordered_map<std::string, OpCodes> keywordsMap ({
-            {"if",      OpCodes::FLOW_IF},
-            {"else",    OpCodes::FLOW_ELSE},
-            {"while",   OpCodes::FLOW_WHILE},
-            {"for",     OpCodes::FLOW_FOR},
-            {"int",     OpCodes::DECLARATION_INT},
-            {"bool",    OpCodes::DECLARATION_BOOL},
-            {"float",   OpCodes::DECLARATION_FLOAT},
-            {"string",  OpCodes::DECLARATION_STRING},
-    });
+    // maps string to a keyword
+    extern const std::unordered_map<std::string, OpCodes> keywordsMap;
 
 
+    // a constant structure holding a keyword's predefined value
     typedef struct KeywordValue
     {
         const Value value;
@@ -35,15 +26,15 @@ namespace Keywords
     } KeywordValue;
 
 
-    const std::unordered_map<std::string, KeywordValue> keywordsValues ({
-        {"true",    KeywordValue(1, Tokens::TokenType::BOOL)},
-        {"false",   KeywordValue(0, Tokens::TokenType::BOOL)},
-    });
+    // maps a keyword to a value
+    extern const std::unordered_map<std::string, KeywordValue> keywordValues;
 
 
+    // whether the given keyword has a predefiend value or not
     bool hasValue(std::string const& word, Value& value, Tokens::TokenType& type);
 
 
+    // returns the priority of a given keyword using a switch statement
     int keywordPriority(OpCodes keyword);
 
 

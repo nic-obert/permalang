@@ -142,7 +142,7 @@ TokenList::TokenList(std::string& script)
 
                         // end of text token
                         // check if text is a keyword
-                        OpCodes opCode = Keywords::isKeyword(*(std::string*) token->value);
+                        OpCodes opCode = keywords::isKeyword(*(std::string*) token->value);
                         if (opCode == OpCodes::NO_OP)
                         {   
                             // check if keyword has a predefined value
@@ -151,7 +151,7 @@ TokenList::TokenList(std::string& script)
                             Value _value; 
                             TokenType _type;
 
-                            if (Keywords::hasValue(*(std::string*) token->value, _value, _type))
+                            if (keywords::hasValue(*(std::string*) token->value, _value, _type))
                             {
                                 token->type = _type;
                                 token->priority = LITERAL_P;
@@ -171,7 +171,7 @@ TokenList::TokenList(std::string& script)
                         } else {
                             // if word is a keyword instead
                             token->type = TokenType::KEYWORD;
-                            token->priority = Keywords::keywordPriority(opCode) + currentPriority;
+                            token->priority = keywords::keywordPriority(opCode) + currentPriority;
                             token->opCode = opCode;
 
                             // delete the string value since it won't be used anymore

@@ -2,9 +2,7 @@
 
 #include "pch.hh"
 
-#include "utils.hh"
 #include "syntax_tree.hh"
-#include "token.hh"
 #include "pvm.hh"
 
 
@@ -24,7 +22,7 @@ namespace tac
         DIV,
         EQ,
         LESS,
-        NO_OP
+        NO_OP,
 
     } TacOp;
 

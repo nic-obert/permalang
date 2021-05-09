@@ -185,7 +185,7 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         switch (token.type)
         {
         case TokenType::KEYWORD:
-            return stream << '<' << TokenType::KEYWORD << ": " << Keywords::keywordName(token.opCode) << " (" << token.priority << ")>";
+            return stream << '<' << TokenType::KEYWORD << ": " << keywords::keywordName(token.opCode) << " (" << token.priority << ")>";
     
         case TokenType::ENDS:
             return stream;

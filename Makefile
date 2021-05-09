@@ -10,25 +10,34 @@ PCH=$(HH).pch
 
 BUILD_DIR=build
 
-C_FLAGS=-std=$(STD) -I headers -Wall
-C_FLAGS_NW=-std=$(STD) -I headers
+
+C_FLAGS=-std=$(STD) -I headers
+WARINGS=-Wall -Wno-switch
+WARNINGS_ALL=-Wall
 
 
 all: build
 
 
-build: $(PCH) $(SOURCES) $(HEADERS)
-	$(CC) $(C_FLAGS) $(SOURCES) -o $(BUILD_DIR)/perma
+rules: $(PCH) $(SOURCES) $(HEADERS)
 
-builddb: $(PCH) $(SOURCES) $(HEADERS)
-	$(CC) -g $(C_FLAGS) $(SOURCES) -o $(BUILD_DIR)/perma
 
-builddb-nw:
+build: rules
+	$(CC) $(C_FLAGS) $(WARINGS) $(SOURCES) -o $(BUILD_DIR)/perma
+
+builddb: rules
+	$(CC) -g $(C_FLAGS) $(WARINGS) $(SOURCES) -o $(BUILD_DIR)/perma
+
+builddb-nw: rules
 	$(CC) -g $(C_FLAGS_NW) $(SOURCES) -o $(BUILD_DIR)/perma
+
+build-wall: rules
+	$(CC) $(C_FLAGS) $(WARINGS_ALL) $(SOURCES) -o $(BUILD_DIR)/perma
 
 
 $(PCH): $(HH)
-	$(CC) $(C_FLAGS) $(HH) -o $(PCH)
+	echo "Recompiling headers"
+	$(CC) $(C_FLAGS) $(WARINGS) $(HH) -o $(PCH)
 
 
 clean:

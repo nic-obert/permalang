@@ -1,10 +1,25 @@
 #include "keywords.hh"
 
 
-using namespace Keywords;
+using namespace keywords;
 
 
-const char* Keywords::keywordName(OpCodes keyword)
+const std::unordered_map<std::string, OpCodes> keywords::keywordsMap
+({
+    {"if",      OpCodes::FLOW_IF},
+    {"else",    OpCodes::FLOW_ELSE},
+    {"while",   OpCodes::FLOW_WHILE},
+    {"for",     OpCodes::FLOW_FOR},
+    {"int",     OpCodes::DECLARATION_INT},
+    {"bool",    OpCodes::DECLARATION_BOOL},
+    {"float",   OpCodes::DECLARATION_FLOAT},
+    {"string",  OpCodes::DECLARATION_STRING},
+});
+
+
+// switch statements maps
+
+const char* keywords::keywordName(OpCodes keyword)
 {
     switch (keyword)
     {
@@ -19,37 +34,26 @@ const char* Keywords::keywordName(OpCodes keyword)
     
     case OpCodes::FLOW_WHILE:
         return "while";
-            
+    
     case OpCodes::DECLARATION_INT:
         return "int";
     
     case OpCodes::DECLARATION_BOOL:
         return "bool";
-    
+
     case OpCodes::DECLARATION_FLOAT:
         return "float";
-            
+    
     case OpCodes::DECLARATION_STRING:
         return "string";
-
+    
     }
-
-    return "UNDEFINED KEYWORD";
+    
+    return "";
 }
 
 
-OpCodes Keywords::isKeyword(std::string const& word)
-{
-    auto keyword = keywordsMap.find(word);
-    if (keyword == keywordsMap.end())
-    {
-        return OpCodes::NO_OP;
-    }
-    return keyword->second;
-}
-
-
-int Keywords::keywordPriority(OpCodes keyword)
+int keywords::keywordPriority(OpCodes keyword)
 {
     switch (keyword)
     {
@@ -78,15 +82,26 @@ int Keywords::keywordPriority(OpCodes keyword)
         return DECLARATION_P;
     
     }
-
+    
     return 0;
 }
 
 
-bool Keywords::hasValue(std::string const& word, Value& value, Tokens::TokenType& type)
+OpCodes keywords::isKeyword(std::string const& word)
 {
-    auto val = keywordsValues.find(word);
-    if (val == keywordsValues.end())
+    auto keyword = keywordsMap.find(word);
+    if (keyword == keywordsMap.end())
+    {
+        return OpCodes::NO_OP;
+    }
+    return keyword->second;
+}
+
+
+bool keywords::hasValue(std::string const& word, Value& value, Tokens::TokenType& type)
+{
+    auto val = keywordValues.find(word);
+    if (val == keywordValues.end())
     {
         return false;
     }
@@ -96,9 +111,4 @@ bool Keywords::hasValue(std::string const& word, Value& value, Tokens::TokenType
 }
 
 
-KeywordValue::KeywordValue(Value value, Tokens::TokenType type)
-: value(value), type(type)
-{
-
-}
 

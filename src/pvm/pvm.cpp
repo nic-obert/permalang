@@ -11,7 +11,8 @@ using namespace pvm;
 Pvm::Pvm(size_t memSize)
 : memory(memSize)
 {
-
+    // add the first scope to the CallStack
+    callStack = new CallStack(0, nullptr);
 }
 
 

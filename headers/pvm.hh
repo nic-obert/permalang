@@ -1,7 +1,10 @@
 #pragma once
 
 
-#define size_t unsigned long
+typedef unsigned long size_t;
+
+// whether the given register is a bit register
+#define isBitRegister(reg) (reg == Registers::RZF || reg == Registers::RSF)
 
 
 // Perma Virtual Machine
@@ -40,7 +43,10 @@ namespace pvm
         MEM_SET,    // sets a memory address to a value
 
         JMP,        // unconditional jump to index   
-        IF_JUMP,    // conditional jump based on zero flag register's value (1 = true, 0 = false)     
+        IF_JUMP,    // conditional jump based on zero flag register's value (1 = true, 0 = false)
+
+        PUSH,       // push a new scope to the stack
+        POP,        // pop the current scope from the stack
 
 
     } OpCode;
@@ -52,7 +58,7 @@ namespace pvm
 
         // memory size in bytes
         size_t size;
-
+        // the actual memory
         Byte* memory = nullptr;
 
     public:
@@ -84,7 +90,16 @@ namespace pvm
     } Registers;
 
 
-    #define isBitRegister(reg) (reg == Registers::RZF || reg == Registers::RSF)    
+    // stack data structure holding a memory offset
+    typedef struct CallStack
+    {
+        
+        Address address;
+        CallStack* prev;
+
+        CallStack(Address address, CallStack* prev);
+
+    } CallStack;
 
     
     // Perma Virtual Machine
@@ -94,9 +109,10 @@ namespace pvm
 
         Memory memory;
 
+        CallStack* callStack;
+
         // REGISTERS
 
-        // general purpose registers
         // general purpose register A
         long rga;
         // general purpose register B
@@ -111,7 +127,8 @@ namespace pvm
         // sign flag register (see x86 assembly for reference)
         bool rsf;
 
-
+        // returns a pointer to the requested register
+        // the returned pointer has to be cast to the right type
         void* getRegister(Registers reg) const;
 
     public:
