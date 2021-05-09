@@ -11,6 +11,9 @@
 // the amount to increase the Byte array by when resizing
 #define RESIZE_AMOUNT size
 
+// maps a label (TacInstruction*) to an instruction index
+typedef std::unordered_map<Value, size_t> LabelTable;
+
 
 using namespace tac;
 
@@ -80,11 +83,29 @@ void compileBinaryOperation(pvm::OpCode operation, const TacInstruction* instruc
 }
 
 
+// fills the labels' placeholders in bytecode, given a label table
+void fillLabels(pvm::Byte* byteCode, const LabelTable& labels, std::vector<size_t>& jumpIndexes)
+{
+    for (size_t index : jumpIndexes)
+    {
+        // get the label, treating the byteCode as a long array
+        Value label = *((long*) (byteCode + index + 1));
+        // get the corresponding index to jump to
+        size_t target = labels.at(label);
+        // replace the old label with the new target
+        *((long*) (byteCode + index + 1)) = target;
+    }
+}
+
+
 pvm::Byte* Tac::toByteCode() const
 {
     using namespace pvm;
 
-    std::unordered_map<void*, size_t> labels = std::unordered_map<void*, size_t>();
+    LabelTable labels = LabelTable();
+
+    std::vector<size_t> jumpIndexes = std::vector<size_t>();
+    jumpIndexes.reserve(size);
 
     // reserve at least the size of TAC instructions * 3
     // most operators require 2 operands (min 3 bytes per instruction)
@@ -108,7 +129,7 @@ pvm::Byte* Tac::toByteCode() const
         case TacOp::LABEL:
         {   
             // save index of the label
-            labels[instruction] = index;
+            labels[toValue(instruction)] = index;
             // increment index for next instruction
             index ++;
             break;
@@ -118,6 +139,9 @@ pvm::Byte* Tac::toByteCode() const
         // instruction size: 9 bytes
         case TacOp::JUMP:
         {
+            // add instruction index to the jumpIndexes vector
+            jumpIndexes.push_back(index);
+
             // add unconditional jump instruction
             bytes[index] = (Byte) OpCode::JMP;
             index ++;
@@ -268,6 +292,9 @@ pvm::Byte* Tac::toByteCode() const
             bytes[index] = (Byte) OpCode::CMP;
             index ++;
 
+            // add the conditional jump's index to the jumpIndexes
+            jumpIndexes.push_back(index);
+
             // actual if instruction
             bytes[index] = (Byte) OpCode::IF_JUMP;
             index ++;
@@ -307,25 +334,25 @@ pvm::Byte* Tac::toByteCode() const
     } // for (instruction in instructions)
 
 
-    // TODO fill in labels 
-
     // allocate a new ByteCode with the size of index + 1
     // to leave place for the final EXIT instruction
-    Byte* bytecode = new Byte[index + 1];
+    Byte* byteCode = new Byte[index + 1];
 
     // copy the byte array into a ByteCode to be returned
-    // TODO fill in labels here with a for loop instead of memcpying 
-    memcpy(bytecode, bytes, index - 1);
+    memcpy(byteCode, bytes, index - 1);
+
+    // fill in labels based on the label table 
+    fillLabels(byteCode, labels, jumpIndexes);
 
     // set the last Byte of ByteCode to the EXIT OpCode
-    bytecode[index] = (Byte) OpCode::EXIT;
+    byteCode[index] = (Byte) OpCode::EXIT;
     index ++;
     // exit code should be 0 if program terminated successfully
-    bytecode[index] = 0;
+    byteCode[index] = 0;
 
     // finally delete bytes array
     delete[] bytes;
 
-    return bytecode;
+    return byteCode;
 }
 

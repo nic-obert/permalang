@@ -1,5 +1,7 @@
 #pragma once
 
+#include "pch.hh"
+
 
 typedef unsigned long size_t;
 
@@ -79,6 +81,7 @@ namespace pvm
     };
 
 
+    // enum of Pvm registers
     typedef enum class Registers : Byte
     {
         RGA,
@@ -142,4 +145,9 @@ namespace pvm
     };
 
 };
+
+
+std::ostream& operator<<(std::ostream& stream, const pvm::Byte* byteCode);
+
+std::ostream& operator<<(std::ostream& stream, const pvm::Registers& reg);
 

@@ -12,7 +12,7 @@ BUILD_DIR=build
 
 
 C_FLAGS=-std=$(STD) -I headers
-WARINGS=-Wall -Wno-switch
+WARNINGS=-Wall -Wno-switch
 WARNINGS_ALL=-Wall
 
 
@@ -23,21 +23,21 @@ rules: $(PCH) $(SOURCES) $(HEADERS)
 
 
 build: rules
-	$(CC) $(C_FLAGS) $(WARINGS) $(SOURCES) -o $(BUILD_DIR)/perma
+	$(CC) $(C_FLAGS) $(WARNINGS) $(SOURCES) -o $(BUILD_DIR)/perma
 
 builddb: rules
-	$(CC) -g $(C_FLAGS) $(WARINGS) $(SOURCES) -o $(BUILD_DIR)/perma
+	$(CC) -g $(C_FLAGS) $(WARNINGS) $(SOURCES) -o $(BUILD_DIR)/perma
 
 builddb-nw: rules
-	$(CC) -g $(C_FLAGS_NW) $(SOURCES) -o $(BUILD_DIR)/perma
+	$(CC) -g $(C_FLAGS) $(SOURCES) -o $(BUILD_DIR)/perma
 
 build-wall: rules
-	$(CC) $(C_FLAGS) $(WARINGS_ALL) $(SOURCES) -o $(BUILD_DIR)/perma
+	$(CC) $(C_FLAGS) $(WARNINGS_ALL) $(SOURCES) -o $(BUILD_DIR)/perma
 
 
 $(PCH): $(HH)
 	echo "Recompiling headers"
-	$(CC) $(C_FLAGS) $(WARINGS) $(HH) -o $(PCH)
+	$(CC) $(C_FLAGS) $(WARNINGS) $(HH) -o $(PCH)
 
 
 clean:

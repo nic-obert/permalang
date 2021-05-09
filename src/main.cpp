@@ -41,19 +41,21 @@ int main(int argc, const char** argv)
 
     TokenList tokens = TokenList(file);
 
-    std::cout << tokens << "\n" << std::endl;
+    std::cout << tokens << '\n' << std::endl;
 
     SyntaxTree syntaxTree = SyntaxTree(tokens);
     syntaxTree.parse();
 
-    std::cout << syntaxTree << "\n" << std::endl;
+    std::cout << syntaxTree << '\n' << std::endl;
 
     Tac tac = Tac();
     tac.parseTree(syntaxTree, Tac::NO_LABEL);
 
-    std::cout << tac << "\n" << std::endl;
+    std::cout << tac << '\n' << std::endl;
 
     const Byte* byteCode = tac.toByteCode();
+
+    std::cout << byteCode << '\n' << std::endl;
 
     Pvm pvm = Pvm(1024);
     Byte exitCode = pvm.execute(byteCode);

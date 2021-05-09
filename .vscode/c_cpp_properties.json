@@ -7,7 +7,7 @@
                 "${workspaceFolder}/headers"
             ],
             "defines": [],
-            "compilerPath": "/usr/bin/gcc",
+            "compilerPath": "/usr/bin/g++",
             "cStandard": "gnu11",
             "cppStandard": "gnu++17",
             "intelliSenseMode": "linux-gcc-x64"
