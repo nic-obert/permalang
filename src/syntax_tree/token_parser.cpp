@@ -11,6 +11,7 @@ typedef enum Side
 #define DELETE true
 
 using namespace Tokens;
+using namespace syntax_tree;
 
 
 /*
@@ -29,7 +30,7 @@ TokenType tokenTypeOf(const Token* token)
 }
 
 
-void binarySatisfy(Token* token, TokenType leftType, TokenType rightType, syntax_tree::Statement* statement)
+void binarySatisfy(Token* token, TokenType leftType, TokenType rightType, Statement* statement)
 {
 
     if (token->prev == nullptr)
@@ -66,7 +67,7 @@ void binarySatisfy(Token* token, TokenType leftType, TokenType rightType, syntax
 }
 
 
-void unarySatisfy(Token* token, TokenType type, Side side, syntax_tree::Statement* statement)
+void unarySatisfy(Token* token, TokenType type, Side side, Statement* statement)
 {
 
     if (side == LEFT)
@@ -112,7 +113,7 @@ void unarySatisfy(Token* token, TokenType type, Side side, syntax_tree::Statemen
 
 
 
-void declarationSatisfy(Token* token, TokenType type, syntax_tree::Statement* statement)
+void declarationSatisfy(Token* token, TokenType type, Statement* statement)
 {
 
     if (token->next == nullptr)
@@ -148,7 +149,7 @@ void declarationSatisfy(Token* token, TokenType type, syntax_tree::Statement* st
 }
 
 
-void assignSatisfy(Token* token, syntax_tree::Statement* statement)
+void assignSatisfy(Token* token, Statement* statement)
 {
 
     if (token->prev == nullptr)
@@ -193,7 +194,7 @@ void assignSatisfy(Token* token, syntax_tree::Statement* statement)
 
 
 // increment ++, decrement -- operators
-void incDecSatisfy(Token* token, syntax_tree::Statement* statement)
+void incDecSatisfy(Token* token, Statement* statement)
 {
     if (token->prev == nullptr)
     {
@@ -215,7 +216,7 @@ void incDecSatisfy(Token* token, syntax_tree::Statement* statement)
 }
 
 
-void addressOfSatisfy(Token* token, syntax_tree::Statement* statement)
+void addressOfSatisfy(Token* token, Statement* statement)
 {
     if (token->next == nullptr)
     {
@@ -236,7 +237,7 @@ void addressOfSatisfy(Token* token, syntax_tree::Statement* statement)
 
 
 
-void syntax_tree::Statement::satisfy(Token* token)
+void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 {
     // set token's priority to 0 right away so that it doesn't get evaluated multiple times
     token->priority = 0;
@@ -250,14 +251,14 @@ void syntax_tree::Statement::satisfy(Token* token)
     case OpCodes::ARITHMETICAL_DIV:
     case OpCodes::ARITHMETICAL_POW:
     {
-        binarySatisfy(token, TokenType::INT, TokenType::INT, this);
+        binarySatisfy(token, TokenType::INT, TokenType::INT, statement);
         break;
     }
 
     case OpCodes::ARITHMETICAL_INC:
     case OpCodes::ARITHMETICAL_DEC:
     {
-        incDecSatisfy(token, this);
+        incDecSatisfy(token, statement);
         break;
     }
 
@@ -271,20 +272,20 @@ void syntax_tree::Statement::satisfy(Token* token)
     case OpCodes::LOGICAL_GREATER:
     case OpCodes::LOGICAL_GREATER_EQ:
     {
-        binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, this);
+        binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
         break;
     }
     
     case OpCodes::LOGICAL_NOT:
     {
-        unarySatisfy(token, TokenType::BOOL, RIGHT, this);
+        unarySatisfy(token, TokenType::BOOL, RIGHT, statement);
         break;
     }
 
 
     case OpCodes::ADDRESS_OF:
     {
-        addressOfSatisfy(token, this);
+        addressOfSatisfy(token, statement);
         break;
     }
 
@@ -296,36 +297,34 @@ void syntax_tree::Statement::satisfy(Token* token)
     case OpCodes::ASSIGNMENT_POW:
     case OpCodes::ASSIGNMENT_MUL:
     {
-        assignSatisfy(token, this);
+        assignSatisfy(token, statement);
         break;
     }
 
 
     case OpCodes::DECLARATION_INT:
-        declarationSatisfy(token, TokenType::INT, this);
+        declarationSatisfy(token, TokenType::INT, statement);
         break;
     case OpCodes::DECLARATION_STRING:
-        declarationSatisfy(token, TokenType::STRING, this);
+        declarationSatisfy(token, TokenType::STRING, statement);
         break;
     case OpCodes::DECLARATION_FLOAT:
-        declarationSatisfy(token, TokenType::FLOAT, this);
+        declarationSatisfy(token, TokenType::FLOAT, statement);
         break;
     case OpCodes::DECLARATION_BOOL:
-        declarationSatisfy(token, TokenType::BOOL, this);
+        declarationSatisfy(token, TokenType::BOOL, statement);
         break;
 
     
     case OpCodes::PUSH_SCOPE:
     {
-        using namespace syntax_tree;
-
         // first push the scope to the SymbolTable
         symbol_table::SymbolTable::pushScope(DO_INHERIT);
 
         // transfer the part of the statement which is in the new scope
         // to another statement
         Statement* scopeStatement = new Statement(token->next);
-        scopeStatement->next = next;
+        scopeStatement->next = statement->next;
         
         // set previous token to null since this is the beginning of the statement
         scopeStatement->root->prev = nullptr;
@@ -387,7 +386,7 @@ void syntax_tree::Statement::satisfy(Token* token)
 
                     // make the outer Statement linked list (Statements)
                     // continue from the next statement
-                    next = scopeStatement->next;
+                    statement->next = scopeStatement->next;
 
                     // if statement's root is the newly deleted token --> delete it
                     if (scopeStatement->root == tok)
@@ -407,17 +406,19 @@ void syntax_tree::Statement::satisfy(Token* token)
             }
         }
         
-        // create a new SyntaxTree for the scope and move it to the SyntaxTree
-        SyntaxTree* scopeTree = new SyntaxTree(std::move(scopeStatements));
+        // create a temporary SyntaxTree for the scope and move it to the SyntaxTree
+        SyntaxTree scopeTree = SyntaxTree(std::move(scopeStatements));
 
         // parse the new SyntaxTree recursively
-        scopeTree->parse();
+        scopeTree.parse();
+
+        // extend the tree's TAC with the newly generated one
+        tac.extend(scopeTree.tac);
 
         // pop the Scope once parsed its SyntaxTree
         symbol_table::SymbolTable::popScope();
 
-        // set the token's value to the Scope's content
-        token->value = toValue(scopeTree);
+        token->value = 0;
 
         break;
     }
@@ -448,8 +449,8 @@ void syntax_tree::Statement::satisfy(Token* token)
         // set parenthesis' type to it's content's
         token->type = tokenTypeOf(content);
 
-        remove(content);
-        remove(closing, DELETE);
+        statement->remove(content);
+        statement->remove(closing, DELETE);
 
         break;
     }
@@ -487,8 +488,8 @@ void syntax_tree::Statement::satisfy(Token* token)
         token->value = toValue((new Token*[2] { condition, body }));
 
         // remove operands from the statement (this)
-        remove(condition);
-        remove(body);
+        statement->remove(condition);
+        statement->remove(body);
 
         break;
     }
@@ -513,7 +514,7 @@ void syntax_tree::Statement::satisfy(Token* token)
 
         token->value = toValue(new Token*[1] { body });
 
-        remove(body);
+        statement->remove(body);
 
         break;
     }
@@ -528,5 +529,33 @@ void syntax_tree::Statement::satisfy(Token* token)
 
     } // switch (token->opCode)
 
+}
+
+
+void SyntaxTree::parseStatement(Statement* statement)
+{
+    Tokens::Token* root = statement->root;
+
+    // parse statement
+    while (true)
+    {   
+        
+        // return to the beginning of the statement
+        while (root->prev != nullptr)
+        {
+            root = root->prev;
+        }
+
+        root = getHighestPriority(root);
+
+        if (root->priority < 1) // 0 or less
+        {
+            break;
+        }
+
+        // evaluate the Token    
+        satisfyToken(statement, root);
+
+    }
 }
 

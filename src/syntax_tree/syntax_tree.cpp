@@ -4,10 +4,11 @@
 using namespace syntax_tree;
 
 
+
 SyntaxTree::SyntaxTree(Statements&& statements)
 : statements(std::move(statements))
 {
-
+    tac = tac::Tac();
 }
 
 
@@ -60,6 +61,12 @@ SyntaxTree::SyntaxTree(Tokens::TokenList& tokens)
 }
 
 
+const tac::Tac& SyntaxTree::getTac() const 
+{
+    return tac;
+}
+
+
 // returns the token with the highest priority in the statement
 Tokens::Token* SyntaxTree::getHighestPriority(Tokens::Token* root) 
 {
@@ -101,29 +108,7 @@ void SyntaxTree::parse()
     Statement* statement;
     for (statement = statements.start; true; statement = statement->next)
     {
-        Tokens::Token* root = statement->root;
-
-        // parse statement
-        while (true)
-        {   
-            
-            // return to the beginning of the statement
-            while (root->prev != nullptr)
-            {
-                root = root->prev;
-            }
-
-            root = getHighestPriority(root);
-
-            if (root->priority < 1) // 0 or less
-            {
-                break;
-            }
-
-            // satisfy token's requirements
-            statement->satisfy(root);
-            
-        }
+        parseStatement(statement);
 
         // check if next statement is nullptr and break
         // so not to set statements.end to nullptr (aka. cause segfault)

@@ -5,13 +5,14 @@ using namespace syntax_tree;
 
 
 Statement::Statement(Tokens::Token* root)
-: root(root)
+: root(root), next(nullptr)
 {
 
 }
 
 
 Statement::Statement()
+: root(nullptr), next(nullptr)
 {
     
 }
@@ -74,16 +75,16 @@ std::ostream& operator<<(std::ostream& stream, syntax_tree::Statement const& sta
 
 
 Statements::Statements(Statement* statement)
+: start(statement), end(statement)
 {
-    start = statement;
-    end = start;
+
 }
 
 
 Statements::Statements()
+: start(nullptr), end(nullptr)
 {
-    start = nullptr;
-    end = nullptr;
+
 }
 
 

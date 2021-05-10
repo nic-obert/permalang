@@ -85,7 +85,7 @@ namespace tac
     public:
 
         // next element in doubly-linked list
-        TacInstruction* next = nullptr;
+        TacInstruction* next;
         // previous element in doubly-linked list
         // not initialized since it will be by the Tac::add() function
         TacInstruction* prev;
@@ -109,24 +109,58 @@ namespace tac
     };
 
 
+    class CodeBlock
+    {
+    private:
+
+        // start of the doubly-linked list
+        TacInstruction* start;
+        // end of the doubly-linked list
+        TacInstruction* end;
+
+        // TODO implement symbol declaration list
+
+        // instruction count
+        size_t size;
+
+        // previous element in doubly-linked list
+        CodeBlock* prev;
+        // next element in doubly-linked list
+        CodeBlock* next;
+
+    public:
+
+        CodeBlock(CodeBlock* prev);
+        CodeBlock() = delete;
+
+        // add an instrution to the block
+        // increment the block's size
+        // performs nullptr checks
+        void add(TacInstruction* instruction);
+
+        
+        const TacInstruction* getStart() const;
+        const TacInstruction* getEnd() const;
+
+        const CodeBlock* getPrev() const;
+        const CodeBlock* getNext() const;
+
+        void setNext(CodeBlock* block);
+        void setPrev(CodeBlock* block);
+
+    };
+
+
     // Three Address Code
     class Tac
     {
     private:
 
-        size_t size;
+        // start of doubly-linked list of CodeBlock
+        CodeBlock* start;
+        // end of doubly-linked list of CodeBlock
+        CodeBlock* end;
 
-        // last element of doubly linked list of TacInstructions
-        TacInstruction* instructions;
-
-        // add an instruction to the TacInstruction doubly-linked list
-        // increments the size counter
-        void add(TacInstruction* in);
-
-        // recursive function that parses recursively an operator Token
-        // sets the token's value to an Address* which stores
-        // the result of the operation
-        void parseOperator(Tokens::Token* token);
 
         // recursive function that generates TAC for a complex operation
         // returns a reference to the result of the operation
@@ -135,34 +169,41 @@ namespace tac
 
     public:
 
-        // boolean false
-        static const bool NO_LABEL;
-
-        // first element of the TacInstruction doubly linked list
-        TacInstruction* start = nullptr;
-
         Tac();
 
-        // transforms a syntax tree to a tac instructions linked list
-        // returns a label to the TAC generated for the given SyntaxTree
-        TacInstruction* parseTree(syntax_tree::SyntaxTree& tree, bool addLabel = true);
+        // extend the TAC with a new codeBlock
+        // performs nullptr checks
+        void extend(CodeBlock* codeBlock);
+        // extend the TAC with another TAC
+        // performs nullptr checks
+        // possibly destructive
+        void extend(Tac& tac);
+
+        // recursive function that parses recursively an operator Token
+        // sets the token's value to an Address* which stores
+        // the result of the operation
+        void parseOperator(Tokens::Token* token);
 
         // returns the ByteCode for the generated TAC instructions
         pvm::Byte* toByteCode() const; 
+
+        const CodeBlock* getStart() const;
+        const CodeBlock* getEnd() const;
 
     };
 
 };
 
 
-std::ostream& operator<<(std::ostream& stream, tac::Tac const& tac);
+std::ostream& operator<<(std::ostream& stream, const tac::Tac& tac);
 
-std::ostream& operator<<(std::ostream& stream, tac::TacInstruction const& instruction);
+std::ostream& operator<<(std::ostream& stream, const tac::TacInstruction& instruction);
 
-std::ostream& operator<<(std::ostream& stream, tac::TacValue const& value);
+std::ostream& operator<<(std::ostream& stream, const tac::TacValue& value);
 
-std::ostream& operator<<(std::ostream& stream, tac::TacOp const& op);
+std::ostream& operator<<(std::ostream& stream, const tac::TacOp& op);
 
 std::ostream& operator<<(std::ostream& stream, const tac::Address* const address);
 
+std::ostream& operator<<(std::ostream& stream, const tac::CodeBlock& codeBlock);
 

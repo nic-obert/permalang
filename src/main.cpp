@@ -48,9 +48,8 @@ int main(int argc, const char** argv)
 
     std::cout << syntaxTree << '\n' << std::endl;
 
-    Tac tac = Tac();
-    tac.parseTree(syntaxTree, Tac::NO_LABEL);
-
+    const Tac& tac = syntaxTree.getTac();
+    
     std::cout << tac << '\n' << std::endl;
 
     const Byte* byteCode = tac.toByteCode();

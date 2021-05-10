@@ -10,65 +10,9 @@
 using namespace tac;
 
 
-TacInstruction* Tac::parseTree(syntax_tree::SyntaxTree& tree, bool addLabel)
-{
-    using namespace syntax_tree;
-    using namespace Tokens;
-
-    TacInstruction* label = nullptr;
-
-    if (addLabel)
-    {
-        // the first instruction for the SyntaxTree is a label 
-        // pointing to the start of the instructions for said SyntaxTree
-        label = new TacInstruction(TacOp::LABEL);
-        // add the label to the three address code
-        add(label);
-    }
-
-    for (Statement* statement = tree.statements.start; statement != nullptr; statement = statement->next)
-    {   
-        // iterate over operators in the statement
-        for (Token* root = statement->root; root != nullptr; root = root->next)
-        {
-            if (isOperator(root->opCode))
-            {
-                parseOperator(root);
-            }
-        }
-    }
-
-    /*
-        return label pointing to the first instruction for the parsed SyntaxTree
-        or nullptr if parameter addLabel is false
-    */
-    return label;
-    
-}
-
-
 void Tac::parseOperator(Tokens::Token* token)
 {
     using namespace Tokens;
-
-    /*
-        check if token is a scope and handle it differently 
-        from regular tokens
-        this scope is independent from any operator, since
-        operators that require scopes should parse the scopes they
-        require in the tacFor() function when and how they need it
-    */
-    if (token->opCode == OpCodes::PUSH_SCOPE)
-    {
-        using namespace syntax_tree;
-
-        // Scope Token's value is a SyntaxTree* of its content
-        SyntaxTree* tree = (SyntaxTree*) token->value;
-
-        parseTree(*tree, NO_LABEL);
-        return;
-    }
-
 
     // treat token's value as a pointer to an array of token pointers
     Token** operands = (Token**) token->value; 

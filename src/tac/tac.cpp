@@ -4,50 +4,56 @@
 using namespace tac;
 
 
-const bool Tac::NO_LABEL = false;
-
-
 Tac::Tac()
-: size(1)
+: start(nullptr), end(nullptr)
 {
-    /*
-        initialize with the zeroth instruction so not 
-        to have to check for null pointers when adding
-        a new instruction
-    */
-    start = new TacInstruction(TacOp::NO_OP);
-    instructions = start;
-    start->prev = nullptr;
+
 }
 
 
-void Tac::add(TacInstruction* in)
+void Tac::extend(CodeBlock* codeBlock)
 {
-    /*
-        just add the instruction without checking for
-        null pointers because the first element of the list
-        is always initialized in the constructor
-    */
-    instructions->next = in;
-    in->prev = instructions;
-    instructions = in;
-    // increment size
-    size ++;
+    if (start == nullptr)
+    {
+        start = codeBlock;
+    }
+    else // if (start != nullptr)
+    {
+        end->setNext(codeBlock);
+    }
+
+    codeBlock->setPrev(end);
+    end = codeBlock;
 }
 
 
-std::ostream& operator<<(std::ostream& stream, tac::Tac const& tac)
+void Tac::extend(Tac& tac)
+{
+    // just steal the other TAC's CodeBlocks
+    end->setNext(tac.start);
+    end = tac.end;
+}
+
+
+const CodeBlock* Tac::getStart() const
+{
+    return start;
+}
+
+
+const CodeBlock* Tac::getEnd() const
+{
+    return end;
+}
+
+
+std::ostream& operator<<(std::ostream& stream, const tac::Tac& tac)
 {
     stream << "Three Address Code: {\n";
 
-    for (const TacInstruction* instruction = tac.start; instruction != nullptr; instruction = instruction->next)
+    for (const CodeBlock* block = tac.getStart(); block != nullptr; block = block->getNext())
     {
-        // do not add a tab if instruction is a label for readability
-        if (instruction->operation != TacOp::LABEL)
-        {
-            stream << '\t';
-        }
-        stream << *instruction << "\n";
+        stream << *block << "\n" << "---\n\n";
     }
 
     return stream << "}";
