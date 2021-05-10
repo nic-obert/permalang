@@ -144,6 +144,21 @@ namespace pvm
 
     };
 
+
+    // a pair of <Byte*, size_t>
+    // holds the byte code along with its size
+    typedef struct ByteCode
+    {
+        // the actual byte code
+        Byte* byteCode;
+        size_t size;
+
+        ByteCode(Byte* byteCode, size_t size);
+        ByteCode();
+
+    } ByteCode;
+
+
 };
 
 

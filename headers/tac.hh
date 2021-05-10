@@ -2,8 +2,9 @@
 
 #include "pch.hh"
 
-#include "syntax_tree.hh"
 #include "pvm.hh"
+#include "utils.hh"
+#include "token.hh"
 
 
 namespace tac
@@ -109,6 +110,7 @@ namespace tac
     };
 
 
+    // block of TacInstructions 
     class CodeBlock
     {
     private:
@@ -131,19 +133,26 @@ namespace tac
     public:
 
         CodeBlock(CodeBlock* prev);
-        CodeBlock() = delete;
+        CodeBlock() = delete; 
+
+
+        // compiles a CodeBlock to byte code
+        pvm::ByteCode toByteCode() const;
+
 
         // add an instrution to the block
         // increment the block's size
         // performs nullptr checks
         void add(TacInstruction* instruction);
 
-        
+
         const TacInstruction* getStart() const;
         const TacInstruction* getEnd() const;
 
+
         const CodeBlock* getPrev() const;
         const CodeBlock* getNext() const;
+
 
         void setNext(CodeBlock* block);
         void setPrev(CodeBlock* block);
@@ -161,31 +170,36 @@ namespace tac
         // end of doubly-linked list of CodeBlock
         CodeBlock* end;
 
+        size_t blockCount;
 
         // recursive function that generates TAC for a complex operation
         // returns a reference to the result of the operation
         const Address* tacFor(Tokens::Token* token, Tokens::Token** operands);
         const Address* tacFor(OpCodes opCode, Tokens::Token** operands);
-
+       
     public:
 
         Tac();
 
         // extend the TAC with a new codeBlock
         // performs nullptr checks
+        // increments the blockCount
         void extend(CodeBlock* codeBlock);
         // extend the TAC with another TAC
         // performs nullptr checks
-        // possibly destructive
-        void extend(Tac& tac);
+        // destructive for the give Tac
+        // increments the blockCount by the give Tac's blockCount
+        void extend(Tac& _tac);
 
         // recursive function that parses recursively an operator Token
         // sets the token's value to an Address* which stores
         // the result of the operation
         void parseOperator(Tokens::Token* token);
 
+
         // returns the ByteCode for the generated TAC instructions
-        pvm::Byte* toByteCode() const; 
+        pvm::ByteCode toByteCode() const; 
+
 
         const CodeBlock* getStart() const;
         const CodeBlock* getEnd() const;
@@ -195,7 +209,7 @@ namespace tac
 };
 
 
-std::ostream& operator<<(std::ostream& stream, const tac::Tac& tac);
+std::ostream& operator<<(std::ostream& stream, const tac::Tac& _tac);
 
 std::ostream& operator<<(std::ostream& stream, const tac::TacInstruction& instruction);
 

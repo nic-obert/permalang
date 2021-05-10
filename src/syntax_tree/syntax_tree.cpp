@@ -8,7 +8,7 @@ using namespace syntax_tree;
 SyntaxTree::SyntaxTree(Statements&& statements)
 : statements(std::move(statements))
 {
-    tac = tac::Tac();
+    tacRepr = tac::Tac();
 }
 
 
@@ -63,7 +63,7 @@ SyntaxTree::SyntaxTree(Tokens::TokenList& tokens)
 
 const tac::Tac& SyntaxTree::getTac() const 
 {
-    return tac;
+    return tacRepr;
 }
 
 

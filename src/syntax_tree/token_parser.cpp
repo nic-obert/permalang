@@ -412,13 +412,14 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
         // parse the new SyntaxTree recursively
         scopeTree.parse();
 
-        // extend the tree's TAC with the newly generated one
-        tac.extend(scopeTree.tac);
+        // get the newly generated TAC and move it out of the tree
+        tac::Tac* scopeTac = new tac::Tac(std::move(scopeTree.tacRepr));
 
         // pop the Scope once parsed its SyntaxTree
         symbol_table::SymbolTable::popScope();
 
-        token->value = 0;
+        // set the token's value to the newly generated tac
+        token->value = toValue(scopeTac);
 
         break;
     }

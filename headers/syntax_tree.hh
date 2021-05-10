@@ -13,8 +13,9 @@ namespace syntax_tree
     {
     public:
 
-        Statement* next;
         Tokens::Token* root;
+
+        Statement* next;
 
 
         Statement(Tokens::Token* root, Statement* next);
@@ -51,15 +52,13 @@ namespace syntax_tree
     };
 
 
+    // tree representation of source code
     class SyntaxTree
     {
     private:
+    
         // tac representation of the tree
-        tac::Tac tac;
-
-        // compile a CodeBlock to TAC
-        // extend the tree's TAC
-        void compileBlock(Tokens::Token* root);
+        tac::Tac tacRepr;
 
         // parse a Statement in the tree
         void parseStatement(Statement* statement);
@@ -96,7 +95,7 @@ namespace syntax_tree
 
 
 
-std::ostream& operator<<(std::ostream& stream, syntax_tree::SyntaxTree const& tree);
+std::ostream& operator<<(std::ostream& stream, const syntax_tree::SyntaxTree& tree);
 
-std::ostream& operator<<(std::ostream& stream, syntax_tree::Statement const& statement);
+std::ostream& operator<<(std::ostream& stream, const syntax_tree::Statement& statement);
 

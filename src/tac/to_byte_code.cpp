@@ -98,7 +98,49 @@ void fillLabels(pvm::Byte* byteCode, const LabelTable& labels, std::vector<size_
 }
 
 
-pvm::Byte* Tac::toByteCode() const
+pvm::ByteCode Tac::toByteCode() const
+{
+    using namespace pvm;
+
+    // create a temporary array of Byte*
+    // to hold the byte code for the single code blocks
+    ByteCode codeBlocks[blockCount];
+    // total size of byte code
+    // to be used later to allocate an array large enough
+    size_t totalSize = 0;
+
+    size_t i = 0;
+    for (const CodeBlock* block = start; block != nullptr; block = block->getNext(), i++)
+    {
+        codeBlocks[i] = block->toByteCode();
+        totalSize += codeBlocks[i].size;
+    }
+
+    // create the final byte code array
+    // the +2 is to add a final OpCode::EXIT instruction
+    Byte* byteCode = new Byte[totalSize + 2];
+
+    // copy the old code into the new array
+    size_t offset = 0;
+    for (i = 0; i != blockCount; i++)
+    {
+        // copy the code block into the final array
+        memcpy(byteCode + offset, codeBlocks[i].byteCode, codeBlocks[i].size);
+        // update the final array's offset 
+        offset += codeBlocks[i].size;
+        // delete the old code block
+        delete codeBlocks[i].byteCode;
+    }
+
+    // add the final OpCode::EXIT instruction
+    byteCode[i] = (Byte) OpCode::EXIT;
+    byteCode[i + 1] = 0;
+
+    return ByteCode(byteCode, totalSize);
+}
+
+
+pvm::ByteCode CodeBlock::toByteCode() const
 {
     using namespace pvm;
 
@@ -334,21 +376,15 @@ pvm::Byte* Tac::toByteCode() const
     } // for (instruction in instructions)
 
 
-    // allocate a new ByteCode with the size of index + 1
-    // to leave place for the final EXIT instruction
-    Byte* byteCode = new Byte[index + 1];
+    // create a ByteCode object to hold the byte code
+    ByteCode byteCode = ByteCode(new Byte[index - 1], index - 1);
+    // allocate a new ByteCode with the size of index - 1
 
     // copy the byte array into a ByteCode to be returned
-    memcpy(byteCode, bytes, index - 1);
+    memcpy(byteCode.byteCode, bytes, byteCode.size);
 
     // fill in labels based on the label table 
-    fillLabels(byteCode, labels, jumpIndexes);
-
-    // set the last Byte of ByteCode to the EXIT OpCode
-    byteCode[index] = (Byte) OpCode::EXIT;
-    index ++;
-    // exit code should be 0 if program terminated successfully
-    byteCode[index] = 0;
+    fillLabels(byteCode.byteCode, labels, jumpIndexes);
 
     // finally delete bytes array
     delete[] bytes;

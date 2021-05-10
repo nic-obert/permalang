@@ -4,6 +4,20 @@
 using namespace pvm;
 
 
+ByteCode::ByteCode(Byte* byteCode, size_t size)
+: byteCode(byteCode), size(size)
+{
+    
+}
+
+
+ByteCode::ByteCode()
+: byteCode(nullptr), size(0)
+{
+    
+}
+
+
 std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
 {
     stream << "ByteCode: {\n";

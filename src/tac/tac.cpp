@@ -24,14 +24,21 @@ void Tac::extend(CodeBlock* codeBlock)
 
     codeBlock->setPrev(end);
     end = codeBlock;
+
+    blockCount ++;
 }
 
 
-void Tac::extend(Tac& tac)
+void Tac::extend(Tac& _tac)
 {
     // just steal the other TAC's CodeBlocks
-    end->setNext(tac.start);
-    end = tac.end;
+    end->setNext(_tac.start);
+    end = _tac.end;
+
+    _tac.start = nullptr;
+    _tac.end = nullptr;
+
+    blockCount += _tac.blockCount;
 }
 
 
@@ -47,11 +54,11 @@ const CodeBlock* Tac::getEnd() const
 }
 
 
-std::ostream& operator<<(std::ostream& stream, const tac::Tac& tac)
+std::ostream& operator<<(std::ostream& stream, const tac::Tac& _tac)
 {
     stream << "Three Address Code: {\n";
 
-    for (const CodeBlock* block = tac.getStart(); block != nullptr; block = block->getNext())
+    for (const CodeBlock* block = _tac.getStart(); block != nullptr; block = block->getNext())
     {
         stream << *block << "\n" << "---\n\n";
     }

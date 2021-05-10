@@ -52,12 +52,12 @@ int main(int argc, const char** argv)
     
     std::cout << tac << '\n' << std::endl;
 
-    const Byte* byteCode = tac.toByteCode();
+    ByteCode byteCode = tac.toByteCode();
 
-    std::cout << byteCode << '\n' << std::endl;
+    std::cout << byteCode.byteCode << '\n' << std::endl;
 
     Pvm pvm = Pvm(1024);
-    Byte exitCode = pvm.execute(byteCode);
+    Byte exitCode = pvm.execute(byteCode.byteCode);
 
     std::cout << "Exit code: " << exitCode << std::endl;
     
