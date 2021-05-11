@@ -113,7 +113,9 @@ namespace tac
     };
 
 
-    // block of TacInstructions 
+    // block of TacInstructions
+    // doubly-linked list of TacInstructions
+    // keeps track of its size and declared symbols
     class CodeBlock
     {
     private:
@@ -146,7 +148,9 @@ namespace tac
 
 
         // compiles a CodeBlock to byte code
-        pvm::ByteCode toByteCode() const;
+        // allocates "reserveBytes" more bytes than the byte code really needs
+        // reserveBytes is mainly used to allocate the last 2 bytes for the OpCode::EXIT instruction
+        pvm::ByteCode toByteCode(size_t reserveBytes) const;
 
 
         // add an instrution to the block
@@ -156,10 +160,18 @@ namespace tac
 
 
         // initialize the declared symbols list for the CodeBlock
+        // if no symbol is declared, do nothing
         void initSymbols(const symbol_table::Table& localScope);
 
         // pop the declared symbols
+        // if no symbol is declared, do nothing
         void popSymbols();
+
+        // extends the CodeBlock with TacInstructions from another CodeBlock
+        // is potentially destructive for the other CodeBlock
+        // do not reuse the other CodeBlock
+        // performs nullptr checks
+        void extend(const CodeBlock* other);
 
 
         const TacInstruction* getStart() const;
@@ -185,7 +197,7 @@ namespace tac
         CodeBlock* start;
         // end of doubly-linked list of CodeBlock
         CodeBlock* end;
-
+        // number of CodeBlocks in this Tac
         size_t blockCount;
 
         // recursive function that generates TAC for a complex operation

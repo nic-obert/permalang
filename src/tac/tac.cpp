@@ -5,7 +5,7 @@ using namespace tac;
 
 
 Tac::Tac()
-: start(nullptr), end(nullptr)
+: start(nullptr), end(nullptr), blockCount(0)
 {
 
 }

@@ -46,7 +46,7 @@ int main(int argc, const char** argv)
     SyntaxTree syntaxTree = SyntaxTree(tokens);
     syntaxTree.parse();
 
-    std::cout << syntaxTree << '\n' << std::endl;
+    // std::cout << syntaxTree << '\n' << std::endl;
 
     const Tac& tac = syntaxTree.getTac();
     

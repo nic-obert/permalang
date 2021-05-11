@@ -110,8 +110,12 @@ void SyntaxTree::parse()
 	{
 		parseStatement(statement);
 
-		// check if next statement is nullptr and break
-		// so not to set statements.end to nullptr (aka. cause segfault)
+		/*
+			check if next statement is nullptr and break
+			so not to set statements.end to nullptr (aka. cause segfault)
+			this check has to be performed here in case of single-statement
+			SyntaxTrees 
+		*/
 		if (statement->next == nullptr)
 		{
 			break;

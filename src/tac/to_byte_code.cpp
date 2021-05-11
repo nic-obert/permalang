@@ -12,6 +12,7 @@
 #define RESIZE_AMOUNT size
 
 // maps a label (TacInstruction*) to an instruction index
+// stores the instruction index to jump to, corresponding to the label
 typedef std::unordered_map<Value, size_t> LabelTable;
 
 
@@ -102,50 +103,35 @@ pvm::ByteCode Tac::toByteCode() const
 {
     using namespace pvm;
 
-    // create a temporary array of Byte*
-    // to hold the byte code for the single code blocks
-    ByteCode codeBlocks[blockCount];
-    // total size of byte code
-    // to be used later to allocate an array large enough
-    size_t totalSize = 0;
+    // create the final code block that will hold all code blocks
+    CodeBlock finalBlock = CodeBlock();
 
-    size_t i = 0;
-    for (const CodeBlock* block = start; block != nullptr; block = block->getNext(), i++)
+    // extend the final CodeBlock with all CodeBlocks
+    for (const CodeBlock* block = start; block != nullptr; block = block->getNext())
     {
-        codeBlocks[i] = block->toByteCode();
-        totalSize += codeBlocks[i].size;
+        finalBlock.extend(block);
     }
 
-    // create the final byte code array
-    // the +2 is to add a final OpCode::EXIT instruction
-    Byte* byteCode = new Byte[totalSize + 2];
-
-    // copy the old code into the new array
-    size_t offset = 0;
-    for (i = 0; i != blockCount; i++)
-    {
-        // copy the code block into the final array
-        memcpy(byteCode + offset, codeBlocks[i].byteCode, codeBlocks[i].size);
-        // update the final array's offset 
-        offset += codeBlocks[i].size;
-        // delete the old code block
-        delete codeBlocks[i].byteCode;
-    }
+    // compile the final CodeBlock to byte code
+    // reserve 2 more bytes to add the final OpCode::EXIT instruction
+    ByteCode byteCode = finalBlock.toByteCode(2);
 
     // add the final OpCode::EXIT instruction
-    byteCode[i] = (Byte) OpCode::EXIT;
-    byteCode[i + 1] = 0;
+    byteCode.byteCode[byteCode.size - 2] = (Byte) OpCode::EXIT;
+    byteCode.byteCode[byteCode.size - 1] = 0;
 
-    return ByteCode(byteCode, totalSize);
+    return byteCode;
 }
 
 
-pvm::ByteCode CodeBlock::toByteCode() const
+pvm::ByteCode CodeBlock::toByteCode(size_t reserveBytes) const
 {
     using namespace pvm;
 
+
     LabelTable labels = LabelTable();
 
+    // vector of the indexes of jump instructions
     std::vector<size_t> jumpIndexes = std::vector<size_t>();
     jumpIndexes.reserve(size);
 
@@ -170,10 +156,9 @@ pvm::ByteCode CodeBlock::toByteCode() const
         // instruction size: 1 byte
         case TacOp::LABEL:
         {   
-            // save index of the label
+            // save index of the declared label
             labels[toValue(instruction)] = index;
-            // increment index for next instruction
-            index ++;
+            // do not increment index as labels do not occupy physical space 
             break;
         }
 
@@ -181,7 +166,7 @@ pvm::ByteCode CodeBlock::toByteCode() const
         // instruction size: 9 bytes
         case TacOp::JUMP:
         {
-            // add instruction index to the jumpIndexes vector
+            // add the jump instruction index to the jumpIndexes vector
             jumpIndexes.push_back(index);
 
             // add unconditional jump instruction
@@ -334,7 +319,7 @@ pvm::ByteCode CodeBlock::toByteCode() const
             bytes[index] = (Byte) OpCode::CMP;
             index ++;
 
-            // add the conditional jump's index to the jumpIndexes
+            // add the conditional jump instruction's index to the jumpIndexes
             jumpIndexes.push_back(index);
 
             // actual if instruction
@@ -377,7 +362,7 @@ pvm::ByteCode CodeBlock::toByteCode() const
 
 
     // create a ByteCode object to hold the byte code
-    ByteCode byteCode = ByteCode(new Byte[index - 1], index - 1);
+    ByteCode byteCode = ByteCode(new Byte[index - 1 + reserveBytes], index - 1 + reserveBytes);
     // allocate a new ByteCode with the size of index - 1
 
     // copy the byte array into a ByteCode to be returned

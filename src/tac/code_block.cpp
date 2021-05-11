@@ -41,21 +41,29 @@ void CodeBlock::initSymbols(const symbol_table::Table& localScope)
         declaredSymbolsSize += Tokens::typeSize(iter->second->type);
     }
 
-    // add the TacOp::PUSH instruction to push the stack index
-    add(new TacInstruction(
-        TacOp::PUSH,
-        TacValue(TacValueType::LITERAL, declaredSymbolsSize)
-    ));
+    // don't even add a PUSH instruction if the size is 0
+    if (declaredSymbolsSize != 0)
+    {
+        // add the TacOp::PUSH instruction to push the stack index
+        add(new TacInstruction(
+            TacOp::PUSH,
+            TacValue(TacValueType::LITERAL, declaredSymbolsSize)
+        ));
+    }
 
 }
 
 
 void CodeBlock::popSymbols()
 {
-    add(new TacInstruction(
-        TacOp::POP,
-        TacValue(TacValueType::LITERAL, declaredSymbolsSize)
-    ));
+    // don't add a POP instruction if nothing was pushed
+    if (declaredSymbolsSize != 0)
+    {
+        add(new TacInstruction(
+            TacOp::POP,
+            TacValue(TacValueType::LITERAL, declaredSymbolsSize)
+        ));
+    }
 }
 
 
@@ -128,6 +136,23 @@ std::ostream& operator<<(std::ostream& stream, const tac::CodeBlock& codeBlock)
     }
 
     return stream;
+}
+
+
+void CodeBlock::extend(const CodeBlock* other)
+{
+    // check for nullptr (this CodeBlock is not initialized)
+    if (end == nullptr)
+    {
+        start = other->start;
+    }
+    else // if (end != nullptr) --> this CodeBlock is initialized
+    {
+        end->next = other->start;
+        other->start->prev = end;
+    }
+    
+    end = other->end;
 }
 
 
@@ -390,7 +415,6 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
             ));
 
             return toAddress(operands[0]->value);
-            break;
         }
 
         case OpCodes::ASSIGNMENT_DIV:
@@ -407,8 +431,6 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
             ));
 
             return toAddress(operands[0]->value);
-
-            break;
         }
 
         case OpCodes::ARITHMETICAL_INC:
@@ -424,7 +446,7 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
                 TacValue(TacValueType::LITERAL, 1)
             ));
 
-            break;
+            return toAddress(operands[0]->value);
         }
 
         case OpCodes::ARITHMETICAL_DEC:
@@ -440,7 +462,7 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
                 TacValue(TacValueType::LITERAL, 1)
             ));
 
-            break;
+            return toAddress(operands[0]->value);
         }
 
         case OpCodes::LOGICAL_NOT_EQ:
