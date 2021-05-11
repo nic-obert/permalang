@@ -6,6 +6,7 @@ typedef enum Side
 {
     RIGHT,
     LEFT
+    
 } Side;
 
 #define DELETE true

@@ -5,6 +5,7 @@
 #include "pvm.hh"
 #include "utils.hh"
 #include "token.hh"
+#include "symbol_table.hh"
 
 
 namespace tac
@@ -23,6 +24,8 @@ namespace tac
         DIV,
         EQ,
         LESS,
+        PUSH,   // push the stack pointer by a given value
+        POP,    // pop the stack pointer
         NO_OP,
 
     } TacOp;
@@ -120,7 +123,11 @@ namespace tac
         // end of the doubly-linked list
         TacInstruction* end;
 
-        // TODO implement symbol declaration list
+        // symbol declaration list
+        symbol_table::Symbol* symbols;
+
+        // total size of symbols decalred in this block
+        size_t declaredSymbolsSize;
 
         // instruction count
         size_t size;
@@ -133,7 +140,9 @@ namespace tac
     public:
 
         CodeBlock(CodeBlock* prev);
-        CodeBlock() = delete; 
+        CodeBlock(); 
+
+        ~CodeBlock();
 
 
         // compiles a CodeBlock to byte code
@@ -144,6 +153,13 @@ namespace tac
         // increment the block's size
         // performs nullptr checks
         void add(TacInstruction* instruction);
+
+
+        // initialize the declared symbols list for the CodeBlock
+        void initSymbols(const symbol_table::Table& localScope);
+
+        // pop the declared symbols
+        void popSymbols();
 
 
         const TacInstruction* getStart() const;
@@ -203,6 +219,10 @@ namespace tac
 
         const CodeBlock* getStart() const;
         const CodeBlock* getEnd() const;
+
+
+        // initialize the declared Symbol list for the last CodeBlock
+        void declareSymbols(const symbol_table::Table& symbols);
 
     };
 

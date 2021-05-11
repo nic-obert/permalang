@@ -66,3 +66,9 @@ std::ostream& operator<<(std::ostream& stream, const tac::Tac& _tac)
     return stream << "}";
 }
 
+
+void Tac::declareSymbols(const symbol_table::Table& symbols)
+{
+    end->initSymbols(symbols);
+}
+

@@ -2,7 +2,6 @@
 
 #include "symbol_table.hh"
 #include "tac.hh"
-#include "token.hh"
 
 
 namespace syntax_tree
@@ -52,7 +51,14 @@ namespace syntax_tree
     };
 
 
-    // tree representation of source code
+    /*
+        Tree representation of source code
+        a SyntaxTree is a doubly-linked list of
+        statements, each structured in a tree-like fashion
+
+        The SyntaxTree works closely along with the SymbolTable
+        to generate intermediate three address code
+    */
     class SyntaxTree
     {
     private:
@@ -67,6 +73,9 @@ namespace syntax_tree
         // add the generated TAC to the tree's TAC
         // generate SymbolTable entries for the evaluated symbols
         void satisfyToken(Statement* statement, Tokens::Token* token);
+
+        // generate Tac for the tree's code block
+        void generateTac();
 
 
     public:

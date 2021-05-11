@@ -7,6 +7,7 @@ using namespace symbol_table;
 
 
 // initialize SymbolTable
+
 Table SymbolTable::globalScope = Table();
 
 Scope* SymbolTable::scopeStack = new Scope();
@@ -97,5 +98,11 @@ Symbol* SymbolTable::get(std::string* identifier)
     // any reachable scope, thus throw exception
     std::cerr << "\"" << *identifier << "\" was not declared" << std::endl;
     exit(1);
+}
+
+
+const Scope* SymbolTable::getScope()
+{
+    return scopeStack;
 }
 

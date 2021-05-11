@@ -20,6 +20,7 @@ namespace symbol_table
         Tokens::TokenType type;
 
         Symbol(Value value, Tokens::TokenType type);
+        Symbol();
 
     } Symbol;
 
@@ -31,11 +32,16 @@ namespace symbol_table
     // keeps track of the symbols in scope
     typedef struct Scope
     {
+        // outer scope
         // outer table is optional since it can be undefined
+        // for independent scopes
         std::optional<Table> outer;
+        // local scope
         Table local;
 
-        Scope* prev = nullptr;
+        // previous Scope in the stack
+        // will be initialized when added to the stack
+        Scope* prev;
 
         // initialize a completely new Scope
         // that doesn't inherit from outer scopes
@@ -77,6 +83,10 @@ namespace symbol_table
 
         
         static Symbol* get(std::string* identifier);
+
+
+        // returns the last Scope on the scopeStack
+        static const Scope* getScope();
 
     };
 

@@ -27,7 +27,12 @@ namespace Tokens
         SCOPE,          // {}
         PARENTHESIS,
         ENDS,           // end of statement
+
     } TokenType;
+
+
+    // returns the size of a TokenType
+    size_t typeSize(TokenType type);
 
 
     // syntactical element of a program

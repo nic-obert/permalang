@@ -18,6 +18,47 @@ CodeBlock::CodeBlock(CodeBlock* prev)
 }
 
 
+CodeBlock::CodeBlock()
+: start(nullptr), end(nullptr), size(0), prev(nullptr), next(nullptr)
+{
+
+}
+
+
+CodeBlock::~CodeBlock()
+{
+    delete[] symbols;
+}
+
+
+void CodeBlock::initSymbols(const symbol_table::Table& localScope)
+{
+    // calculate the stack size to push
+    declaredSymbolsSize = 0;
+
+    for (auto iter = localScope.cbegin(); iter != localScope.cend(); iter++)
+    {
+        declaredSymbolsSize += Tokens::typeSize(iter->second->type);
+    }
+
+    // add the TacOp::PUSH instruction to push the stack index
+    add(new TacInstruction(
+        TacOp::PUSH,
+        TacValue(TacValueType::LITERAL, declaredSymbolsSize)
+    ));
+
+}
+
+
+void CodeBlock::popSymbols()
+{
+    add(new TacInstruction(
+        TacOp::POP,
+        TacValue(TacValueType::LITERAL, declaredSymbolsSize)
+    ));
+}
+
+
 void CodeBlock::add(TacInstruction* instruction)
 {
     if (start == nullptr)
