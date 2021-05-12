@@ -153,7 +153,7 @@ pvm::ByteCode CodeBlock::toByteCode(size_t reserveBytes) const
             continue;
         
         
-        // instruction size: 1 byte
+        // instruction size: 0 bytes
         case TacOp::LABEL:
         {   
             // save index of the declared label

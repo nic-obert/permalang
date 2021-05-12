@@ -7,7 +7,7 @@
             "command": "/usr/bin/make",
             "args": [
                 "-j$(nproc)",
-                "builddb-nw" 
+                "builddb" 
             ],
             "options": {
                 "cwd": "${workspaceFolder}"

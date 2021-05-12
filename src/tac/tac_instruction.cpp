@@ -66,6 +66,14 @@ std::ostream& operator<<(std::ostream& stream, TacInstruction const& instruction
         case TacOp::LABEL:
             return stream << "@["
                 << (void*) &instruction << "]:";
+        
+        case TacOp::PUSH:
+            return stream << TacOp::PUSH << " "
+                << instruction.addr1.value;
+        
+        case TacOp::POP:
+            return stream << TacOp::POP << " "
+                << instruction.addr1.value;
 
         default:
             return stream << instruction.operation;

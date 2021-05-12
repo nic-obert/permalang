@@ -25,28 +25,19 @@ void* Pvm::getRegister(Registers reg) const
 }
 
 
+// lookup table for Register string representation
+static const char* const registerRepr[] =
+{
+    "rga",
+    "rgb",
+    "rdr",
+    "rzf",
+    "rsf"
+};
+
+
 std::ostream& operator<<(std::ostream& stream, const Registers& reg)
 {
-    switch (reg)
-    {
-    case Registers::RDR:
-        stream << "rdr";
-        break;
-    
-    case Registers::RGA:
-        stream << "rga";
-    
-    case Registers::RGB:
-        stream << "rgb";
-
-    case Registers::RSF:
-        stream << "rsf";
-    
-    case Registers::RZF:
-        stream << "rzf";
-        
-    }
-
-    return stream;
+    return stream << registerRepr[(unsigned char) reg];
 }
 

@@ -15,18 +15,19 @@ namespace Tokens
 {
 
     // syntactical type of a Token
-    typedef enum class TokenType
+    // enum values must be constant for lookup tables
+    typedef enum class TokenType : unsigned char
     {
-        NONE,           // a Token of no type
-        TEXT,           // any reference (e.g. variable or function name)
-        INT,
-        FLOAT,
-        STRING,
-        KEYWORD,
-        BOOL,
-        SCOPE,          // {}
-        PARENTHESIS,
-        ENDS,           // end of statement
+        NONE        = 0, // a Token of no type
+        TEXT        = 1, // any reference (e.g. variable or function name)
+        INT         = 2,
+        FLOAT       = 3,
+        STRING      = 4,
+        KEYWORD     = 5,
+        BOOL        = 6,
+        SCOPE       = 7, // {}
+        PARENTHESIS = 8,
+        ENDS        = 9 // end of statement
 
     } TokenType;
 

@@ -82,13 +82,14 @@ namespace pvm
 
 
     // enum of Pvm registers
+    // enum values must be constant for lookup tables
     typedef enum class Registers : Byte
     {
-        RGA,
-        RGB,
-        RDR,
-        RZF,
-        RSF
+        RGA = 0,
+        RGB = 1,
+        RDR = 2,
+        RZF = 3,
+        RSF = 4
 
     } Registers;
 

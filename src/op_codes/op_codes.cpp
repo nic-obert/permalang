@@ -1,96 +1,65 @@
 #include "op_codes.hh"
 
 
+// lookup table for OpCodes
+static const char* const opCodeRepr[] = 
+{
+    "LOGICAL AND",
+    "LOGICAL OR",
+    "LOGICAL EQ",
+    "LOGICAL NOT EQ",
+    "LOGICAL GREATER",
+    "LOGICAL LESS",
+    "LOGICAL LESS EQ",
+    "LOGICAL GREATER EQ",
+    "LOGICAL NOT",
+
+    "ARITHMETICAL SUM",
+    "ARITHMETICAL SUB",
+    "ARITHMETICAL MUL",
+    "ARITHMETICAL DIV",
+    "ARITHMETICAL POW",
+    "ARITHMETICAL MOD",
+    "ARITHMETICAL INC",
+    "ARITHMETICAL DEC",
+
+    "ASSIGNEMNT ASSIGN",
+    "ASSIGNMENT ADD",
+    "ASSIGNMENT SUB",
+    "ASSIGNMENT MUL",
+    "ASSIGNMENT DIV",
+    "ASSIGNEMNT POW",
+
+    "DECLARATION INT",
+    "DECLARATION FLOAT",
+    "DECLARATION STRING",
+    "DECLARATION BOOL",
+    
+    "LITERAL",
+
+    "REFERENCE",
+    
+    "ADDRESS OF",
+
+    "PUSH SCOPE",
+    "POP SCOPE",
+
+    "CALL",
+
+    "PARENTHESIS",
+
+    "FLOW IF",
+    "FLOW ELSE",
+    "FLOW FOR",
+    "FLOW WHILE",
+    
+    "NO OP"
+};
+
+
 std::ostream& operator<<(std::ostream& stream, OpCodes const& opCode)
 {
-    switch (opCode)
-    {
-    case OpCodes::LOGICAL_AND:
-        return stream << "LOGICAL AND";
-    case OpCodes::LOGICAL_OR:
-        return stream << "LOGICAL OR";  
-    case OpCodes::LOGICAL_EQ:
-        return stream << "LOGICAL EQ";
-    case OpCodes::LOGICAL_NOT:
-        return stream << "LOGICAL NOT";
-    case OpCodes::LOGICAL_GREATER:
-        return stream << "LOGICAL GREATER";
-    case OpCodes::LOGICAL_GREATER_EQ:
-        return stream << "LOGICAL GRATER EQ";
-    case OpCodes::LOGICAL_LESS:
-        return stream << "LOGICAL LESS";
-    case OpCodes::LOGICAL_LESS_EQ:
-        return stream << "LOGICAL LESS EQUAL";
-    case OpCodes::LOGICAL_NOT_EQ:
-        return stream << "LOGICAL NOT EQ";
-
-    case OpCodes::ARITHMETICAL_SUM:
-        return stream << "ARITHMETICAL SUM";
-    case OpCodes::ARITHMETICAL_SUB:
-        return stream << "ARITHMETICAL SUB";
-    case OpCodes::ARITHMETICAL_MUL:
-        return stream << "ARITHMETICAL MUL";
-    case OpCodes::ARITHMETICAL_DIV:
-        return stream << "ARITHMETICAL DIV";
-    case OpCodes::ARITHMETICAL_POW:
-        return stream << "ARITHMETICAL POW";
-    case OpCodes::ARITHMETICAL_INC:
-        return stream << "ARITHMETICAL INC";
-    case OpCodes::ARITHMETICAL_DEC:
-        return stream << "ARITHMETICAL DEC";
-    case OpCodes::ARITHMETICAL_MOD:
-        return stream << "ARITHMETICAL MOD";
-
-    case OpCodes::ASSIGNMENT_ASSIGN:
-        return stream << "ASSIGNMENT ASSIGN";
-    case OpCodes::ASSIGNMENT_ADD:
-        return stream << "ASSIGNMENT ADD";
-    case OpCodes::ASSIGNMENT_SUB:
-        return stream << "ASSIGNMENT SUB";
-    case OpCodes::ASSIGNMENT_MUL:
-        return stream << "ASSIGNMENT MUL";
-    case OpCodes::ASSIGNMENT_DIV:
-        return stream << "ASSIGNMENT DIV";
-    case OpCodes::ASSIGNMENT_POW:
-        return stream << "ASSIGNMENT POW";
-
-    case OpCodes::DECLARATION_INT:
-        return stream << "DECLARATION INT";
-    case OpCodes::DECLARATION_FLOAT:
-        return stream << "DECLARATION FLOAT";
-    case OpCodes::DECLARATION_STRING:
-        return stream << "DECLARATION STRING";
-    case OpCodes::DECLARATION_BOOL:
-        return stream << "DECLARATION BOOL";
-
-    case OpCodes::REFERENCE:
-        return stream << "REFERENCE";
-    
-    case OpCodes::LITERAL:
-        return stream << "LITERAL";
-    
-    case OpCodes::PUSH_SCOPE:
-        return stream << "PUSH SCOPE";
-    case OpCodes::POP_SCOPE:
-        return stream << "POP SCOPE";
-
-    case OpCodes::PARENTHESIS:
-        return stream << "PARENTHESIS";
-
-    case OpCodes::FLOW_IF:
-        return stream << "FLOW IF";
-    case OpCodes::FLOW_ELSE:
-        return stream << "FLOW ELSE";
-    case OpCodes::FLOW_WHILE:
-        return stream << "FLOW WHILE";
-    case OpCodes::FLOW_FOR:
-        return stream << "FLOW FOR";
-    
-    
-    default:
-        return stream << "UNDEFINED OPCODE";
-
-    }    
+    return stream << opCodeRepr[(unsigned char) opCode];
 }
 
 

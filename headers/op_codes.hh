@@ -33,58 +33,59 @@ typedef enum class OpType
 } OpType;
 
 
+// enum values must be constants for lookup table
 typedef enum class OpCodes
 {
-    LOGICAL_AND,
-    LOGICAL_OR,
-    LOGICAL_EQ,
-    LOGICAL_NOT_EQ,
-    LOGICAL_GREATER,
-    LOGICAL_LESS,
-    LOGICAL_LESS_EQ,
-    LOGICAL_GREATER_EQ,
-    LOGICAL_NOT,
+    LOGICAL_AND         = 0,
+    LOGICAL_OR          = 1,
+    LOGICAL_EQ          = 2,
+    LOGICAL_NOT_EQ      = 3,
+    LOGICAL_GREATER     = 4,
+    LOGICAL_LESS        = 5,
+    LOGICAL_LESS_EQ     = 6,
+    LOGICAL_GREATER_EQ  = 7,
+    LOGICAL_NOT         = 8,
 
-    ARITHMETICAL_SUM,
-    ARITHMETICAL_SUB,
-    ARITHMETICAL_MUL,
-    ARITHMETICAL_DIV,
-    ARITHMETICAL_POW,
-    ARITHMETICAL_MOD,
-    ARITHMETICAL_INC,
-    ARITHMETICAL_DEC,
+    ARITHMETICAL_SUM    = 9,
+    ARITHMETICAL_SUB    = 10,
+    ARITHMETICAL_MUL    = 11,
+    ARITHMETICAL_DIV    = 12,
+    ARITHMETICAL_POW    = 13,
+    ARITHMETICAL_MOD    = 14,
+    ARITHMETICAL_INC    = 15,
+    ARITHMETICAL_DEC    = 16,
 
-    ASSIGNMENT_ASSIGN,
-    ASSIGNMENT_ADD,
-    ASSIGNMENT_SUB,
-    ASSIGNMENT_MUL,
-    ASSIGNMENT_DIV,
-    ASSIGNMENT_POW,
+    ASSIGNMENT_ASSIGN   = 17,
+    ASSIGNMENT_ADD      = 18,
+    ASSIGNMENT_SUB      = 19,
+    ASSIGNMENT_MUL      = 20,
+    ASSIGNMENT_DIV      = 21,
+    ASSIGNMENT_POW      = 22,
 
-    DECLARATION_INT,
-    DECLARATION_FLOAT,
-    DECLARATION_STRING,
-    DECLARATION_BOOL,
+    DECLARATION_INT     = 23,
+    DECLARATION_FLOAT   = 24,
+    DECLARATION_STRING  = 25,
+    DECLARATION_BOOL    = 26,
 
-    LITERAL,
+    LITERAL             = 27,
 
-    REFERENCE,
+    REFERENCE           = 28,
 
-    ADDRESS_OF,
+    ADDRESS_OF          = 29,
 
-    PUSH_SCOPE,
-    POP_SCOPE,
+    PUSH_SCOPE          = 30,
+    POP_SCOPE           = 31,
 
-    CALL,
+    CALL                = 32,
 
-    PARENTHESIS,
+    PARENTHESIS         = 33,
 
-    FLOW_IF,
-    FLOW_ELSE,
-    FLOW_FOR,
-    FLOW_WHILE,
+    FLOW_IF             = 34,
+    FLOW_ELSE           = 35,
+    FLOW_FOR            = 36,
+    FLOW_WHILE          = 37,
 
-    NO_OP
+    NO_OP               = 38
 
 } OpCodes;
 

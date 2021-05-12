@@ -12,21 +12,22 @@ namespace tac
 {   
 
     // basic operations from which to generate TAC
-    typedef enum class TacOp
+    // enum values need to be constant for lookup tables
+    typedef enum class TacOp : unsigned char
     {
-        LABEL,
-        IF,
-        JUMP,
-        ASSIGN,
-        SUM,
-        SUB,
-        MUL,
-        DIV,
-        EQ,
-        LESS,
-        PUSH,   // push the stack pointer by a given value
-        POP,    // pop the stack pointer
-        NO_OP,
+        LABEL   = 0,
+        IF      = 1,
+        JUMP    = 2,
+        ASSIGN  = 3,
+        SUM     = 4,
+        SUB     = 5,
+        MUL     = 6,
+        DIV     = 7,
+        EQ      = 8,
+        LESS    = 9,
+        PUSH    = 10, // push the stack pointer by a given value
+        POP     = 11, // pop the stack pointer
+        NO_OP   = 12,
 
     } TacOp;
 
