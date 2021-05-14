@@ -25,43 +25,29 @@ CodeBlock::CodeBlock()
 }
 
 
-CodeBlock::~CodeBlock()
+void CodeBlock::initSymbols(const symbol_table::Scope* localScope)
 {
-    delete[] symbols;
-}
-
-
-void CodeBlock::initSymbols(const symbol_table::Table& localScope)
-{
-    // calculate the stack size to push
-    declaredSymbolsSize = 0;
-
-    for (auto iter = localScope.cbegin(); iter != localScope.cend(); iter++)
-    {
-        declaredSymbolsSize += Tokens::typeSize(iter->second->type);
-    }
-
     // don't even add a PUSH instruction if the size is 0
-    if (declaredSymbolsSize != 0)
+    if (localScope->localSymbolsSize != 0)
     {
         // add the TacOp::PUSH instruction to push the stack index
         add(new TacInstruction(
             TacOp::PUSH,
-            TacValue(TacValueType::LITERAL, declaredSymbolsSize)
+            TacValue(TacValueType::LITERAL, localScope->localSymbolsSize)
         ));
     }
 
 }
 
 
-void CodeBlock::popSymbols()
+void CodeBlock::popSymbols(const symbol_table::Scope* localScope)
 {
     // don't add a POP instruction if nothing was pushed
-    if (declaredSymbolsSize != 0)
+    if (localScope->localSymbolsSize != 0)
     {
         add(new TacInstruction(
             TacOp::POP,
-            TacValue(TacValueType::LITERAL, declaredSymbolsSize)
+            TacValue(TacValueType::LITERAL, localScope->localSymbolsSize)
         ));
     }
 }
@@ -81,6 +67,8 @@ void CodeBlock::add(TacInstruction* instruction)
     // insert instruction in list
     instruction->prev = end;
     end = instruction;
+
+    end->next = nullptr;
 
     // increase block size
     size ++;
@@ -153,6 +141,9 @@ void CodeBlock::extend(const CodeBlock* other)
     }
     
     end = other->end;
+
+    // increment the size
+    size += other->size;
 }
 
 

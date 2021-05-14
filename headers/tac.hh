@@ -126,12 +126,6 @@ namespace tac
         // end of the doubly-linked list
         TacInstruction* end;
 
-        // symbol declaration list
-        symbol_table::Symbol* symbols;
-
-        // total size of symbols decalred in this block
-        size_t declaredSymbolsSize;
-
         // instruction count
         size_t size;
 
@@ -144,8 +138,6 @@ namespace tac
 
         CodeBlock(CodeBlock* prev);
         CodeBlock(); 
-
-        ~CodeBlock();
 
 
         // compiles a CodeBlock to byte code
@@ -162,16 +154,17 @@ namespace tac
 
         // initialize the declared symbols list for the CodeBlock
         // if no symbol is declared, do nothing
-        void initSymbols(const symbol_table::Table& localScope);
+        void initSymbols(const symbol_table::Scope* localScope);
 
         // pop the declared symbols
         // if no symbol is declared, do nothing
-        void popSymbols();
+        void popSymbols(const symbol_table::Scope* localScope);
 
         // extends the CodeBlock with TacInstructions from another CodeBlock
         // is potentially destructive for the other CodeBlock
         // do not reuse the other CodeBlock
         // performs nullptr checks
+        // updates instruction count
         void extend(const CodeBlock* other);
 
 
@@ -234,8 +227,11 @@ namespace tac
         const CodeBlock* getEnd() const;
 
 
-        // initialize the declared Symbol list for the last CodeBlock
-        void declareSymbols(const symbol_table::Table& symbols);
+        // initialize the locally declared symbols for the last CodeBlock
+        void declareSymbols(const symbol_table::Scope* scope);
+
+        // pops the locally declared symbols from the last CodeBlock
+        void popSymbols(const symbol_table::Scope* scope);
 
     };
 

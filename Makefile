@@ -26,13 +26,16 @@ build: rules
 	$(CC) $(C_FLAGS) $(WARNINGS) $(SOURCES) -o $(BUILD_DIR)/perma
 
 builddb: rules
-	$(CC) -g $(C_FLAGS) $(WARNINGS_ALL) $(SOURCES) -o $(BUILD_DIR)/perma
+	$(CC) -g $(C_FLAGS) $(WARNINGS) $(SOURCES) -o $(BUILD_DIR)/perma
 
 builddb-nw: rules
 	$(CC) -g $(C_FLAGS) $(SOURCES) -o $(BUILD_DIR)/perma
 
 build-wall: rules
 	$(CC) $(C_FLAGS) $(WARNINGS_ALL) $(SOURCES) -o $(BUILD_DIR)/perma
+
+builddb-wall: rules
+	$(CC) -g $(C_FLAGS) $(WARNINGS_ALL) $(SOURCES) -o $(BUILD_DIR)/perma
 
 
 $(PCH): $(HH)

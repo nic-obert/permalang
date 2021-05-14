@@ -411,7 +411,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
         SyntaxTree scopeTree = SyntaxTree(std::move(scopeStatements));
 
         // parse the new SyntaxTree recursively
-        scopeTree.parse();
+        scopeTree.parse(DO_POP_SCOPE);
 
         // get the newly generated TAC and move it out of the tree
         tac::Tac* scopeTac = new tac::Tac(std::move(scopeTree.tacRepr));

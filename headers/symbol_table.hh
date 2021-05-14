@@ -39,6 +39,9 @@ namespace symbol_table
         // local scope
         Table local;
 
+        // number of bytes to push to the stack when evaluating the scope
+        size_t localSymbolsSize;
+
         // previous Scope in the stack
         // will be initialized when added to the stack
         Scope* prev;
@@ -49,7 +52,7 @@ namespace symbol_table
 
         // initialize a new Scope that inherits from
         // the previous Scope
-        Scope(Table& _local, std::optional<Table>& _outer);
+        Scope(const Table& _local, const std::optional<Table>& _outer);
 
         // scope destructor, deletes symbols in local scope
         ~Scope();
@@ -62,7 +65,8 @@ namespace symbol_table
     {
     private:
 
-        static Table globalScope;
+        // references the first scope in the stack
+        static Scope* globalScope;
 
         static Scope* scopeStack;
 
@@ -87,6 +91,15 @@ namespace symbol_table
 
         // returns the last Scope on the scopeStack
         static const Scope* getScope();
+
+        
+        // initializes the SymbolTable
+        // pushes the global scope
+        static void init();
+
+
+        // pops the global scope
+        static void clear();
 
     };
 

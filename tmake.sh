@@ -1,1 +1,1 @@
-time make -j$(nproc)
+time make -j$(nproc) $1

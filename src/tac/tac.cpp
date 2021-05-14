@@ -30,9 +30,19 @@ void Tac::extend(CodeBlock* codeBlock)
 
 
 void Tac::extend(Tac& _tac)
-{
-    // just steal the other TAC's CodeBlocks
-    end->setNext(_tac.start);
+{   
+    // check for uninitialized values
+    if (start == nullptr)
+    {
+        start = _tac.start;
+    }
+    else // if (start != nullptr)
+    {
+        // just steal the other TAC's CodeBlocks
+        end->setNext(_tac.start);
+    }
+
+    _tac.start->setPrev(end);
     end = _tac.end;
 
     _tac.start = nullptr;
@@ -67,8 +77,14 @@ std::ostream& operator<<(std::ostream& stream, const tac::Tac& _tac)
 }
 
 
-void Tac::declareSymbols(const symbol_table::Table& symbols)
+void Tac::declareSymbols(const symbol_table::Scope* scope)
 {
-    end->initSymbols(symbols);
+    end->initSymbols(scope);
+}
+
+
+void Tac::popSymbols(const symbol_table::Scope* scope)
+{
+    end->popSymbols(scope);
 }
 

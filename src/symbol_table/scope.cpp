@@ -7,6 +7,7 @@ using namespace symbol_table;
 
 
 Scope::Scope()
+: localSymbolsSize(0)
 {   
     // just create a new local scope
     // without inheriting from outer scopes
@@ -14,7 +15,8 @@ Scope::Scope()
 }
 
 
-Scope::Scope(Table& _local, std::optional<Table>& _outer)
+Scope::Scope(const Table& _local, const std::optional<Table>& _outer)
+: localSymbolsSize(0)
 {
     // create a new local scope
     local = Table();
@@ -41,36 +43,3 @@ Scope::~Scope()
     }
 }
 
-
-// pushes a new Scope to the ScopeStack
-void SymbolTable::pushScope(bool inherits)
-{
-    Scope* scope;
-
-    if (inherits)
-    {
-        // create a new scope that inherits from the previous scope
-        scope = new Scope(scopeStack->local, scopeStack->outer);
-    }
-    else
-    {
-        // create a completely new, independent Scope
-        scope = new Scope();
-    }
-
-    // push the new Scope to the stack
-    scope->prev = scopeStack;
-    scopeStack = scope;
-}
-
-
-// pops the last Scope form the ScopeStack
-void SymbolTable::popScope()
-{   
-    // pop scope from the stack
-    Scope* tmpScope = scopeStack;
-    scopeStack = scopeStack->prev;
-
-    // delete popped scope
-    delete tmpScope;
-}

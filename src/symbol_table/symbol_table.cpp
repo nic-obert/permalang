@@ -6,11 +6,9 @@
 using namespace symbol_table;
 
 
-// initialize SymbolTable
+Scope* SymbolTable::scopeStack = nullptr;
 
-Table SymbolTable::globalScope = Table();
-
-Scope* SymbolTable::scopeStack = new Scope();
+Scope* SymbolTable::globalScope = nullptr;
 
 
 void SymbolTable::assign(std::string* identifier, Symbol* symbol)
@@ -33,9 +31,9 @@ void SymbolTable::assign(std::string* identifier, Symbol* symbol)
     }
 
     // lastly check in global scope
-    if (globalScope.find(*identifier) != globalScope.end())
+    if (globalScope->local.find(*identifier) != globalScope->local.end())
     {
-        globalScope[*identifier] = symbol;
+        globalScope->local[*identifier] = symbol;
         return;
     }
 
@@ -60,6 +58,8 @@ void SymbolTable::declare(std::string* identifier, Symbol* symbol)
 
     // insert symbol 
     scopeStack->local[*identifier] = symbol;
+    // update scope size
+    scopeStack->localSymbolsSize += Tokens::typeSize(symbol->type);
 }
 
 
@@ -87,9 +87,9 @@ Symbol* SymbolTable::get(std::string* identifier)
     
 
     // lastly in global scope
-    iterator = globalScope.find(*identifier);
+    iterator = globalScope->local.find(*identifier);
 
-    if (iterator != globalScope.find(*identifier))
+    if (iterator != globalScope->local.find(*identifier))
     {
         return iterator->second;
     }
@@ -104,5 +104,54 @@ Symbol* SymbolTable::get(std::string* identifier)
 const Scope* SymbolTable::getScope()
 {
     return scopeStack;
+}
+
+
+// pushes a new Scope to the ScopeStack
+void SymbolTable::pushScope(bool inherits)
+{
+    Scope* scope;
+
+    if (inherits)
+    {
+        // create a new scope that inherits from the previous scope
+        scope = new Scope(scopeStack->local, scopeStack->outer);
+    }
+    else
+    {
+        // create a completely new, independent Scope
+        scope = new Scope();
+    }
+
+    // push the new Scope to the stack
+    scope->prev = scopeStack;
+    scopeStack = scope;
+}
+
+
+// pops the last Scope form the ScopeStack
+void SymbolTable::popScope()
+{   
+    // pop scope from the stack
+    Scope* tmpScope = scopeStack;
+    scopeStack = scopeStack->prev;
+
+    // delete popped scope
+    delete tmpScope;
+}
+
+
+void SymbolTable::clear()
+{
+    // pop the last scope and unset globalScope
+    popScope();
+    globalScope = nullptr;
+}
+
+
+void SymbolTable::init()
+{
+    scopeStack = new Scope();
+    globalScope = scopeStack;
 }
 

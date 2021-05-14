@@ -99,6 +99,24 @@ Tokens::Token* SyntaxTree::getHighestPriority(Tokens::Token* root)
 
 void SyntaxTree::parse()
 {
+	using namespace symbol_table;
+
+	// firstly initialize the SymbolTable
+	SymbolTable::init();
+
+	// since this is the global scope, pop the symbols at the end
+	parse(DONT_POP_SCOPE);
+
+	// finally pop the global scope and clear the SymbolTable
+	tacRepr.popSymbols(SymbolTable::getScope());
+	SymbolTable::clear();
+}
+
+
+void SyntaxTree::parse(bool doPopScope)
+{
+	using namespace symbol_table;
+
 	/*
 		loop through every statement
 		for every statement, parse it and build a tree out of it
@@ -127,7 +145,7 @@ void SyntaxTree::parse()
 	statements.end = statement;
 
 	// at the end of tree generation, transform it into Tac
-	generateTac();
+	generateTac(doPopScope);
 
 }
 
@@ -145,7 +163,7 @@ std::ostream& operator<<(std::ostream& stream, SyntaxTree const& tree)
 }
 
 
-void SyntaxTree::generateTac()
+void SyntaxTree::generateTac(bool doPopScope)
 {
 	/*
 		- get all the stack-declared variables from the SymbolTable
@@ -167,7 +185,7 @@ void SyntaxTree::generateTac()
 	tacRepr.extend(block);
 
 	// declare the local symbols in the new CodeBlock
-	tacRepr.declareSymbols(scope->local);
+	tacRepr.declareSymbols(scope);
 
 	// generate Tac for the actual instructions
 	for (Statement* statement = statements.start; statement != nullptr; statement = statement->next)
@@ -181,8 +199,11 @@ void SyntaxTree::generateTac()
 		}
 	}
 
-	// pop the local scope symbols from the stack
-	block->popSymbols();
-		
+	// pop the local scope symbols from the stack if required
+	if (doPopScope)
+	{
+		block->popSymbols(SymbolTable::getScope());
+	}
+
 }
 

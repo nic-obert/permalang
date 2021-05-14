@@ -7,6 +7,10 @@
 namespace syntax_tree
 {   
 
+    #define DO_POP_SCOPE true
+    #define DONT_POP_SCOPE false
+
+
     // linked list of Token organized in a tree-like fashion
     class Statement
     {
@@ -75,7 +79,12 @@ namespace syntax_tree
         void satisfyToken(Statement* statement, Tokens::Token* token);
 
         // generate Tac for the tree's code block
-        void generateTac();
+        void generateTac(bool doPopScope);
+
+        // parse the tree and generate TAC for it recursively
+        // allows to choose whether to pop the declared symbols or not
+        // should not be accessible to the public 
+        void parse(bool doPopScope);
 
 
     public:
@@ -91,6 +100,7 @@ namespace syntax_tree
         Tokens::Token* getHighestPriority(Tokens::Token* root);
 
         // parse the tree and generate TAC for it recursively
+        // internally calls the private method `void parse(bool)`
         void parse();
 
 
