@@ -196,6 +196,7 @@ pvm::ByteCode CodeBlock::toByteCode(size_t reserveBytes) const
 
             // get the variable the value is being assigned to
             longArray = instruction->addr1.value;
+            index += sizeof(long);
 
             // the value the variable is being set to
             longArray = instruction->addr2.value;
@@ -334,6 +335,37 @@ pvm::ByteCode CodeBlock::toByteCode(size_t reserveBytes) const
         }
 
         
+        case TacOp::PUSH:
+        {
+            // push instruction
+            bytes[index] = (Byte) OpCode::PUSH;
+            index ++;
+
+            // bytes to push
+            longArray = instruction->addr1.value;
+            index += sizeof(long);
+
+            break;
+        }
+
+        
+        case TacOp::POP:
+        {
+            // pop instruction
+            bytes[index] = (Byte) OpCode::POP;
+            index ++;
+
+            // bytes to pop
+            longArray = instruction->addr1.value;
+            index += sizeof(long);
+
+            break;
+        }
+
+        
+        } // switch (instruction->operation)
+
+
     // END OF case TacOp::*:
 
 
@@ -354,16 +386,13 @@ pvm::ByteCode CodeBlock::toByteCode(size_t reserveBytes) const
             bytes = newArray;
         }
 
-        
-        } // switch (instruction->operation)
-
 
     } // for (instruction in instructions)
 
 
     // create a ByteCode object to hold the byte code
-    ByteCode byteCode = ByteCode(new Byte[index - 1 + reserveBytes], index - 1 + reserveBytes);
     // allocate a new ByteCode with the size of index - 1
+    ByteCode byteCode = ByteCode(new Byte[index + reserveBytes], index + reserveBytes);
 
     // copy the byte array into a ByteCode to be returned
     memcpy(byteCode.byteCode, bytes, byteCode.size);

@@ -1,6 +1,10 @@
 #include "pvm.hh"
 
 
+#define longArray *((long*) (byteCode + i))
+
+
+
 using namespace pvm;
 
 
@@ -22,40 +26,32 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
 {
     stream << "ByteCode: {\n";
 
-    size_t i = 0;
-    size_t line = 0;
-
-    while (true)
+    for (size_t line = 1, i = 0; true; line++)
     {
-        line ++;
 
         stream << '\t' << line << '\t';
 
-        switch ((OpCode) byteCode[i])
+        // switch byte and increment index
+        switch ((OpCode) byteCode[i++])
         {
         case OpCode::ADD:
             stream << "add\n";
-            i ++;
             continue;
         
         case OpCode::SUB:
             stream << "sub\n";
-            i ++;
             continue;
         
         case OpCode::MUL:
             stream << "mul\n";
-            i ++;
             continue;
 
         case OpCode::DIV:
             stream << "div\n";
-            i ++;
             continue;
         
         case OpCode::CMP:
             stream << "cmp\n";
-            i ++;
             continue;
         
         case OpCode::EXIT:
@@ -64,120 +60,114 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
             break;
         
         case OpCode::JMP:
-            i ++;
             stream << "jmp @["
-                << *((long*) (byteCode + i))
+                << longArray
                 << "]\n";
                 
             i += sizeof(long);
             continue;
         
         case OpCode::IF_JUMP:
-            i ++;
             stream << "ifjmp @["
-                << *((long*) (byteCode + i))
+                << longArray
                 << "]\n";
                 
             i += sizeof(long);
             continue;
 
         case OpCode::PUSH:
-            stream << "push\n";
-            i ++;
+            stream << "push ";
+            
+            stream << longArray << '\n';
+            i += sizeof(long);
             continue;
         
         case OpCode::POP:
-            stream << "pop\n";
-            i ++;
+            stream << "pop ";
+
+            stream << longArray << '\n';
+            i += sizeof(long);
             continue;
 
         case OpCode::LDA:
-            i ++;
             stream << "lda ["
-                << *((long*) (byteCode + i))
+                << longArray
                 << "]\n";
 
             i += sizeof(long);
             continue;
 
         case OpCode::LDB:
-            i ++;
             stream << "ldb ["
-                << *((long*) (byteCode + i))
+                << longArray
                 << "]\n";
 
             i += sizeof(long);
             continue;
 
         case OpCode::LDCA:
-            i ++;
             stream << "ldca "
-                << *((long*) (byteCode + i))
+                << longArray
                 << '\n';
 
             i += sizeof(long);
             continue;
         
         case OpCode::LDCB:
-            i ++;
             stream << "ldcb "
-                << *((long*) (byteCode + i))
+                << longArray
                 << '\n';
 
             i += sizeof(long);
             continue;
         
         case OpCode::MEM_MOV:
-            i ++;
             stream << "memmov ["
-                << *((long*) (byteCode + i))
+                << longArray
                 << "], [";
             
             i += sizeof(long);
 
-            stream << *((long*) (byteCode + i))
+            stream << longArray
                 << "]\n";
 
             i += sizeof(long);
             continue;
         
         case OpCode::REG_MOV:
-            i ++;
-            stream << "memmov "
+            stream << "regmov "
                 << (Registers) byteCode[i]
                 << ", [";
             
             i ++;
 
-            stream << *((long*) (byteCode + i))
+            stream << longArray
                 << "]\n";
 
             i += sizeof(long);
             continue;
         
         case OpCode::REG_MOV_BIT:
-            i ++;
-            stream << "memmovbit "
+            stream << "regmovbit "
                 << (Registers) byteCode[i]
                 << ", [";
             
             i ++;
 
-            stream << *((long*) (byteCode + i))
+            stream << longArray
                 << "]\n";
 
             i += sizeof(long);
             continue;
         
         case OpCode::MEM_SET:
-            i ++;
             stream << "memset ["
-                << *((long*) (byteCode + i))
+                << longArray
                 << "], ";
             
             i += sizeof(long);
 
-            stream << *((long*) (byteCode + i))
+            stream << longArray
                 << '\n';
 
             i += sizeof(long);
@@ -191,5 +181,11 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
     } // while (true)
 
     return stream << '}';
+}
+
+
+std::ostream& operator<<(std::ostream& stream, const Byte byte)
+{
+    return stream << (unsigned char) byte;
 }
 
