@@ -2,6 +2,8 @@
 #include "syntax_tree.hh"
 #include "tac.hh"
 
+#include "timerpp.hh"
+
 
 void loadFile(const char* path, std::string& output)
 {
@@ -28,6 +30,7 @@ int main(int argc, const char** argv)
     using namespace syntax_tree;
     using namespace tac;
     using namespace pvm;
+    using namespace timerpp;
 
     if (argc < 2) {
         std::cerr << "No file specified" << std::endl;
@@ -39,12 +42,21 @@ int main(int argc, const char** argv)
     std::string file;
     loadFile(filename, file);
 
-    TokenList tokens = TokenList(file);
+    Timer timer = Timer();
 
+    timer.start();
+    TokenList tokens = TokenList(file);
+    timer.stop();
+
+    std::cout << "Token List took: " << timer.millis() << std::endl;
     std::cout << tokens << '\n' << std::endl;
 
+    timer.start();
     SyntaxTree syntaxTree = SyntaxTree(tokens);
     syntaxTree.parse();
+    timer.stop();
+
+    std::cout << "Syntax Tree took: " << timer.millis() << std::endl;
 
     // std::cout << syntaxTree << '\n' << std::endl;
 
@@ -52,14 +64,20 @@ int main(int argc, const char** argv)
     
     std::cout << tac << '\n' << std::endl;
 
+    timer.start();
     ByteCode byteCode = tac.toByteCode();
+    timer.stop();
 
+    std::cout << "Byte Code took: " << timer.millis() << std::endl;
     std::cout << byteCode.byteCode << '\n' << std::endl;
 
+    timer.start();
     Pvm pvm = Pvm(1024);
     Byte exitCode = pvm.execute(byteCode.byteCode);
+    timer.stop();
 
     std::cout << "Exit code: " << exitCode << std::endl;
+    std::cout << "Execution took: " << timer.millis() << std::endl;
     
 }
 
