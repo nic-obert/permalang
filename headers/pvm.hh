@@ -6,7 +6,7 @@
 typedef unsigned long size_t;
 
 // whether the given register is a bit register
-#define isBitRegister(reg) (reg == Registers::RZF || reg == Registers::RSF)
+#define isBitRegister(reg) (reg == Registers::ZERO_FLAG || reg == Registers::SIGN_FLAG)
 
 
 // Perma Virtual Machine
@@ -32,11 +32,11 @@ namespace pvm
 
         CMP,        // compare registers A and B
 
-        LDCA,       // load long integer constant into register A
-        LDCB,       // load long integer constant into register A
+        LD_CONST_A, // load long integer constant into register A
+        LD_CONST_B, // load long integer constant into register A
 
-        LDA,        // load long integer from memory into register A
-        LDB,        // load long intefer from memory into register B
+        LD_A,       // load long integer from memory into register A
+        LD_B,       // load long intefer from memory into register B
 
         MEM_MOV,    // copy a long value from a memory address to another
         REG_MOV,    // copy a long value from a register into a memory address
@@ -47,8 +47,13 @@ namespace pvm
         JMP,        // unconditional jump to index   
         IF_JUMP,    // conditional jump based on zero flag register's value (1 = true, 0 = false)
 
-        PUSH,       // push a new scope to the stack
-        POP,        // pop the current scope from the stack
+        PUSH_CONST, // push a constant long value on the stack
+        PUSH_REG,   // push a value on the stack from a specified register
+        PUSH_BYTES, // increments the stack pointer by a specified amount
+
+        POP,        // pop the stack pointer by a specified amount
+
+        CALL,       // calls a function
 
 
     } OpCode;
@@ -60,8 +65,9 @@ namespace pvm
 
         // memory size in bytes
         size_t size;
-        // the actual memory
-        Byte* memory = nullptr;
+
+        // the stack section 
+        Byte* stack = nullptr;
 
     public:
 
@@ -85,25 +91,14 @@ namespace pvm
     // enum values must be constant for lookup tables
     typedef enum class Registers : Byte
     {
-        RGA = 0,
-        RGB = 1,
-        RDR = 2,
-        RZF = 3,
-        RSF = 4
+        GENERAL_A           = 0,
+        GENERAL_B           = 1,
+        DIVISION_REMAINDER  = 2,
+        ZERO_FLAG           = 3,
+        SIGN_FLAG           = 4,
+        RESULT              = 5,
 
     } Registers;
-
-
-    // stack data structure holding a memory offset
-    typedef struct CallStack
-    {
-        
-        Address address;
-        CallStack* prev;
-
-        CallStack(Address address, CallStack* prev);
-
-    } CallStack;
 
     
     // Perma Virtual Machine
@@ -113,23 +108,28 @@ namespace pvm
 
         Memory memory;
 
-        CallStack* callStack;
-
         // REGISTERS
 
         // general purpose register A
-        long rga;
+        long rGeneralA;
         // general purpose register B
-        long rgb;
+        long rGeneralB;
 
-        // division remainder register
-        long rdr;
+        // result register, result of the last performed operation
+        long rResult;
+
+        // division remainder register, remainder of the last division operation
+        long rDivisionRemainder;
         
-        // zero flag register (see x86 assembly for reference)
-        bool rzf;
+        // zero flag register, whether the result of the last operation was 0 (see x86 assembly for reference)
+        bool rZeroFlag;
 
-        // sign flag register (see x86 assembly for reference)
-        bool rsf;
+        // sign flag register, holds the sign of the last operation (see x86 assembly for reference)
+        bool rSignFlag;
+
+        // stack pointer, points to the last used address in the stack
+        long rStackPointer;
+
 
         // returns a pointer to the requested register
         // the returned pointer has to be cast to the right type

@@ -11,18 +11,28 @@ using namespace pvm;
 Pvm::Pvm(size_t memSize)
 : memory(memSize)
 {
-    // add the first scope to the CallStack
-    callStack = new CallStack(0, nullptr);
+
+}
+
+
+// utility function
+// returns a long value from the byteCode
+// updates the offset by sizeof(long)
+inline long getLongValue(const Byte* byteCode, size_t& offset)
+{
+    long value = *((long*) (byteCode + offset));
+    offset += sizeof(long);
+    return value;
 }
 
 
 Byte Pvm::execute(const Byte* byteCode)
 {
 
-    // index of execution (offset from byteCode)
+    // index of execution (offset from byteCode pointer)
     size_t offset = 0;
 
-    // exit code
+    // exit code that will be set by the EXIT instruction and finally returned
     Byte exitCode;
 
     // exexution loop
@@ -49,9 +59,9 @@ Byte Pvm::execute(const Byte* byteCode)
 
         case OpCode::CMP:
         {
-            // set zero flag register to the result of comparison
-            rzf = rga == rgb;
-            // increment offset to pass to the next instruction
+            // set zero flag register to the result of comparison (see x86 asm)
+            rZeroFlag = rGeneralA == rGeneralB;
+            
             offset ++;
             break;
         }
@@ -60,101 +70,84 @@ Byte Pvm::execute(const Byte* byteCode)
         case OpCode::ADD:
         {
             // add value stored in B to A
-            rga += rgb;
+            rResult += rGeneralA + rGeneralB;
 
             // set the sign flag (true if result is negative, else false)
-            rsf = rga < 0;
+            rSignFlag = rResult < 0;
 
             // set the zero flag
-            rzf = rga == 0;
+            rZeroFlag = rResult == 0;
 
             break;
         }
 
         case OpCode::SUB:
         {
-            rga -= rgb;
+            rResult = rGeneralA - rGeneralB;
 
-            rsf = rga < 0;
+            rSignFlag = rResult < 0;
 
-            rzf = rga == 0;
+            rZeroFlag = rResult == 0;
 
             break;
         }
 
         case OpCode::MUL:
         {
-            rga *= rgb;
+            rResult = rGeneralA * rGeneralB;
 
-            rsf = rga < 0;
+            rSignFlag = rResult < 0;
 
-            rzf = rga == 0;
+            rZeroFlag = rResult == 0;
 
             break;
         }
 
         case OpCode::DIV:
         {
-            rga /= rgb;
+            rResult = rGeneralA / rGeneralB;
 
-            // set the remainder
-            rdr = rga % rgb;
+            rDivisionRemainder = rResult % rGeneralB;
 
-            rzf = rga == 0;
+            rZeroFlag = rResult == 0;
 
             break;
         }
 
         
-        case OpCode::LDCA:
+        case OpCode::LD_CONST_A:
         {
-            // get the long constant value from the byteCode
-            const long value = fetchLong();
+            const long value = getLongValue(byteCode, offset);
 
-            // since a long has been read, increment offset by sizeof(long)
-            // to pass to the next instruction
-            offset += sizeof(long);
-
-            // load value into register
-            rga = value;
+            rGeneralA = value;
             break;
         }
 
 
-        case OpCode::LDCB:
+        case OpCode::LD_CONST_B:
         {
-            // get the long constant value from the byteCode
-            const long value = fetchLong();
+            const long value = getLongValue(byteCode, offset);
 
-            // since a long has been read, increment offset by sizeof(long)
-            // to pass to the next instruction
-            offset += sizeof(long);
-
-            // load value into register
-            rgb = value;
+            rGeneralB = value;
             break;
         }
 
 
-        case OpCode::LDA:
+        case OpCode::LD_A:
         {
-            Address address = fetchLong();
+            Address address = getLongValue(byteCode, offset);
 
-            offset += sizeof(long);
-
-            rga = memory.getLong(address);
+            rGeneralA = memory.getLong(address);
 
             break;            
         }
 
 
-        case OpCode::LDB:
+        case OpCode::LD_B:
         {
-            Address address = fetchLong();
+            Address address = getLongValue(byteCode, offset);
 
-            offset += sizeof(long);
-
-            rgb = memory.getLong(address);
+            rGeneralB = memory.getLong(address);
 
             break;            
         }
@@ -162,13 +155,9 @@ Byte Pvm::execute(const Byte* byteCode)
 
         case OpCode::MEM_MOV:
         {
-            Address addr1 = fetchLong();
-            
-            offset += sizeof(long);
+            Address addr1 = getLongValue(byteCode, offset);
 
-            Address addr2 = fetchLong();
-            
-            offset += sizeof(long);
+            Address addr2 = getLongValue(byteCode, offset);
 
             memory.set(addr1, memory.getLong(addr2));
 
@@ -178,8 +167,7 @@ Byte Pvm::execute(const Byte* byteCode)
 
         case OpCode::REG_MOV:
         {
-            Address address = fetchLong();
-            offset += sizeof(long);
+            Address address = getLongValue(byteCode, offset);
 
             Registers reg = (Registers) byteCode[offset];
 
@@ -193,8 +181,7 @@ Byte Pvm::execute(const Byte* byteCode)
 
         case OpCode::REG_MOV_BIT:
         {
-            Address address = fetchLong();
-            offset += sizeof(long);
+            Address address = getLongValue(byteCode, offset);
 
             Registers reg = (Registers) byteCode[offset];
 
@@ -208,8 +195,7 @@ Byte Pvm::execute(const Byte* byteCode)
 
         case OpCode::MEM_SET:
         {
-            Address address = fetchLong();
-            offset += sizeof(long);
+            Address address = getLongValue(byteCode, offset);
 
             long value = fetchLong();
             offset += sizeof(long);
@@ -223,7 +209,7 @@ Byte Pvm::execute(const Byte* byteCode)
         case OpCode::JMP:
         {
             // set offset to the instruction to jump to
-            offset = fetchLong();
+            offset = *((long*) (byteCode + offset));
             break;
         }
 
@@ -231,9 +217,10 @@ Byte Pvm::execute(const Byte* byteCode)
         case OpCode::IF_JUMP:
         {
             // if zero flag register is set to 1 perform the jump
-            if (rzf)
+            // by updating the offset from the byteCode*
+            if (rZeroFlag)
             {
-                offset = fetchLong();
+                offset = *((long*) (byteCode + offset));
                 break;
             }
 
@@ -245,12 +232,53 @@ Byte Pvm::execute(const Byte* byteCode)
         }
 
 
+        case OpCode::PUSH_CONST:
+        {
+            long value = getLongValue(byteCode, offset);
+
+            memory.set(rStackPointer, value);
+
+            rStackPointer += sizeof(long);
+
+            break;
+        }
+
+
+        case OpCode::PUSH_REG:
+        {
+            long value = *(long*) getRegister((Registers) byteCode[offset]);
+
+            memory.set(rStackPointer, value);
+
+            rStackPointer += sizeof(long);
+
+            break;
+        }
+
+
+        case OpCode::PUSH_BYTES:
+        {
+            size_t amount = getLongValue(byteCode, offset);
+
+            rStackPointer += amount;
+        }
+
+
+        case OpCode::POP:
+        {
+            size_t amount = getLongValue(byteCode, offset);
+
+            rStackPointer -= amount;
+
+            break;
+        }
+
+
         } // switch ((OpCode) byte)
 
     } // while (executing)
 
 
-    // finally return exit code
     return exitCode;
 }
 

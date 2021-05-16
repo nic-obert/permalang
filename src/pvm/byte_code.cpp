@@ -35,32 +35,32 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
         switch ((OpCode) byteCode[i++])
         {
         case OpCode::ADD:
-            stream << "add\n";
+            stream << "add:\n";
             continue;
         
         case OpCode::SUB:
-            stream << "sub\n";
+            stream << "sub:\n";
             continue;
         
         case OpCode::MUL:
-            stream << "mul\n";
+            stream << "mul:\n";
             continue;
 
         case OpCode::DIV:
-            stream << "div\n";
+            stream << "div:\n";
             continue;
         
         case OpCode::CMP:
-            stream << "cmp\n";
+            stream << "cmp:\n";
             continue;
         
         case OpCode::EXIT:
-            stream << "exit\n";
+            stream << "exit:\n";
             // breaking the switch statement means breaking the while loop
             break;
         
         case OpCode::JMP:
-            stream << "jmp @["
+            stream << "jmp: @["
                 << longArray
                 << "]\n";
                 
@@ -68,53 +68,60 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
             continue;
         
         case OpCode::IF_JUMP:
-            stream << "ifjmp @["
+            stream << "if jmp: @["
                 << longArray
                 << "]\n";
                 
             i += sizeof(long);
             continue;
 
-        case OpCode::PUSH:
-            stream << "push ";
+        case OpCode::PUSH_CONST:
+            stream << "push const: ";
             
             stream << longArray << '\n';
             i += sizeof(long);
             continue;
         
+        case OpCode::PUSH_REG:
+            stream << "push reg:";
+
+            stream << (Registers) byteCode[i] << '\n';
+            i++;
+            continue;
+        
         case OpCode::POP:
-            stream << "pop ";
+            stream << "pop:";
 
             stream << longArray << '\n';
             i += sizeof(long);
             continue;
 
-        case OpCode::LDA:
-            stream << "lda ["
+        case OpCode::LD_A:
+            stream << "ld a: ["
                 << longArray
                 << "]\n";
 
             i += sizeof(long);
             continue;
 
-        case OpCode::LDB:
-            stream << "ldb ["
+        case OpCode::LD_B:
+            stream << "ld b: ["
                 << longArray
                 << "]\n";
 
             i += sizeof(long);
             continue;
 
-        case OpCode::LDCA:
-            stream << "ldca "
+        case OpCode::LD_CONST_A:
+            stream << "ld const a: "
                 << longArray
                 << '\n';
 
             i += sizeof(long);
             continue;
         
-        case OpCode::LDCB:
-            stream << "ldcb "
+        case OpCode::LD_CONST_B:
+            stream << "ld const b: "
                 << longArray
                 << '\n';
 
@@ -122,7 +129,7 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
             continue;
         
         case OpCode::MEM_MOV:
-            stream << "memmov ["
+            stream << "mem mov: ["
                 << longArray
                 << "], [";
             
@@ -135,7 +142,7 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
             continue;
         
         case OpCode::REG_MOV:
-            stream << "regmov "
+            stream << "reg mov: "
                 << (Registers) byteCode[i]
                 << ", [";
             
@@ -148,7 +155,7 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
             continue;
         
         case OpCode::REG_MOV_BIT:
-            stream << "regmovbit "
+            stream << "reg mov bit: "
                 << (Registers) byteCode[i]
                 << ", [";
             
@@ -161,7 +168,7 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
             continue;
         
         case OpCode::MEM_SET:
-            stream << "memset ["
+            stream << "mem set: ["
                 << longArray
                 << "], ";
             

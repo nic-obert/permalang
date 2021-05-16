@@ -8,16 +8,18 @@ void* Pvm::getRegister(Registers reg) const
 {
     switch (reg)
     {
-    case Registers::RGA:
-        return (void*) &rga;
-    case Registers::RGB:
-        return (void*) &rgb;
-    case Registers::RDR:
-        return (void*) &rdr;
-    case Registers::RZF:
-        return (void*) &rzf;
-    case Registers::RSF:
-        return (void*) &rsf;    
+    case Registers::GENERAL_A:
+        return (void*) &rGeneralA;
+    case Registers::GENERAL_B:
+        return (void*) &rGeneralB;
+    case Registers::DIVISION_REMAINDER:
+        return (void*) &rDivisionRemainder;
+    case Registers::ZERO_FLAG:
+        return (void*) &rZeroFlag;
+    case Registers::SIGN_FLAG:
+        return (void*) &rSignFlag;
+    case Registers::RESULT:
+        return (void*) &rResult;   
     }
 
     // this code never gets reached
@@ -28,16 +30,17 @@ void* Pvm::getRegister(Registers reg) const
 // lookup table for Register string representation
 static const char* const registerRepr[] =
 {
-    "rga",
-    "rgb",
-    "rdr",
-    "rzf",
-    "rsf"
+    "A",
+    "B",
+    "DIVISION REMAINDER",
+    "ZERO FLAG",
+    "SIGN FLAG",
+    "RESULT",
 };
 
 
 std::ostream& operator<<(std::ostream& stream, const Registers& reg)
 {
-    return stream << registerRepr[(unsigned char) reg];
+    return stream << '<' << registerRepr[(unsigned char) reg] << '>';
 }
 

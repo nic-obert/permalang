@@ -1,9 +1,6 @@
 #include "tac.hh"
 
 
-// treats the Byte[] array as a long[] array
-#define longArray *((long*) (bytes + index))
-
 // the left capacity in bytes that triggers Byte array resize
 // this is the size of the largest TAC instruction translated to ByteCode
 #define TRIGGER_CAPACITY 30
@@ -19,6 +16,16 @@ typedef std::unordered_map<Value, size_t> LabelTable;
 using namespace tac;
 
 
+// utility function
+// sets the byte array at the given index to the given value
+// updates index
+inline void setLongValue(pvm::Byte* bytes, size_t& index, long value)
+{
+    *((long*) (bytes + index)) = value;
+    index += sizeof(long);
+}
+
+
 void compileBinaryOperation(pvm::OpCode operation, const TacInstruction* instruction, pvm::Byte* bytes, size_t& index)
 {
     using namespace pvm;
@@ -30,36 +37,34 @@ void compileBinaryOperation(pvm::OpCode operation, const TacInstruction* instruc
     if (instruction->addr2.type == TacValueType::ADDRESS)
     {
         // load from memory instruction
-        bytes[index] = (Byte) OpCode::LDA;
+        bytes[index] = (Byte) OpCode::LD_A;
     }
     else // if (instruction->addr2.type == TacValueType::LITERAL)
     {
         // load constant literal
-        bytes[index] = (Byte) OpCode::LDCA;
+        bytes[index] = (Byte) OpCode::LD_CONST_A;
     }
     index ++;
 
     // the first operand
-    longArray = instruction->addr2.value;
-    index += sizeof(long);
+    setLongValue(bytes, index, instruction->addr2.value);
 
 // second operand
 
     if (instruction->addr3.type == TacValueType::ADDRESS)
     {
         // load from memory instruction
-        bytes[index] = (Byte) OpCode::LDB;
+        bytes[index] = (Byte) OpCode::LD_B;
     }
     else // if (instruction->addr3.type == TacValueType::LITERAL)
     {
         // load constant literal
-        bytes[index] = (Byte) OpCode::LDCB;
+        bytes[index] = (Byte) OpCode::LD_CONST_B;
     }
     index ++;
 
     // the first operand
-    longArray = instruction->addr3.value;
-    index += sizeof(long);
+    setLongValue(bytes, index, instruction->addr3.value);
 
 
 // perform the actual operation
@@ -74,11 +79,10 @@ void compileBinaryOperation(pvm::OpCode operation, const TacInstruction* instruc
     index ++;
 
     // the memory address to copy the result to
-    longArray = instruction->addr1.value;
-    index += sizeof(long);
+    setLongValue(bytes, index, instruction->addr1.value);
 
     // the register where to copy the result from
-    bytes[index] = (Byte) Registers::RGA;
+    bytes[index] = (Byte) Registers::RESULT;
     index ++;
 
 }
@@ -169,13 +173,11 @@ pvm::ByteCode CodeBlock::toByteCode(size_t reserveBytes) const
             // add the jump instruction index to the jumpIndexes vector
             jumpIndexes.push_back(index);
 
-            // add unconditional jump instruction
             bytes[index] = (Byte) OpCode::JMP;
             index ++;
 
             // add label to jump to
-            longArray = instruction->addr1.value; 
-            index += sizeof(Value);
+            setLongValue(bytes, index, instruction->addr1.value);
             break;
         }
 
@@ -195,12 +197,10 @@ pvm::ByteCode CodeBlock::toByteCode(size_t reserveBytes) const
             }
 
             // get the variable the value is being assigned to
-            longArray = instruction->addr1.value;
-            index += sizeof(long);
+            setLongValue(bytes, index, instruction->addr1.value);
 
             // the value the variable is being set to
-            longArray = instruction->addr2.value;
-            index += sizeof(long);
+            setLongValue(bytes, index, instruction->addr2.value);
 
             break;
         }
@@ -245,36 +245,34 @@ pvm::ByteCode CodeBlock::toByteCode(size_t reserveBytes) const
             if (instruction->addr2.type == TacValueType::ADDRESS)
             {
                 // load from memory instruction
-                bytes[index] = (Byte) OpCode::LDA;
+                bytes[index] = (Byte) OpCode::LD_A;
             }
             else // if (instruction->addr2.type == TacValueType::LITERAL)
             {
                 // load constant literal
-                bytes[index] = (Byte) OpCode::LDCA;
+                bytes[index] = (Byte) OpCode::LD_CONST_A;
             }
             index ++;
 
             // the first operand
-            longArray = instruction->addr2.value;
-            index += sizeof(long);
+            setLongValue(bytes, index, instruction->addr2.value);
 
         // second operand
 
             if (instruction->addr3.type == TacValueType::ADDRESS)
             {
                 // load from memory instruction
-                bytes[index] = (Byte) OpCode::LDB;
+                bytes[index] = (Byte) OpCode::LD_B;
             }
             else // if (instruction->addr3.type == TacValueType::LITERAL)
             {
                 // load constant literal
-                bytes[index] = (Byte) OpCode::LDCB;
+                bytes[index] = (Byte) OpCode::LD_CONST_B;
             }
             index ++;
 
             // the first operand
-            longArray = instruction->addr3.value;
-            index += sizeof(long);
+            setLongValue(bytes, index, instruction->addr3.value);
 
 
         // perform the actual operation
@@ -289,11 +287,10 @@ pvm::ByteCode CodeBlock::toByteCode(size_t reserveBytes) const
             index ++;
 
             // the memory address to copy the result to
-            longArray = instruction->addr1.value;
-            index += sizeof(long);
+            setLongValue(bytes, index, instruction->addr1.value);
 
             // the register where to copy the result from (zero flag)
-            bytes[index] = (Byte) Registers::RZF;
+            bytes[index] = (Byte) Registers::ZERO_FLAG;
             index ++;
 
             break;
@@ -303,15 +300,14 @@ pvm::ByteCode CodeBlock::toByteCode(size_t reserveBytes) const
         case TacOp::IF:
         {
             // load condition
-            bytes[index] = (Byte) OpCode::LDA;
+            bytes[index] = (Byte) OpCode::LD_A;
             index ++;
 
             // condition's address
-            longArray = instruction->addr1.value;
-            index += sizeof(long);
+            setLongValue(bytes, index, instruction->addr1.value);
 
             // load const 0 to be compared with the condition (invert condition)
-            bytes[index] = (Byte) OpCode::LDCB;
+            bytes[index] = (Byte) OpCode::LD_CONST_B;
             index ++;
             bytes[index] = 0;
             index ++;
@@ -328,8 +324,7 @@ pvm::ByteCode CodeBlock::toByteCode(size_t reserveBytes) const
             index ++;
 
             // add label to jump to
-            longArray = instruction->addr2.value; 
-            index += sizeof(Value); 
+            setLongValue(bytes, index, instruction->addr2.value); 
 
             break;
         }
@@ -338,12 +333,11 @@ pvm::ByteCode CodeBlock::toByteCode(size_t reserveBytes) const
         case TacOp::PUSH:
         {
             // push instruction
-            bytes[index] = (Byte) OpCode::PUSH;
+            bytes[index] = (Byte) OpCode::PUSH_CONST;
             index ++;
 
             // bytes to push
-            longArray = instruction->addr1.value;
-            index += sizeof(long);
+            setLongValue(bytes, index, instruction->addr1.value);
 
             break;
         }
@@ -356,8 +350,7 @@ pvm::ByteCode CodeBlock::toByteCode(size_t reserveBytes) const
             index ++;
 
             // bytes to pop
-            longArray = instruction->addr1.value;
-            index += sizeof(long);
+            setLongValue(bytes, index, instruction->addr1.value);
 
             break;
         }
