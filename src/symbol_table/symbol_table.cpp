@@ -1,5 +1,3 @@
-#include "pch.hh"
-
 #include "symbol_table.hh"
 
 
@@ -9,6 +7,8 @@ using namespace symbol_table;
 Scope* SymbolTable::scopeStack = nullptr;
 
 Scope* SymbolTable::globalScope = nullptr;
+
+size_t SymbolTable::stackPointer = 0;
 
 
 void SymbolTable::assign(std::string* identifier, Symbol* symbol)
@@ -22,7 +22,6 @@ void SymbolTable::assign(std::string* identifier, Symbol* symbol)
         return;
     }
 
-    // check then in outer scope
     if (scopeStack->outer.has_value()
         && scopeStack->outer.value().find(*identifier) != scopeStack->outer.value().end())
     {
@@ -30,7 +29,6 @@ void SymbolTable::assign(std::string* identifier, Symbol* symbol)
         return;
     }
 
-    // lastly check in global scope
     if (globalScope->local.find(*identifier) != globalScope->local.end())
     {
         globalScope->local[*identifier] = symbol;
@@ -56,14 +54,16 @@ void SymbolTable::declare(std::string* identifier, Symbol* symbol)
         exit(1);
     }
 
-    // insert symbol 
     scopeStack->local[*identifier] = symbol;
-    // update scope size
-    scopeStack->localSymbolsSize += Tokens::typeSize(symbol->type);
+
+    symbol->stackPosition = stackPointer;
+    
+    size_t symbolSize = Tokens::typeSize(symbol->type);
+    stackPointer += symbolSize;
+    scopeStack->localSymbolsSize += symbolSize;  
 }
 
 
-// gets a Symbol given its name
 Symbol* SymbolTable::get(std::string* identifier)
 {
     // check in local scope first
@@ -74,7 +74,6 @@ Symbol* SymbolTable::get(std::string* identifier)
         return iterator->second;
     }
 
-    // then in outer scope
     if (scopeStack->outer.has_value())
     {
         iterator = scopeStack->outer.value().find(*identifier);
@@ -85,8 +84,6 @@ Symbol* SymbolTable::get(std::string* identifier)
         }
     }
     
-
-    // lastly in global scope
     iterator = globalScope->local.find(*identifier);
 
     if (iterator != globalScope->local.find(*identifier))
@@ -107,7 +104,6 @@ const Scope* SymbolTable::getScope()
 }
 
 
-// pushes a new Scope to the ScopeStack
 void SymbolTable::pushScope(bool inherits)
 {
     Scope* scope;
@@ -123,27 +119,22 @@ void SymbolTable::pushScope(bool inherits)
         scope = new Scope();
     }
 
-    // push the new Scope to the stack
     scope->prev = scopeStack;
     scopeStack = scope;
 }
 
 
-// pops the last Scope form the ScopeStack
 void SymbolTable::popScope()
 {   
-    // pop scope from the stack
     Scope* tmpScope = scopeStack;
     scopeStack = scopeStack->prev;
 
-    // delete popped scope
     delete tmpScope;
 }
 
 
 void SymbolTable::clear()
 {
-    // pop the last scope and unset globalScope
     popScope();
     globalScope = nullptr;
 }

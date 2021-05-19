@@ -2,6 +2,8 @@
 
 #include "pch.hh"
 
+#include "utils.hh"
+
 
 typedef unsigned long size_t;
 
@@ -158,6 +160,48 @@ namespace pvm
         ByteCode();
 
     } ByteCode;
+
+
+    typedef unsigned char InstructionSize;
+
+
+    // node of doubly-linked list of instuctions
+    typedef struct ByteNode
+    {
+        ByteNode* next;
+        ByteNode* prev;
+
+        Value data;
+        InstructionSize dataSize; 
+
+        ByteNode();
+        ByteNode(OpCode data);
+        ByteNode(Value data, InstructionSize dataSize = sizeof(Value));       
+
+    } ByteNode;
+
+
+    class ByteList
+    {
+    private:
+
+        ByteNode* start;
+        ByteNode* end;
+
+        size_t nodeCount;
+        size_t byteSize;
+
+    public:
+
+        ByteList();
+        
+        ~ByteList();
+
+        void add(ByteNode* node);
+
+        ByteCode toByteCode() const;
+
+    };
 
 
 };

@@ -20,7 +20,7 @@ using namespace syntax_tree;
  - returns the TokenType of it's value if token is a variable
  - throws exception if token is not declared
 */
-TokenType tokenTypeOf(const Token* token)
+static TokenType tokenTypeOf(const Token* token)
 {
     if (token->opCode == OpCodes::REFERENCE)
     {
@@ -31,7 +31,7 @@ TokenType tokenTypeOf(const Token* token)
 }
 
 
-void binarySatisfy(Token* token, TokenType leftType, TokenType rightType, Statement* statement)
+static void binarySatisfy(Token* token, TokenType leftType, TokenType rightType, Statement* statement)
 {
 
     if (token->prev == nullptr)
@@ -68,7 +68,7 @@ void binarySatisfy(Token* token, TokenType leftType, TokenType rightType, Statem
 }
 
 
-void unarySatisfy(Token* token, TokenType type, Side side, Statement* statement)
+static void unarySatisfy(Token* token, TokenType type, Side side, Statement* statement)
 {
 
     if (side == LEFT)
@@ -114,7 +114,7 @@ void unarySatisfy(Token* token, TokenType type, Side side, Statement* statement)
 
 
 
-void declarationSatisfy(Token* token, TokenType type, Statement* statement)
+static void declarationSatisfy(Token* token, TokenType type, Statement* statement)
 {
 
     if (token->next == nullptr)
@@ -150,7 +150,7 @@ void declarationSatisfy(Token* token, TokenType type, Statement* statement)
 }
 
 
-void assignSatisfy(Token* token, Statement* statement)
+static void assignSatisfy(Token* token, Statement* statement)
 {
 
     if (token->prev == nullptr)
@@ -195,7 +195,7 @@ void assignSatisfy(Token* token, Statement* statement)
 
 
 // increment ++, decrement -- operators
-void incDecSatisfy(Token* token, Statement* statement)
+static void incDecSatisfy(Token* token, Statement* statement)
 {
     if (token->prev == nullptr)
     {
@@ -217,7 +217,7 @@ void incDecSatisfy(Token* token, Statement* statement)
 }
 
 
-void addressOfSatisfy(Token* token, Statement* statement)
+static void addressOfSatisfy(Token* token, Statement* statement)
 {
     if (token->next == nullptr)
     {

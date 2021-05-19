@@ -19,14 +19,14 @@ using namespace tac;
 // utility function
 // sets the byte array at the given index to the given value
 // updates index
-inline void setLongValue(pvm::Byte* bytes, size_t& index, long value)
+static inline void setLongValue(pvm::Byte* bytes, size_t& index, long value)
 {
     *((long*) (bytes + index)) = value;
     index += sizeof(long);
 }
 
 
-void compileBinaryOperation(pvm::OpCode operation, const TacInstruction* instruction, pvm::Byte* bytes, size_t& index)
+static void compileBinaryOperation(pvm::OpCode operation, const TacInstruction* instruction, pvm::Byte* bytes, size_t& index)
 {
     using namespace pvm;
 
@@ -89,7 +89,7 @@ void compileBinaryOperation(pvm::OpCode operation, const TacInstruction* instruc
 
 
 // fills the labels' placeholders in bytecode, given a label table
-void fillLabels(pvm::Byte* byteCode, const LabelTable& labels, std::vector<size_t>& jumpIndexes)
+static void fillLabels(pvm::Byte* byteCode, const LabelTable& labels, std::vector<size_t>& jumpIndexes)
 {
     for (size_t index : jumpIndexes)
     {
@@ -138,6 +138,8 @@ pvm::ByteCode CodeBlock::toByteCode(size_t reserveBytes) const
     // vector of the indexes of jump instructions
     std::vector<size_t> jumpIndexes = std::vector<size_t>();
     jumpIndexes.reserve(size);
+
+
 
     // reserve at least the size of TAC instructions * 3
     // most operators require 2 operands (min 3 bytes per instruction)
@@ -331,12 +333,11 @@ pvm::ByteCode CodeBlock::toByteCode(size_t reserveBytes) const
 
         
         case TacOp::PUSH:
-        {
-            // push instruction
-            bytes[index] = (Byte) OpCode::PUSH_CONST;
+        { 
+            bytes[index] = (Byte) OpCode::PUSH_BYTES;
             index ++;
 
-            // bytes to push
+            // bytes to push (the size of the scope)
             setLongValue(bytes, index, instruction->addr1.value);
 
             break;

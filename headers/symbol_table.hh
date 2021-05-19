@@ -18,6 +18,7 @@ namespace symbol_table
     {
         Value value;
         Tokens::TokenType type;
+        size_t stackPosition;
 
         Symbol(Value value, Tokens::TokenType type);
         Symbol();
@@ -32,11 +33,9 @@ namespace symbol_table
     // keeps track of the symbols in scope
     typedef struct Scope
     {
-        // outer scope
         // outer table is optional since it can be undefined
         // for independent scopes
         std::optional<Table> outer;
-        // local scope
         Table local;
 
         // number of bytes to push to the stack when evaluating the scope
@@ -54,7 +53,6 @@ namespace symbol_table
         // the previous Scope
         Scope(const Table& _local, const std::optional<Table>& _outer);
 
-        // scope destructor, deletes symbols in local scope
         ~Scope();
 
     } Scope;
@@ -65,7 +63,9 @@ namespace symbol_table
     {
     private:
 
-        // references the first scope in the stack
+        static size_t stackPointer;
+
+        // references the first scope in the scopeStack
         static Scope* globalScope;
 
         static Scope* scopeStack;
@@ -100,6 +100,8 @@ namespace symbol_table
 
         // pops the global scope
         static void clear();
+
+        static size_t getStackPointer();
 
     };
 

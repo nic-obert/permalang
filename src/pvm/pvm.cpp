@@ -1,9 +1,6 @@
 #include "pvm.hh"
 
 
-#define fetchLong() (*((long*) (byteCode + offset)))
-
-
 using namespace pvm;
 
 
@@ -18,7 +15,7 @@ Pvm::Pvm(size_t memSize)
 // utility function
 // returns a long value from the byteCode
 // updates the offset by sizeof(long)
-inline long getLongValue(const Byte* byteCode, size_t& offset)
+static inline long getLongValue(const Byte* byteCode, size_t& offset)
 {
     long value = *((long*) (byteCode + offset));
     offset += sizeof(long);
@@ -197,8 +194,7 @@ Byte Pvm::execute(const Byte* byteCode)
         {
             Address address = getLongValue(byteCode, offset);
 
-            long value = fetchLong();
-            offset += sizeof(long);
+            long value = getLongValue(byteCode, offset);
 
             memory.set(address, value);
 

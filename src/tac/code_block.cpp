@@ -147,49 +147,6 @@ void CodeBlock::extend(const CodeBlock* other)
 }
 
 
-void Tac::parseOperator(Tokens::Token* token)
-{
-    using namespace Tokens;
-
-    // treat token's value as a pointer to an array of token pointers
-    Token** operands = (Token**) token->value; 
-    
-    // control flow statements parse themselves their own operands
-    if (!isFlowOp(token->opCode))
-    {
-        /*
-            loop over operands and evaluate those first
-            OpType is compatible with integers 0, 1, 2 which are
-            respectively STANDALONE, UNARY, BINARY
-            
-            unsigned char is used because is the smallest data type (1 byte)
-        */
-        for (unsigned char i = 0; i != (unsigned char) operatorType(token->opCode); i++)
-        {
-            Token* operand = operands[i];
-
-            /*
-                do not parse an operand if it's not an operator itself
-                or if it's a scope, since it will be parsed by 
-                the operator the scope is required by
-            */
-            if (isOperator(operand->opCode) && operand->opCode != OpCodes::PUSH_SCOPE)
-            {
-                parseOperator(operand);
-            }
-
-        }
-
-    } // if (isFLowOp(token->opCode))
-
-
-    // generate three address code for the operator and
-    // store it as the token's value
-    token->value = toValue(tacFor(token, operands));
-    // token is now a reference to its operation's result
-    token->opCode = OpCodes::REFERENCE;
-
-}
 
 
 const Address* Tac::tacFor(OpCodes opCode, Tokens::Token** operands)
@@ -349,15 +306,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
                 r = a
             */
 
-            const Address* result = Address::getAddress();
+            token->value = operands[0]->value;
 
-            end->add(new TacInstruction(
-                TacOp::ASSIGN,
-                TacValue(TacValueType::ADDRESS, toValue(result)),
-                TacValue(isReference(operands[0]), operands[0]->value)
-            ));
-
-            return result;
+            return toAddress(token->value);
         }
 
         case OpCodes::ASSIGNMENT_ADD:
@@ -553,10 +504,16 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
                 r = a == 0
             */
 
-            Token op2 = Token(TokenType::INT, 0, OpCodes::LITERAL, 0);
-            Token* ops[2] = { operands[0], &op2 };
+            const Address* result = Address::getAddress();
 
-            return tacFor(OpCodes::LOGICAL_EQ, ops);
+            end->add(new TacInstruction(
+                TacOp::EQ,
+                TacValue(TacValueType::ADDRESS, toValue(result)),
+                TacValue(isReference(operands[0]), operands[0]->value),
+                TacValue(TacValueType::LITERAL, 0)
+            ));
+
+            return result;
         }
 
         case OpCodes::LOGICAL_GREATER:
@@ -567,9 +524,16 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
                 r = b < a
             */
 
-            Token* ops[2] = { operands[1], operands[0] };
+            const Address* result = Address::getAddress();
 
-            return tacFor(OpCodes::LOGICAL_LESS, ops);
+            end->add(new TacInstruction(
+                TacOp::LESS,
+                TacValue(TacValueType::ADDRESS, toValue(result)),
+                TacValue(isReference(operands[1]), operands[1]->value),
+                TacValue(isReference(operands[0]), operands[0]->value)
+            ));
+
+            return result;
         }
 
         case OpCodes::LOGICAL_LESS_EQ:
@@ -721,11 +685,9 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
                 
                 // set tok's opCode to NO_OP so it doesn't get evaluated
                 tok->opCode = OpCodes::NO_OP;
-
-                // go to next token
                 tok = tok->next;
                 
-            } // loop for enqueueing the condidion-body pairs
+            } // end of loop for enqueueing the condidion-body pairs
 
 
             // generate exit label to be added later
@@ -740,7 +702,6 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
 
                 // retrieve the condition-body pair from the queue
                 std::pair<Token*, Tac*> statement = ifQueue.front();
-                // pop it out
                 ifQueue.pop();
                 
                 Token** ops = (Token**) statement.first->value;
@@ -814,7 +775,6 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
             }
 
 
-            // finally add the exit label
             end->add(exitLabel);
             
 
@@ -897,7 +857,6 @@ const Address* Tac::tacFor(Tokens::Token* token, Tokens::Token** operands)
                 TacValue(TacValueType::LABEL, toValue(conditionLabel))
             ));
 
-            // finally add exit label
             end->add(exitLabel);
 
             // "while" statements do not have a return value

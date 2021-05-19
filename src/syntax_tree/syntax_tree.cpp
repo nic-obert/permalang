@@ -8,7 +8,7 @@ using namespace syntax_tree;
 SyntaxTree::SyntaxTree(Statements&& statements)
 : statements(std::move(statements))
 {
-	tacRepr = tac::Tac();
+	
 }
 
 
@@ -61,18 +61,12 @@ SyntaxTree::SyntaxTree(Tokens::TokenList& tokens)
 }
 
 
-const tac::Tac& SyntaxTree::getTac() const 
-{
-	return tacRepr;
-}
-
-
 // returns the token with the highest priority in the statement
 Tokens::Token* SyntaxTree::getHighestPriority(Tokens::Token* root) 
 {
 	using namespace Tokens;
 
-	// check if first token of statement is null (empty statement)
+	// check for empty statements
 	if (root == nullptr)
 	{
 		return nullptr;
@@ -80,7 +74,7 @@ Tokens::Token* SyntaxTree::getHighestPriority(Tokens::Token* root)
 
 	for (Tokens::Token* token = root; token != nullptr; token = token->next)
 	{   
-		// evaluate the scope first
+		// evaluate the scope first since they are required as operands by certain operators
 		if (isScope(token->opCode) && token->priority != 0)
 		{
 			return token;
@@ -92,28 +86,26 @@ Tokens::Token* SyntaxTree::getHighestPriority(Tokens::Token* root)
 		}
 	}
 
-	// return token with highest priority
 	return root;
 }
 
 
-void SyntaxTree::parse()
+pvm::ByteCode SyntaxTree::parseToByteCode()
 {
 	using namespace symbol_table;
 
-	// firstly initialize the SymbolTable
+	byteList = pvm::ByteList();
+
 	SymbolTable::init();
 
 	// since this is the global scope, pop the symbols at the end
-	parse(DONT_POP_SCOPE);
+	parseToByteCode(DONT_POP_SCOPE);
 
-	// finally pop the global scope and clear the SymbolTable
-	tacRepr.popSymbols(SymbolTable::getScope());
 	SymbolTable::clear();
 }
 
 
-void SyntaxTree::parse(bool doPopScope)
+void SyntaxTree::parseToByteCode(bool doPopScope)
 {
 	using namespace symbol_table;
 
@@ -145,7 +137,7 @@ void SyntaxTree::parse(bool doPopScope)
 	statements.end = statement;
 
 	// at the end of tree generation, transform it into Tac
-	generateTac(doPopScope);
+	generateByteCode(doPopScope);
 
 }
 
@@ -163,7 +155,7 @@ std::ostream& operator<<(std::ostream& stream, SyntaxTree const& tree)
 }
 
 
-void SyntaxTree::generateTac(bool doPopScope)
+void SyntaxTree::generateByteCode(bool doPopScope)
 {
 	/*
 		- get all the stack-declared variables from the SymbolTable
@@ -182,10 +174,8 @@ void SyntaxTree::generateTac(bool doPopScope)
 
 	// create a new CodeBlock and add it to the Tac
 	CodeBlock* block = new CodeBlock();
-	tacRepr.extend(block);
 
 	// declare the local symbols in the new CodeBlock
-	tacRepr.declareSymbols(scope);
 
 	// generate Tac for the actual instructions
 	for (Statement* statement = statements.start; statement != nullptr; statement = statement->next)
@@ -194,7 +184,7 @@ void SyntaxTree::generateTac(bool doPopScope)
 		{
 			if (isOperator(token->opCode))
 			{
-				tacRepr.parseOperator(token);
+				parseTokenOperator(token);
 			}
 		}
 	}

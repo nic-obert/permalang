@@ -1,7 +1,1 @@
-int i = 0;
-bool boolean = true;
-while (true)
-{
-    int var = 2;
-    i++:
-}
+int i = 2+2;

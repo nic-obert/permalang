@@ -1,5 +1,3 @@
-#include "pch.hh"
-
 #include "symbol_table.hh"
 
 
@@ -18,7 +16,6 @@ Scope::Scope()
 Scope::Scope(const Table& _local, const std::optional<Table>& _outer)
 : localSymbolsSize(0)
 {
-    // create a new local scope
     local = Table();
 
     // copy previous local scope first
@@ -28,7 +25,6 @@ Scope::Scope(const Table& _local, const std::optional<Table>& _outer)
     // check if the given outer scope exists
     if (_outer.has_value())
     {
-        // now insert the previous outer scope
         outer.value().insert(_outer.value().begin(), _outer.value().end());
     }
 }
@@ -36,7 +32,7 @@ Scope::Scope(const Table& _local, const std::optional<Table>& _outer)
 
 Scope::~Scope()
 {   
-    // delete iteratively all symbols in local scope
+    // delete only local symbols since they are the only one belonging to the local scope
     for (auto it = local.begin(); it != local.end(); ++it)
     {
         delete it->second;
