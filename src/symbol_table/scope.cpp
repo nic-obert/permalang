@@ -14,7 +14,9 @@ Scope::Scope()
 
 
 Scope::Scope(const Table& _local, const std::optional<Table>& _outer)
-: localSymbolsSize(0)
+    :   
+    localSymbolsSize(0), 
+    stackIndex(SymbolTable::getStackPointer())
 {
     local = Table();
 

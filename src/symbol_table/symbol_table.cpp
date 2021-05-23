@@ -146,3 +146,9 @@ void SymbolTable::init()
     globalScope = scopeStack;
 }
 
+
+size_t SymbolTable::getStackPointer()
+{
+    return stackPointer;
+}
+

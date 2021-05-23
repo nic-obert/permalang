@@ -1,6 +1,5 @@
 #include "token.hh"
 #include "syntax_tree.hh"
-#include "tac.hh"
 
 #include "timerpp.hh"
 
@@ -28,7 +27,6 @@ int main(int argc, const char** argv)
 {
     using namespace Tokens;
     using namespace syntax_tree;
-    using namespace tac;
     using namespace pvm;
     using namespace timerpp;
 
@@ -53,22 +51,13 @@ int main(int argc, const char** argv)
 
     timer.start();
     SyntaxTree syntaxTree = SyntaxTree(tokens);
-    syntaxTree.parse();
+    ByteCode byteCode = syntaxTree.parseToByteCode();
     timer.stop();
 
     std::cout << "Syntax Tree took: " << timer.millis() << std::endl;
 
     // std::cout << syntaxTree << '\n' << std::endl;
 
-    const Tac& tac = syntaxTree.getTac();
-    
-    std::cout << tac << '\n' << std::endl;
-
-    timer.start();
-    ByteCode byteCode = tac.toByteCode();
-    timer.stop();
-
-    std::cout << "Byte Code took: " << timer.millis() << std::endl;
     std::cout << byteCode.byteCode << '\n' << std::endl;
 
     timer.start();

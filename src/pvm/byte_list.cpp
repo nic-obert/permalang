@@ -42,6 +42,19 @@ void ByteList::add(ByteNode* node)
 }
 
 
+void ByteList::insertFisrt(ByteNode* node)
+{
+    node->next = start;
+
+    if (start != nullptr)
+    {
+        start->prev = node;
+    }
+
+    node->prev = nullptr;
+}
+
+
 ByteCode ByteList::toByteCode() const
 {
 

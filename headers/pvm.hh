@@ -32,7 +32,8 @@ namespace pvm
         MUL,        // long integer multiply from registers A and B
         DIV,        // long integer divide from registers A and B
 
-        CMP,        // compare registers A and B
+        CMP,        // compare registers A and B, set the zero flag
+        CMP_REVERSE,// compare registers A and B, set the zero flag
 
         LD_CONST_A, // load long integer constant into register A
         LD_CONST_B, // load long integer constant into register A
@@ -198,6 +199,8 @@ namespace pvm
         ~ByteList();
 
         void add(ByteNode* node);
+
+        void insertFisrt(ByteNode* node);
 
         ByteCode toByteCode() const;
 

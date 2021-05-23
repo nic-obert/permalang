@@ -139,6 +139,11 @@ void SyntaxTree::parseToByteCode(bool doPopScope)
 	// at the end of tree generation, transform it into Tac
 	generateByteCode(doPopScope);
 
+	// now that the byte code for the tree has been generated and the scope size determined,
+	// add the push instruction at the beginning of the scope
+	byteList.insertFisrt(new pvm::ByteNode(pvm::OpCode::PUSH_BYTES));
+	byteList.insertFisrt(new pvm::ByteNode(SymbolTable::getScope()->localSymbolsSize));
+
 }
 
 
@@ -166,14 +171,10 @@ void SyntaxTree::generateByteCode(bool doPopScope)
 	*/
 
 	using namespace symbol_table;
-	using namespace tac;
 	using namespace Tokens;
 
 	// get the current scope
 	const Scope* scope = SymbolTable::getScope();
-
-	// create a new CodeBlock and add it to the Tac
-	CodeBlock* block = new CodeBlock();
 
 	// declare the local symbols in the new CodeBlock
 
@@ -192,7 +193,7 @@ void SyntaxTree::generateByteCode(bool doPopScope)
 	// pop the local scope symbols from the stack if required
 	if (doPopScope)
 	{
-		block->popSymbols(SymbolTable::getScope());
+		//block->popSymbols(SymbolTable::getScope());
 	}
 
 }

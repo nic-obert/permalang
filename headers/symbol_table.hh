@@ -40,6 +40,8 @@ namespace symbol_table
 
         // number of bytes to push to the stack when evaluating the scope
         size_t localSymbolsSize;
+        // index where the scope begins on the stack
+        size_t stackIndex;
 
         // previous Scope in the stack
         // will be initialized when added to the stack

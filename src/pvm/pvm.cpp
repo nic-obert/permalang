@@ -63,11 +63,21 @@ Byte Pvm::execute(const Byte* byteCode)
             break;
         }
 
+
+        case OpCode::CMP_REVERSE:
+        {
+            // set zero flag register to the result of comparison (see x86 asm)
+            rZeroFlag = rGeneralA != rGeneralB;
+            
+            offset ++;
+            break;
+        }
+
         
         case OpCode::ADD:
         {
             // add value stored in B to A
-            rResult += rGeneralA + rGeneralB;
+            rResult = rGeneralA + rGeneralB;
 
             // set the sign flag (true if result is negative, else false)
             rSignFlag = rResult < 0;

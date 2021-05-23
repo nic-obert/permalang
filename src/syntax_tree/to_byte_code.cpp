@@ -48,6 +48,41 @@ void SyntaxTree::parseTokenOperator(Tokens::Token* token)
 }
 
 
+// operation size: 19 bytes
+static void byteCodeForBinaryOperation(Tokens::Token** operands, pvm::OpCode opCode, pvm::ByteList byteList)
+{
+    using namespace pvm;
+    using namespace symbol_table;
+
+    if (operands[0]->opCode == OpCodes::REFERENCE)
+    {
+        
+        byteList.add(new ByteNode(OpCode::LD_A));
+        byteList.add(new ByteNode(SymbolTable::get((std::string*) operands[0]->value)->stackPosition));
+    }
+    else
+    {
+        byteList.add(new ByteNode(OpCode::LD_CONST_A));
+        byteList.add(new ByteNode(operands[0]->value)); 
+    }
+
+    if (operands[1]->opCode == OpCodes::REFERENCE)
+    {
+        
+        byteList.add(new ByteNode(OpCode::LD_B));
+        byteList.add(new ByteNode(SymbolTable::get((std::string*) operands[1]->value)->stackPosition));
+    }
+    else
+    {
+        byteList.add(new ByteNode(OpCode::LD_CONST_B));
+        byteList.add(new ByteNode(operands[1]->value)); 
+    }
+
+    byteList.add(new ByteNode(opCode));
+
+}
+
+
 size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands)
 {
     using namespace Tokens;
@@ -68,7 +103,7 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands)
             byteList.add(new ByteNode(lValue->stackPosition));
             byteList.add(new ByteNode(SymbolTable::get((std::string*) operands[1]->value)->stackPosition));
         }
-        else if (operands[1]->opCode == OpCodes::LITERAL)
+        else // token is a literal
         {
             byteList.add(new ByteNode(OpCode::MEM_SET));
             byteList.add(new ByteNode(lValue->stackPosition));
@@ -77,6 +112,145 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands)
         }
         
         return lValue->stackPosition;
+    }
+
+
+    case OpCodes::ARITHMETICAL_SUM:
+    {
+        byteCodeForBinaryOperation(operands, OpCode::ADD, byteList);
+
+        // sum operations do not return any stack pointer
+        // since the result is stored in the result register
+        return 0;
+    }
+
+
+    case OpCodes::ARITHMETICAL_SUB:
+    {
+        byteCodeForBinaryOperation(operands, OpCode::SUB, byteList);
+        return 0;
+    }
+
+
+    case OpCodes::ARITHMETICAL_MUL:
+    {
+        byteCodeForBinaryOperation(operands, OpCode::MUL, byteList);
+        return 0;
+    }
+
+
+    case OpCodes::ARITHMETICAL_DIV:
+    {
+        byteCodeForBinaryOperation(operands, OpCode::DIV, byteList);
+        return 0;
+    }
+
+
+    case OpCodes::LOGICAL_EQ:
+    {
+        byteCodeForBinaryOperation(operands, OpCode::CMP, byteList);
+        return 0;
+    }
+
+    
+    case OpCodes::LOGICAL_NOT_EQ:
+    {
+        byteCodeForBinaryOperation(operands, OpCode::CMP_REVERSE, byteList);
+        return 0;
+    }
+
+    
+    case OpCodes::LOGICAL_LESS:
+    {
+        /*
+            tmp = a - b
+            zero flag = tmp < 0
+        */
+        byteCodeForBinaryOperation(operands, OpCode::SUB, byteList);
+        return 0;
+    }
+
+
+    case OpCodes::LOGICAL_GREATER:
+    {
+        /*
+            tmp = b - a
+            zero flag = tmp < 0
+        */
+
+        // just invert operands
+        Token* ops[2] = {operands[1], operands[0]};
+
+        byteCodeForBinaryOperation(ops, OpCode::SUB, byteList);
+        return 0;
+    }
+
+
+    case OpCodes::LOGICAL_NOT:
+    {
+        /*
+            zero flag = a == 0
+        */
+
+        Token zero = Token(TokenType::INT, 0, OpCodes::LITERAL, 0);
+        Token* ops[2] = {operands[0], &zero};
+
+        byteCodeForBinaryOperation(ops, OpCode::CMP, byteList);
+        return 0;
+    }
+    
+
+    case OpCodes::LOGICAL_AND:
+    {
+        /*
+            zero flag = a != 1
+            if zero flag jump @l1
+            zero flag = b != 0
+        @l1:
+        */
+
+        Token one = Token(TokenType::INT, 0, OpCodes::LITERAL, 1);
+        Token* ops[2] = {operands[0], &one};
+
+        byteCodeForBinaryOperation(ops, OpCode::CMP_REVERSE, byteList);
+
+        byteList.add(new ByteNode(OpCode::IF_JUMP));
+        // address to jump to = current stack pointer + size of instructions to jump over
+        byteList.add(new ByteNode(SymbolTable::getStackPointer() + 19));
+
+        Token zero = Token(TokenType::INT, 0, OpCodes::LITERAL, 1);
+        ops[0] = operands[1];
+        ops[1] = &zero;
+
+        byteCodeForBinaryOperation(ops, OpCode::CMP_REVERSE, byteList);
+
+        return 0;
+    }
+
+
+    case OpCodes::LOGICAL_OR:
+    {
+        /*
+            zero flag = a != 0
+            if zero flag jump @l1
+            zero flag = b != 0
+        @l1:
+        */
+
+        Token zero = Token(TokenType::INT, 0, OpCodes::LITERAL, 0);
+        Token* ops[2] = {operands[0], &zero};
+
+        byteCodeForBinaryOperation(ops, OpCode::CMP_REVERSE, byteList);
+
+        byteList.add(new ByteNode(OpCode::IF_JUMP));
+        // address to jump to = current stack pointer + size of instructions to jump over
+        byteList.add(new ByteNode(SymbolTable::getStackPointer() + 19));
+
+        ops[0] = operands[1];
+
+        byteCodeForBinaryOperation(ops, OpCode::CMP_REVERSE, byteList);
+
+        return 0;
     }
 
     } // switch(token->opCode)
