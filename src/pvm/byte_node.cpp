@@ -17,3 +17,10 @@ ByteNode::ByteNode(OpCode data)
     
 }
 
+
+ByteNode::ByteNode(Registers data)
+: data(toValue(data)), dataSize(1)
+{
+    
+}
+

@@ -101,7 +101,34 @@ pvm::ByteCode SyntaxTree::parseToByteCode()
 	// since this is the global scope, pop the symbols at the end
 	parseToByteCode(DONT_POP_SCOPE);
 
+
+
 	SymbolTable::clear();
+
+	return byteList.toByteCode();
+}
+
+
+// inserts the required push instructions at the beginnig of the scope
+// pushes the size of the scope onto the stack
+static void insertInitialPushInstructions(pvm::ByteList& byteList)
+{
+	using namespace symbol_table;
+	using namespace pvm;
+
+	// insert in reverse order
+	byteList.insertFisrt(new ByteNode(SymbolTable::getScope()->localSymbolsSize));
+	byteList.insertFisrt(new ByteNode(OpCode::PUSH_BYTES));
+}
+
+
+static void appendFinalPopInstructions(pvm::ByteList& byteList)
+{
+	using namespace symbol_table;
+	using namespace pvm;
+
+	byteList.add(new ByteNode(OpCode::POP));	
+	byteList.add(new ByteNode(SymbolTable::getScope()->localSymbolsSize));
 }
 
 
@@ -136,13 +163,17 @@ void SyntaxTree::parseToByteCode(bool doPopScope)
 	// set linked list's last element to the last evaluated statement
 	statements.end = statement;
 
-	// at the end of tree generation, transform it into Tac
+	// at the end of tree generation, transform it into byte code
 	generateByteCode(doPopScope);
 
 	// now that the byte code for the tree has been generated and the scope size determined,
 	// add the push instruction at the beginning of the scope
-	byteList.insertFisrt(new pvm::ByteNode(pvm::OpCode::PUSH_BYTES));
-	byteList.insertFisrt(new pvm::ByteNode(SymbolTable::getScope()->localSymbolsSize));
+	insertInitialPushInstructions(byteList);
+
+	if (!doPopScope)
+	{
+		appendFinalPopInstructions(byteList);
+	}
 
 }
 
@@ -162,23 +193,9 @@ std::ostream& operator<<(std::ostream& stream, SyntaxTree const& tree)
 
 void SyntaxTree::generateByteCode(bool doPopScope)
 {
-	/*
-		- get all the stack-declared variables from the SymbolTable
-		- add the pre-allocated stack variables to the tree's Tac's
-		  declared symbols list
-		- generate the Tac for the actual instructions
-		- pop the local scope symbols from the stack
-	*/
-
 	using namespace symbol_table;
 	using namespace Tokens;
 
-	// get the current scope
-	const Scope* scope = SymbolTable::getScope();
-
-	// declare the local symbols in the new CodeBlock
-
-	// generate Tac for the actual instructions
 	for (Statement* statement = statements.start; statement != nullptr; statement = statement->next)
 	{
 		for (Token* token = statement->root; token != nullptr; token = token->next)
@@ -193,7 +210,7 @@ void SyntaxTree::generateByteCode(bool doPopScope)
 	// pop the local scope symbols from the stack if required
 	if (doPopScope)
 	{
-		//block->popSymbols(SymbolTable::getScope());
+		appendFinalPopInstructions(byteList);
 	}
 
 }

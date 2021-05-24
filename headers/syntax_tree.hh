@@ -71,7 +71,7 @@ namespace syntax_tree
 
         void generateByteCode(bool doPopScope);
 
-        size_t byteCodeFor(Tokens::Token* token, Tokens::Token** operands);
+        size_t byteCodeFor(Tokens::Token* token, Tokens::Token** operands, bool doStoreResult);
 
         void parseTokenOperator(Tokens::Token* token);
 

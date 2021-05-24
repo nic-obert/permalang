@@ -267,6 +267,8 @@ Byte Pvm::execute(const Byte* byteCode)
             size_t amount = getLongValue(byteCode, offset);
 
             rStackPointer += amount;
+
+            break;
         }
 
 

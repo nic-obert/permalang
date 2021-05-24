@@ -44,6 +44,7 @@ namespace pvm
         MEM_MOV,    // copy a long value from a memory address to another
         REG_MOV,    // copy a long value from a register into a memory address
         REG_MOV_BIT,// copy a bit value from a register into a memory address
+        REG_TO_REG, // copy a value from a register to another
 
         MEM_SET,    // sets a memory address to a value
 
@@ -177,6 +178,7 @@ namespace pvm
 
         ByteNode();
         ByteNode(OpCode data);
+        ByteNode(Registers data);
         ByteNode(Value data, InstructionSize dataSize = sizeof(Value));       
 
     } ByteNode;

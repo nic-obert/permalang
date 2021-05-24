@@ -24,6 +24,9 @@ ByteList::~ByteList()
 
 void ByteList::add(ByteNode* node)
 {
+    node->next = nullptr;
+    node->prev = end;
+
     if (start == nullptr)
     {
         start = node;
@@ -33,8 +36,6 @@ void ByteList::add(ByteNode* node)
         end->next = node;
     }
 
-    node->next = nullptr;
-    node->prev = end;
     end = node;
 
     nodeCount ++;
@@ -45,13 +46,21 @@ void ByteList::add(ByteNode* node)
 void ByteList::insertFisrt(ByteNode* node)
 {
     node->next = start;
+    node->prev = nullptr;
 
     if (start != nullptr)
     {
         start->prev = node;
     }
+    else
+    {
+        end = node;
+    }
 
-    node->prev = nullptr;
+    start = node;
+
+    nodeCount ++;
+    byteSize += node->dataSize;
 }
 
 

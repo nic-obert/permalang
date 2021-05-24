@@ -2,7 +2,39 @@
 #include "pvm.hh"
 
 
+#define hasReturnValueInRegister(token) (token->priority == 1)
+
+#define setReturnValueToRegister(token) token->priority = 1
+
+#define DO_STORE_RESULT true
+#define DONT_STORE_RESULT false
+
+
 using namespace syntax_tree;
+
+
+static unsigned int symbolNumber = 0;
+
+static std::string* getTmpSymbolName()
+{
+    // 10 is the number of numeric characters in ASCII
+    // +1 is to round the result up in integer division
+    const unsigned char length = symbolNumber / 10 + 1;
+    std::string* string = new std::string(length, '0');
+
+    unsigned int n = symbolNumber;
+
+    for (unsigned char i = 0; i != length; i++)
+    {
+        (*string)[i] = n % 10 + '0';
+        // integer division discards rightmost digit (325 -> 32)
+        n /= 10;
+    }
+
+    symbolNumber ++;
+    
+    return string;
+}
 
 
 void SyntaxTree::parseTokenOperator(Tokens::Token* token)
@@ -11,6 +43,7 @@ void SyntaxTree::parseTokenOperator(Tokens::Token* token)
 
     // treat token's value as a pointer to an array of token pointers
     Token** operands = (Token**) token->value; 
+    OpType opType = operatorType(token->opCode);
     
     // control flow statements parse themselves their own operands
     if (!isFlowOp(token->opCode))
@@ -22,7 +55,7 @@ void SyntaxTree::parseTokenOperator(Tokens::Token* token)
             
             unsigned char is used because is the smallest data type (1 byte)
         */
-        for (unsigned char i = 0; i != (unsigned char) operatorType(token->opCode); i++)
+        for (unsigned char i = 0; i != (unsigned char) opType; i++)
         {
             Token* operand = operands[i];
 
@@ -40,8 +73,20 @@ void SyntaxTree::parseTokenOperator(Tokens::Token* token)
 
     } // if (isFLowOp(token->opCode))
 
-
-    token->value = toValue(byteCodeFor(token, operands));
+    // if token is a unary operator the result stored in the result register of an
+    // eventual operation performed in the evaluation of its operand will not be overwritten 
+    if (opType == OpType::UNARY ||
+        opType == OpType::STANDALONE ||
+        isAssignmentOp(token->opCode)
+        )
+    {
+        token->value = toValue(byteCodeFor(token, operands, DONT_STORE_RESULT));
+    }
+    else
+    {
+        token->value = toValue(byteCodeFor(token, operands, DO_STORE_RESULT));
+    }
+    
     // token is now a reference to its operation's result
     token->opCode = OpCodes::REFERENCE;
 
@@ -49,12 +94,18 @@ void SyntaxTree::parseTokenOperator(Tokens::Token* token)
 
 
 // operation size: 19 bytes
-static void byteCodeForBinaryOperation(Tokens::Token** operands, pvm::OpCode opCode, pvm::ByteList byteList)
+static void byteCodeForBinaryOperation(Tokens::Token** operands, pvm::OpCode opCode, pvm::ByteList& byteList)
 {
     using namespace pvm;
     using namespace symbol_table;
 
-    if (operands[0]->opCode == OpCodes::REFERENCE)
+    if (hasReturnValueInRegister(operands[0]))
+    {
+        byteList.add(new ByteNode(OpCode::REG_MOV));
+        byteList.add(new ByteNode(Registers::GENERAL_A));
+        byteList.add(new ByteNode(Registers::RESULT));
+    }
+    else if (operands[0]->opCode == OpCodes::REFERENCE)
     {
         
         byteList.add(new ByteNode(OpCode::LD_A));
@@ -66,7 +117,13 @@ static void byteCodeForBinaryOperation(Tokens::Token** operands, pvm::OpCode opC
         byteList.add(new ByteNode(operands[0]->value)); 
     }
 
-    if (operands[1]->opCode == OpCodes::REFERENCE)
+    if (hasReturnValueInRegister(operands[1]))
+    {
+        byteList.add(new ByteNode(OpCode::REG_MOV));
+        byteList.add(new ByteNode(Registers::GENERAL_B));
+        byteList.add(new ByteNode(Registers::RESULT));
+    }
+    else if (operands[1]->opCode == OpCodes::REFERENCE)
     {
         
         byteList.add(new ByteNode(OpCode::LD_B));
@@ -83,7 +140,7 @@ static void byteCodeForBinaryOperation(Tokens::Token** operands, pvm::OpCode opC
 }
 
 
-size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands)
+size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, bool doStoreResult)
 {
     using namespace Tokens;
     using namespace pvm;
@@ -96,8 +153,13 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands)
     {
         Symbol* lValue = SymbolTable::get((std::string*) operands[0]->value);
 
-        // if second operand is a reference, get its stack position from the symbol table
-        if (operands[1]->opCode == OpCodes::REFERENCE)
+        if (hasReturnValueInRegister(operands[1]))
+        {
+            byteList.add(new ByteNode(OpCode::REG_MOV));
+            byteList.add(new ByteNode(lValue->stackPosition));
+            byteList.add(new ByteNode(Registers::RESULT));
+        }
+        else if (operands[1]->opCode == OpCodes::REFERENCE)
         {
             byteList.add(new ByteNode(OpCode::MEM_MOV));
             byteList.add(new ByteNode(lValue->stackPosition));
@@ -119,6 +181,27 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands)
     {
         byteCodeForBinaryOperation(operands, OpCode::ADD, byteList);
 
+        if (doStoreResult)
+        {
+            // declare a new Symbol holding the value
+            // push the operation result onto the stack
+
+            // TODO string pointer should be deleted later
+
+            std::string* name = getTmpSymbolName();
+
+            SymbolTable::declare(
+                name,
+                new Symbol(0, TokenType::INT));
+
+            byteList.add(new ByteNode(OpCode::PUSH_REG));
+            byteList.add(new ByteNode(Registers::RESULT));
+
+            return (size_t) name;
+        }
+        
+        setReturnValueToRegister(token);
+
         // sum operations do not return any stack pointer
         // since the result is stored in the result register
         return 0;
@@ -128,6 +211,16 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands)
     case OpCodes::ARITHMETICAL_SUB:
     {
         byteCodeForBinaryOperation(operands, OpCode::SUB, byteList);
+
+        if (doStoreResult)
+        {
+            // push result to the stack
+        }
+        else
+        {
+            setReturnValueToRegister(token);
+        }
+        
         return 0;
     }
 
@@ -135,6 +228,16 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands)
     case OpCodes::ARITHMETICAL_MUL:
     {
         byteCodeForBinaryOperation(operands, OpCode::MUL, byteList);
+
+        if (doStoreResult)
+        {
+            // push result to the stack
+        }
+        else
+        {
+            setReturnValueToRegister(token);
+        }
+
         return 0;
     }
 
@@ -142,6 +245,16 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands)
     case OpCodes::ARITHMETICAL_DIV:
     {
         byteCodeForBinaryOperation(operands, OpCode::DIV, byteList);
+
+        if (doStoreResult)
+        {
+            // push result to the stack
+        }
+        else
+        {
+            setReturnValueToRegister(token);
+        }
+        
         return 0;
     }
 
@@ -149,6 +262,16 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands)
     case OpCodes::LOGICAL_EQ:
     {
         byteCodeForBinaryOperation(operands, OpCode::CMP, byteList);
+
+        if (doStoreResult)
+        {
+            // push result to the stack
+        }
+        else
+        {
+            setReturnValueToRegister(token);
+        }
+
         return 0;
     }
 
@@ -156,6 +279,16 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands)
     case OpCodes::LOGICAL_NOT_EQ:
     {
         byteCodeForBinaryOperation(operands, OpCode::CMP_REVERSE, byteList);
+
+        if (doStoreResult)
+        {
+            // push result to the stack
+        }
+        else
+        {
+            setReturnValueToRegister(token);
+        }
+
         return 0;
     }
 
@@ -167,6 +300,16 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands)
             zero flag = tmp < 0
         */
         byteCodeForBinaryOperation(operands, OpCode::SUB, byteList);
+
+        if (doStoreResult)
+        {
+            // push result to the stack
+        }
+        else
+        {
+            setReturnValueToRegister(token);
+        }
+
         return 0;
     }
 
@@ -182,6 +325,16 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands)
         Token* ops[2] = {operands[1], operands[0]};
 
         byteCodeForBinaryOperation(ops, OpCode::SUB, byteList);
+
+        if (doStoreResult)
+        {
+            // push result to the stack
+        }
+        else
+        {
+            setReturnValueToRegister(token);
+        }
+
         return 0;
     }
 
@@ -196,6 +349,15 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands)
         Token* ops[2] = {operands[0], &zero};
 
         byteCodeForBinaryOperation(ops, OpCode::CMP, byteList);
+
+        if (doStoreResult)
+        {
+            // push result to the stack
+        }
+        else
+        {
+            setReturnValueToRegister(token);
+        }
         return 0;
     }
     
@@ -224,6 +386,14 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands)
 
         byteCodeForBinaryOperation(ops, OpCode::CMP_REVERSE, byteList);
 
+        if (doStoreResult)
+        {
+            // push result to the stack
+        }
+        else
+        {
+            setReturnValueToRegister(token);
+        }
         return 0;
     }
 
@@ -250,11 +420,23 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands)
 
         byteCodeForBinaryOperation(ops, OpCode::CMP_REVERSE, byteList);
 
+        if (doStoreResult)
+        {
+            // push result to the stack
+        }
+        else
+        {
+            setReturnValueToRegister(token);
+        }
+
         return 0;
     }
 
     } // switch(token->opCode)
 
 
+    std::cerr << "unhandled opcodes: " << token->opCode << std::endl;
+    exit(1);
+    
 }
 

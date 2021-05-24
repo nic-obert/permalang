@@ -53,7 +53,6 @@ namespace Tokens
         Token(TokenType type, unsigned int priority, OpCodes opCode, Value value);
         Token(TokenType type, unsigned int priority, OpCodes opCode);
 
-        // token destructor
         ~Token();
 
         // removes the token from where it is located

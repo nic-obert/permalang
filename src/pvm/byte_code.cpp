@@ -54,6 +54,10 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
             stream << "cmp:\n";
             continue;
         
+        case OpCode::CMP_REVERSE:
+            stream << "cmp reverse:\n";
+            continue;
+        
         case OpCode::EXIT:
             stream << "exit:\n";
             // breaking the switch statement means breaking the while loop
@@ -83,10 +87,17 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
             continue;
         
         case OpCode::PUSH_REG:
-            stream << "push reg:";
+            stream << "push reg: ";
 
             stream << (Registers) byteCode[i] << '\n';
             i++;
+            continue;
+        
+        case OpCode::PUSH_BYTES:
+            stream << "push bytes: ";
+            
+            stream << longArray << '\n';
+            i += sizeof(long);
             continue;
         
         case OpCode::POP:
@@ -167,6 +178,17 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
             i += sizeof(long);
             continue;
         
+        case OpCode::REG_TO_REG:
+            stream << "reg to reg: "
+                << (Registers) byteCode[i] << ", ";
+
+            i ++;
+
+            stream << (Registers) byteCode[i] << "\n";
+
+            i++;
+            continue;
+        
         case OpCode::MEM_SET:
             stream << "mem set: ["
                 << longArray
@@ -178,6 +200,10 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
                 << '\n';
 
             i += sizeof(long);
+            continue;
+        
+        case OpCode::CALL:
+            stream << "call (unhandled)\n";
             continue;
 
         } // switch ((OpCode) byteCode[i])
