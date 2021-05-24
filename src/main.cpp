@@ -1,6 +1,8 @@
 #include "token.hh"
 #include "syntax_tree.hh"
 
+#include "pch.hh"
+
 #include "timerpp.hh"
 
 
@@ -58,15 +60,18 @@ int main(int argc, const char** argv)
 
     // std::cout << syntaxTree << '\n' << std::endl;
 
-    std::cout << byteCode.byteCode << '\n' << std::endl;
+    std::cout << byteCode << '\n' << std::endl;
 
     timer.start();
     Pvm pvm = Pvm(1024);
     Byte exitCode = pvm.execute(byteCode.byteCode);
     timer.stop();
 
-    std::cout << "Exit code: " << exitCode << std::endl;
+    const char* exitCodeStr = charToASCII(exitCode);
+    
+    std::cout << "Exit code: " << exitCodeStr << std::endl;
     std::cout << "Execution took: " << timer.millis() << std::endl;
     
+    free((void*) exitCodeStr);
 }
 

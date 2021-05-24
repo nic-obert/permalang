@@ -6,7 +6,9 @@ using namespace pvm;
 
 
 Pvm::Pvm(size_t memSize)
-: memory(memSize)
+:   memory(memSize), rGeneralA(0), rGeneralB(0),
+    rResult(0), rDivisionRemainder(0), rZeroFlag(0),
+    rSignFlag(0), rStackPointer(0)
 {
 
 }
@@ -14,11 +16,22 @@ Pvm::Pvm(size_t memSize)
 
 // utility function
 // returns a long value from the byteCode
-// updates the offset by sizeof(long)
+// updates the offset by + sizeof(long)
 static inline long getLongValue(const Byte* byteCode, size_t& offset)
 {
     long value = *((long*) (byteCode + offset));
     offset += sizeof(long);
+    return value;
+}
+
+
+// utility function
+// returns a long value from the byteCode
+// updates the offset by +1
+static inline Byte getByteValue(const Byte* byteCode, size_t& offset)
+{
+    Byte value = byteCode[offset];
+    offset ++;
     return value;
 }
 
@@ -32,17 +45,10 @@ Byte Pvm::execute(const Byte* byteCode)
     // exit code that will be set by the EXIT instruction and finally returned
     Byte exitCode;
 
-    // exexution loop
     bool executing = true;
     while (executing)
     {
-        Byte byte = byteCode[offset];
-
-        // increase offset by 1 byte so not having to write it inside every case
-        offset ++;
-
-        // handle operations
-        switch ((OpCode) byte)
+        switch ((OpCode) byteCode[offset ++])
         {
 
         case OpCode::EXIT:
@@ -58,8 +64,6 @@ Byte Pvm::execute(const Byte* byteCode)
         {
             // set zero flag register to the result of comparison (see x86 asm)
             rZeroFlag = rGeneralA == rGeneralB;
-            
-            offset ++;
             break;
         }
 
@@ -68,8 +72,6 @@ Byte Pvm::execute(const Byte* byteCode)
         {
             // set zero flag register to the result of comparison (see x86 asm)
             rZeroFlag = rGeneralA != rGeneralB;
-            
-            offset ++;
             break;
         }
 
@@ -124,18 +126,14 @@ Byte Pvm::execute(const Byte* byteCode)
         
         case OpCode::LD_CONST_A:
         {
-            const long value = getLongValue(byteCode, offset);
-
-            rGeneralA = value;
+            rGeneralA = getLongValue(byteCode, offset);
             break;
         }
 
 
         case OpCode::LD_CONST_B:
         {
-            const long value = getLongValue(byteCode, offset);
-
-            rGeneralB = value;
+            rGeneralB = getLongValue(byteCode, offset);
             break;
         }
 
@@ -176,9 +174,7 @@ Byte Pvm::execute(const Byte* byteCode)
         {
             Address address = getLongValue(byteCode, offset);
 
-            Registers reg = (Registers) byteCode[offset];
-
-            offset ++;
+            Registers reg = (Registers) getByteValue(byteCode, offset);
 
             memory.set(address, *((long*) getRegister(reg)));
             
@@ -190,9 +186,7 @@ Byte Pvm::execute(const Byte* byteCode)
         {
             Address address = getLongValue(byteCode, offset);
 
-            Registers reg = (Registers) byteCode[offset];
-
-            offset ++;
+            Registers reg = (Registers) getByteValue(byteCode, offset);
 
             memory.set(address, *((bool*) getRegister(reg)));
 
@@ -252,7 +246,8 @@ Byte Pvm::execute(const Byte* byteCode)
 
         case OpCode::PUSH_REG:
         {
-            long value = *(long*) getRegister((Registers) byteCode[offset]);
+            long value = *(long*) getRegister(
+                (Registers) getByteValue(byteCode, offset));
 
             memory.set(rStackPointer, value);
 
@@ -264,20 +259,14 @@ Byte Pvm::execute(const Byte* byteCode)
 
         case OpCode::PUSH_BYTES:
         {
-            size_t amount = getLongValue(byteCode, offset);
-
-            rStackPointer += amount;
-
+            rStackPointer += getLongValue(byteCode, offset);
             break;
         }
 
 
         case OpCode::POP:
         {
-            size_t amount = getLongValue(byteCode, offset);
-
-            rStackPointer -= amount;
-
+            rStackPointer -= getLongValue(byteCode, offset);
             break;
         }
 

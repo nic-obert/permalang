@@ -212,9 +212,7 @@ namespace pvm
 };
 
 
-std::ostream& operator<<(std::ostream& stream, const pvm::Byte* byteCode);
+std::ostream& operator<<(std::ostream& stream, const pvm::ByteCode& byteCode);
 
 std::ostream& operator<<(std::ostream& stream, const pvm::Registers& reg);
-
-std::ostream& operator<<(std::ostream& stream, const pvm::Byte byte);
 

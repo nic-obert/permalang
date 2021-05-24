@@ -27,7 +27,7 @@ static std::string* getTmpSymbolName()
     for (unsigned char i = 0; i != length; i++)
     {
         (*string)[i] = n % 10 + '0';
-        // integer division discards rightmost digit (325 -> 32)
+        // integer division discards rightmost digit (e.g. 325 -> 32)
         n /= 10;
     }
 
@@ -85,10 +85,9 @@ void SyntaxTree::parseTokenOperator(Tokens::Token* token)
     else
     {
         token->value = toValue(byteCodeFor(token, operands, DO_STORE_RESULT));
+        // token is now a reference to its operation's result
+        token->opCode = OpCodes::REFERENCE;
     }
-    
-    // token is now a reference to its operation's result
-    token->opCode = OpCodes::REFERENCE;
 
 }
 
@@ -140,6 +139,31 @@ static void byteCodeForBinaryOperation(Tokens::Token** operands, pvm::OpCode opC
 }
 
 
+static std::string* storeResult(pvm::Registers reg, Tokens::TokenType type, pvm::ByteList& byteList)
+{
+    using namespace symbol_table;
+    using namespace Tokens;
+    using namespace pvm;
+
+    // declare a new Symbol holding the value
+    // push the operation result onto the stack
+
+    // TODO string pointer should be deleted later
+
+    std::string* name = getTmpSymbolName();
+
+    SymbolTable::declare(
+        name,
+        new Symbol(0, TokenType::DOUBLE));
+
+    byteList.add(new ByteNode(OpCode::REG_MOV));
+    byteList.add(new ByteNode(SymbolTable::get(name)->stackPosition));
+    byteList.add(new ByteNode(reg));
+
+    return name;
+}
+
+
 size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, bool doStoreResult)
 {
     using namespace Tokens;
@@ -183,21 +207,7 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         if (doStoreResult)
         {
-            // declare a new Symbol holding the value
-            // push the operation result onto the stack
-
-            // TODO string pointer should be deleted later
-
-            std::string* name = getTmpSymbolName();
-
-            SymbolTable::declare(
-                name,
-                new Symbol(0, TokenType::INT));
-
-            byteList.add(new ByteNode(OpCode::PUSH_REG));
-            byteList.add(new ByteNode(Registers::RESULT));
-
-            return (size_t) name;
+            return (size_t) storeResult(Registers::RESULT, TokenType::DOUBLE, byteList);
         }
         
         setReturnValueToRegister(token);
@@ -214,12 +224,10 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         if (doStoreResult)
         {
-            // push result to the stack
+            return (size_t) storeResult(Registers::RESULT, TokenType::DOUBLE, byteList);
         }
-        else
-        {
-            setReturnValueToRegister(token);
-        }
+        
+        setReturnValueToRegister(token);
         
         return 0;
     }
@@ -231,12 +239,10 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         if (doStoreResult)
         {
-            // push result to the stack
+            return (size_t) storeResult(Registers::RESULT, TokenType::DOUBLE, byteList);
         }
-        else
-        {
-            setReturnValueToRegister(token);
-        }
+        
+        setReturnValueToRegister(token);
 
         return 0;
     }
@@ -248,12 +254,10 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         if (doStoreResult)
         {
-            // push result to the stack
+            return (size_t) storeResult(Registers::RESULT, TokenType::DOUBLE, byteList);
         }
-        else
-        {
-            setReturnValueToRegister(token);
-        }
+        
+        setReturnValueToRegister(token);
         
         return 0;
     }
@@ -265,13 +269,11 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         if (doStoreResult)
         {
-            // push result to the stack
+            return (size_t) storeResult(Registers::ZERO_FLAG, TokenType::BOOL, byteList);
         }
-        else
-        {
-            setReturnValueToRegister(token);
-        }
-
+        
+        setReturnValueToRegister(token);
+        
         return 0;
     }
 
@@ -282,12 +284,10 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         if (doStoreResult)
         {
-            // push result to the stack
+            return (size_t) storeResult(Registers::ZERO_FLAG, TokenType::BOOL, byteList);
         }
-        else
-        {
-            setReturnValueToRegister(token);
-        }
+        
+        setReturnValueToRegister(token);
 
         return 0;
     }
@@ -303,12 +303,10 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         if (doStoreResult)
         {
-            // push result to the stack
+            return (size_t) storeResult(Registers::ZERO_FLAG, TokenType::BOOL, byteList);
         }
-        else
-        {
-            setReturnValueToRegister(token);
-        }
+        
+        setReturnValueToRegister(token);
 
         return 0;
     }
@@ -328,12 +326,10 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         if (doStoreResult)
         {
-            // push result to the stack
+            return (size_t) storeResult(Registers::ZERO_FLAG, TokenType::BOOL, byteList);
         }
-        else
-        {
-            setReturnValueToRegister(token);
-        }
+        
+        setReturnValueToRegister(token);
 
         return 0;
     }
@@ -352,12 +348,11 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         if (doStoreResult)
         {
-            // push result to the stack
+            return (size_t) storeResult(Registers::ZERO_FLAG, TokenType::BOOL, byteList);
         }
-        else
-        {
-            setReturnValueToRegister(token);
-        }
+        
+        setReturnValueToRegister(token);
+
         return 0;
     }
     
@@ -388,12 +383,11 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         if (doStoreResult)
         {
-            // push result to the stack
+            return (size_t) storeResult(Registers::ZERO_FLAG, TokenType::BOOL, byteList);
         }
-        else
-        {
-            setReturnValueToRegister(token);
-        }
+        
+        setReturnValueToRegister(token);
+
         return 0;
     }
 
@@ -422,12 +416,10 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         if (doStoreResult)
         {
-            // push result to the stack
+            return (size_t) storeResult(Registers::ZERO_FLAG, TokenType::BOOL, byteList);
         }
-        else
-        {
-            setReturnValueToRegister(token);
-        }
+        
+        setReturnValueToRegister(token);
 
         return 0;
     }
@@ -437,6 +429,6 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
     std::cerr << "unhandled opcodes: " << token->opCode << std::endl;
     exit(1);
-    
+
 }
 

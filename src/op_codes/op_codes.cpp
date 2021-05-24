@@ -34,6 +34,7 @@ static const char* const opCodeRepr[] =
     "DECLARATION FLOAT",
     "DECLARATION STRING",
     "DECLARATION BOOL",
+    "DECLARATION DOUBLE",
     
     "LITERAL",
 

@@ -21,16 +21,12 @@ Token::Token(TokenType type, unsigned int priority, OpCodes opCode)
 
 Token::~Token()
 {
-    switch (type)
+    if (type == TokenType::TEXT || opCode == OpCodes::REFERENCE)
     {
-    case TokenType::TEXT:
-        // text tokens have a string as their value
+        // text or reference tokens have a string as their value
         delete (std::string*) value;
-        break;
-    
-    default:
-        break;
     }
+  
 }
 
 
@@ -81,6 +77,7 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         case TokenType::STRING:
         case TokenType::BOOL:
         case TokenType::FLOAT:
+        case TokenType::DOUBLE:
             stream << '<' << token.type << "*: " << *(std::string*) token.value << " (" << token.priority << ")>";
             return stream;
         

@@ -16,7 +16,8 @@ static const char* const tokenTypeRepr[] =
     "BOOL",
     "SCOPE",
     "PARENTHESIS",
-    "ENDS"
+    "ENDS",
+    "DOUBLE",
 };
 
 
@@ -34,10 +35,11 @@ size_t Tokens::typeSize(TokenType type)
         return 1;
         
     case TokenType::INT:
+    case TokenType::FLOAT:
         return 4;
     
     case TokenType::STRING:
-    case TokenType::FLOAT:
+    case TokenType::DOUBLE:
         return 8;
 
     default:

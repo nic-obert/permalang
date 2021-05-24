@@ -14,6 +14,7 @@ const std::unordered_map<std::string, OpCodes> keywords::keywordsMap
     {"bool",    OpCodes::DECLARATION_BOOL},
     {"float",   OpCodes::DECLARATION_FLOAT},
     {"string",  OpCodes::DECLARATION_STRING},
+    {"double",  OpCodes::DECLARATION_DOUBLE},
 });
 
 
@@ -47,6 +48,9 @@ const char* keywords::keywordName(OpCodes keyword)
     case OpCodes::DECLARATION_STRING:
         return "string";
     
+    case OpCodes::DECLARATION_DOUBLE:
+        return "double";
+    
     }
     
     return "";
@@ -69,18 +73,11 @@ int keywords::keywordPriority(OpCodes keyword)
     case OpCodes::FLOW_WHILE:
         return WHILE_P;
     
-    case OpCodes::DECLARATION_INT:
-        return DECLARATION_P;
-    
-    case OpCodes::DECLARATION_BOOL:
-        return DECLARATION_P;
+    }
 
-    case OpCodes::DECLARATION_FLOAT:
+    if (isDeclarationOp(keyword))
+    {
         return DECLARATION_P;
-    
-    case OpCodes::DECLARATION_STRING:
-        return DECLARATION_P;
-    
     }
     
     return 0;

@@ -27,7 +27,8 @@ namespace Tokens
         BOOL        = 6,
         SCOPE       = 7, // {}
         PARENTHESIS = 8,
-        ENDS        = 9 // end of statement
+        ENDS        = 9, // end of statement
+        DOUBLE      = 10,
 
     } TokenType;
 

@@ -1,7 +1,7 @@
 #include "pvm.hh"
 
 
-#define longArray *((long*) (byteCode + i))
+#define longArray *((long*) (bytes + i))
 
 
 
@@ -22,9 +22,11 @@ ByteCode::ByteCode()
 }
 
 
-std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
+std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
 {
-    stream << "ByteCode: {\n";
+    const Byte* bytes = byteCode.byteCode;
+
+    stream << "ByteCode (" << byteCode.size << "): {\n";
 
     for (size_t line = 1, i = 0; true; line++)
     {
@@ -32,7 +34,7 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
         stream << '\t' << line << '\t';
 
         // switch byte and increment index
-        switch ((OpCode) byteCode[i++])
+        switch ((OpCode) bytes[i++])
         {
         case OpCode::ADD:
             stream << "add:\n";
@@ -59,9 +61,14 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
             continue;
         
         case OpCode::EXIT:
-            stream << "exit:\n";
+        {
+            const char* exitCode = charToASCII(bytes[i]);
+            stream << "exit: " << exitCode << '\n';
+            free((void*) exitCode);
+            i ++;
             // breaking the switch statement means breaking the while loop
             break;
+        }
         
         case OpCode::JMP:
             stream << "jmp: @["
@@ -89,7 +96,7 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
         case OpCode::PUSH_REG:
             stream << "push reg: ";
 
-            stream << (Registers) byteCode[i] << '\n';
+            stream << (Registers) bytes[i] << '\n';
             i++;
             continue;
         
@@ -101,7 +108,7 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
             continue;
         
         case OpCode::POP:
-            stream << "pop:";
+            stream << "pop: ";
 
             stream << longArray << '\n';
             i += sizeof(long);
@@ -154,7 +161,7 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
         
         case OpCode::REG_MOV:
             stream << "reg mov: "
-                << (Registers) byteCode[i]
+                << (Registers) bytes[i]
                 << ", [";
             
             i ++;
@@ -167,7 +174,7 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
         
         case OpCode::REG_MOV_BIT:
             stream << "reg mov bit: "
-                << (Registers) byteCode[i]
+                << (Registers) bytes[i]
                 << ", [";
             
             i ++;
@@ -180,11 +187,11 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
         
         case OpCode::REG_TO_REG:
             stream << "reg to reg: "
-                << (Registers) byteCode[i] << ", ";
+                << (Registers) bytes[i] << ", ";
 
             i ++;
 
-            stream << (Registers) byteCode[i] << "\n";
+            stream << (Registers) bytes[i] << "\n";
 
             i++;
             continue;
@@ -214,11 +221,5 @@ std::ostream& operator<<(std::ostream& stream, const Byte* byteCode)
     } // while (true)
 
     return stream << '}';
-}
-
-
-std::ostream& operator<<(std::ostream& stream, const Byte byte)
-{
-    return stream << (unsigned char) byte;
 }
 
