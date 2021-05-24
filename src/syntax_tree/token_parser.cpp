@@ -1,13 +1,22 @@
 #include "syntax_tree.hh"
+#include "errors.hh"
 
 
 // for unary operators
 typedef enum Side
 {
-    RIGHT,
-    LEFT
+    RIGHT = 0,
+    LEFT  = 1
     
 } Side;
+
+
+static const char* sides[2] = 
+{
+    "right",
+    "left"
+};
+
 
 #define DELETE true
 
@@ -36,24 +45,20 @@ static void binarySatisfy(Token* token, TokenType leftType, TokenType rightType,
 
     if (token->prev == nullptr)
     {
-        std::cerr << "Missing token of type " << leftType << " to the left of " << *token << std::endl;
-        exit(1);
+        errors::ExpectedTokenError(*token, leftType, sides[LEFT]);
     }    
     else if (token->next == nullptr)
     {
-        std::cerr << "Missing token of type " << rightType << " to the right of " << *token << std::endl;
-        exit(1);
+        errors::ExpectedTokenError(*token, rightType, sides[RIGHT]);
     }
 
     if (tokenTypeOf(token->prev) != leftType)
     {
-        std::cerr << "Token " << *token << " requires token of type " << leftType << " to the left, but " << *token->prev << " was provided" << std::endl;
-        exit(1);
+       errors::TypeError(*token, leftType, *token->prev, sides[LEFT]);
     }
     else if (tokenTypeOf(token->next) != rightType)
     {
-        std::cerr << "Token " << *token << " requires token of type " << rightType << " to the right, but " << *token->next << " was provided" << std::endl;
-        exit(1);
+        errors::TypeError(*token, rightType, *token->next, sides[RIGHT]);
     }
 
     // pointer to array of token pointers
@@ -75,13 +80,11 @@ static void unarySatisfy(Token* token, TokenType type, Side side, Statement* sta
     {
         if (token->prev == nullptr)
         {
-            std::cerr << "Missing token of type " << type << " to the left of " << *token << std::endl;
-            exit(1);
+            errors::ExpectedTokenError(*token, type, sides[LEFT]);
         }
         if (tokenTypeOf(token->prev) != type)
         {
-            std::cerr << "Token " << *token << " requires token of type " << token << " to the left, but " << *token->prev << " was provided" << std::endl;
-            exit(1);
+            errors::TypeError(*token, type, *token->prev, sides[LEFT]);
         }
 
         token->value = toValue(new Token*[1] {token->prev});
@@ -94,13 +97,11 @@ static void unarySatisfy(Token* token, TokenType type, Side side, Statement* sta
     {
         if (token->next == nullptr)
         {
-            std::cerr << "Missing token of type " << type << " to the right of " << *token << std::endl;
-            exit(1);
+            errors::ExpectedTokenError(*token, type, sides[RIGHT]);
         }
         if (tokenTypeOf(token->next) != type)
         {
-            std::cerr << "Token " << *token << " requires token of type " << type << " to the right, but " << *token->next << " was provided" << std::endl;
-            exit(1);
+            errors::TypeError(*token, type, *token->next, sides[RIGHT]);
         }
 
         token->value = toValue(new Token*[1] {token->next});
@@ -119,13 +120,11 @@ static void declarationSatisfy(Token* token, TokenType type, Statement* statemen
 
     if (token->next == nullptr)
     {
-        std::cerr << "Missing token of operator type " << OpCodes::REFERENCE << " to the right of " << *token << std::endl;
-        exit(1);
+        errors::ExpectedTokenError(*token, type, sides[RIGHT]);
     }
     if (token->next->opCode != OpCodes::REFERENCE)
     {
-        std::cerr << "Token " << *token << " requires token of operator type " << OpCodes::REFERENCE << " to the right, but " << *token->next << " was provided" << std::endl;
-        exit(1);
+        errors::TypeError(*token, type, *token->next, sides[RIGHT]);
     }
 
     // inherit value form next Token
@@ -155,24 +154,20 @@ static void assignSatisfy(Token* token, Statement* statement)
 
     if (token->prev == nullptr)
     {
-        std::cerr << "Missing token of operator type " << OpCodes::REFERENCE << " to the left of " << *token << std::endl;
-        exit(1);
+        errors::ExpectedTokenError(*token, OpCodes::REFERENCE, sides[LEFT]);
     }    
     else if (token->next == nullptr)
     {
-        std::cerr << "Missing token of operator type " << OpCodes::REFERENCE << " or " << OpCodes::LITERAL << " to the right of " << *token << std::endl;
-        exit(1);
+        errors::ExpectedTokenError(*token, OpCodes::REFERENCE, sides[RIGHT]);
     }
 
     if (token->prev->opCode != OpCodes::REFERENCE)
     {
-        std::cerr << "Token " << *token << " requires token of operator type " << OpCodes::REFERENCE << " to the left, but " << *token->prev << " was provided" << std::endl;
-        exit(1);
+        errors::TypeError(*token, OpCodes::REFERENCE, *token->prev, sides[LEFT]);
     }
     else if (tokenTypeOf(token->next) != tokenTypeOf(token->prev))
     {
-        std::cerr << "Token " << *token << " requires token of type " << tokenTypeOf(token->prev) << " to the right, but " << *token->prev << " was provided" << std::endl;
-        exit(1);
+        errors::TypeError(*token, OpCodes::REFERENCE, *token->next, sides[RIGHT]);
     }
 
     // set token's value to an array of its operands
@@ -199,13 +194,11 @@ static void incDecSatisfy(Token* token, Statement* statement)
 {
     if (token->prev == nullptr)
     {
-        std::cerr << "Missing token of operator type " << OpCodes::REFERENCE << " to the left of " << *token << std::endl;
-        exit(1);
+        errors::ExpectedTokenError(*token, OpCodes::REFERENCE, sides[LEFT]);
     }
     if (token->prev->opCode != OpCodes::REFERENCE)
     {
-        std::cerr << "Token " << *token << " requires token of operator type " << OpCodes::REFERENCE << " to the left, but " << *token->prev << " was provided" << std::endl;
-        exit(1);
+        errors::TypeError(*token, OpCodes::REFERENCE, *token->prev, sides[LEFT]);
     }
 
 
@@ -221,13 +214,11 @@ static void addressOfSatisfy(Token* token, Statement* statement)
 {
     if (token->next == nullptr)
     {
-        std::cerr << "Missing token of operator type " << OpCodes::REFERENCE << " to the right of " << *token << std::endl;
-        exit(1);
+        errors::ExpectedTokenError(*token, OpCodes::REFERENCE, sides[RIGHT]);
     }
     if (token->next->opCode != OpCodes::REFERENCE)
     {
-        std::cerr << "Token " << *token << " requires token of operator type " << OpCodes::REFERENCE << " to the right, but " << *token->next << " was provided" << std::endl;
-        exit(1);
+        errors::TypeError(*token, OpCodes::REFERENCE, *token->next, sides[RIGHT]);
     } 
     
     token->value = toValue(new Token*[1] { token->next });

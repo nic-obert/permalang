@@ -108,3 +108,7 @@ namespace symbol_table
     };
 
 };
+
+
+std::ostream& operator<<(std::ostream& stream, const symbol_table::Symbol& symbol);
+

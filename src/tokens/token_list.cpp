@@ -2,6 +2,7 @@
 #include "op_codes.hh"
 #include "priorities.hh"
 #include "keywords.hh"
+#include "errors.hh"
 
 
 using namespace Tokens;
@@ -33,7 +34,7 @@ void TokenList::remove(Token* token)
 }
 
 
-std::ostream& operator<<(std::ostream& stream, TokenList const& list)
+std::ostream& operator<<(std::ostream& stream, const TokenList& list)
 {
     stream << "Token List: {\n";
     if (list.first == nullptr)
@@ -52,11 +53,11 @@ TokenList::TokenList(std::string& script)
 {
     Token* token = nullptr;
 
-    unsigned int currentPriority = 0;
+    size_t currentPriority = 0;
 
 
     char c;
-    for (uint i = 0; (c = script[i]) != 0; i++)
+    for (size_t i = 0; (c = script[i]) != 0; i++)
     {
 
         if (token != nullptr)
@@ -464,9 +465,32 @@ TokenList::TokenList(std::string& script)
             }
 
         } // default
-            
+
         } // switch (c)    
+
+
+        // character isn't handled
+        // extract the line of the invalid character
+
+        // use C strings for convenience
+        const char* cString = script.c_str();
+
+        // find the start of the string
+        size_t tmpIndex = i - 1;
+        for (; cString[tmpIndex] != '\n'; tmpIndex--);
+
+        unsigned int length = i - tmpIndex;
+        const char* start = cString + tmpIndex;
+
+        // find the end of the string
+        tmpIndex = i + 1;
+        for (; cString[tmpIndex] != '\n'; tmpIndex++);
+
+        length = tmpIndex - i;
+
+        errors::InvalidCharacterError(std::string(start, length), cString[i]);
     
+
     } // for (uint i = 0; (c = script[i]) != 0; i++)
 
     // add a closing end of statement token

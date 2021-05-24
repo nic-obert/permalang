@@ -85,9 +85,9 @@ namespace Tokens
 };
 
 
-std::ostream& operator<<(std::ostream& stream, Tokens::Token const& token);
+std::ostream& operator<<(std::ostream& stream, const Tokens::Token& token);
 
-std::ostream& operator<<(std::ostream& stream, Tokens::TokenList const& token);
+std::ostream& operator<<(std::ostream& stream, const Tokens::TokenList& tokenList);
 
-std::ostream& operator<<(std::ostream& stream, Tokens::TokenType const& token);
+std::ostream& operator<<(std::ostream& stream, const Tokens::TokenType& tokenType);
 
