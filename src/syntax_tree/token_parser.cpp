@@ -11,7 +11,7 @@ typedef enum Side
 } Side;
 
 
-static const char* sides[2] = 
+static const char* const sides[2] = 
 {
     "right",
     "left"
@@ -238,9 +238,109 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     switch (token->opCode)
     {
     case OpCodes::ARITHMETICAL_SUM:
+    {
+        binarySatisfy(token, TokenType::INT, TokenType::INT, statement);
+
+        if (doOptimize)
+        {
+            Token* op1 = ((Token**) (token->value))[0];
+            Token* op2 = ((Token**) (token->value))[1];
+
+            if (op1->opCode == OpCodes::LITERAL && op2->opCode == OpCodes::LITERAL)
+            {
+                delete[] (Token**) token->value;
+                token->value = op1->value + op2->value;
+                token->opCode = OpCodes::LITERAL;
+                delete op1;
+                delete op2;
+            }
+        }
+
+        break;
+    }
+
     case OpCodes::ARITHMETICAL_SUB:
+    {
+        binarySatisfy(token, TokenType::INT, TokenType::INT, statement);
+
+        if (doOptimize)
+        {
+            Token* op1 = ((Token**) (token->value))[0];
+            Token* op2 = ((Token**) (token->value))[1];
+
+            if (op1->opCode == OpCodes::LITERAL && op2->opCode == OpCodes::LITERAL)
+            {
+                delete[] (Token**) token->value;
+                token->value = op1->value - op2->value;
+                token->opCode = OpCodes::LITERAL;
+                delete op1;
+                delete op2;
+            }
+        }
+
+        break;
+    }
+
     case OpCodes::ARITHMETICAL_MUL:
+    {
+        binarySatisfy(token, TokenType::INT, TokenType::INT, statement);
+
+        if (doOptimize)
+        {
+            Token* op1 = ((Token**) (token->value))[0];
+            Token* op2 = ((Token**) (token->value))[1];
+
+            // multiplication by 0 is always 0
+            if ((op1->opCode == OpCodes::LITERAL && op1->value == 0)
+                || (op2->opCode == OpCodes::LITERAL && op2->value == 0))
+            {
+                delete[] (Token**) token->value;
+                token->value = 0;
+                token->opCode = OpCodes::LITERAL;
+                delete op1;
+                delete op2;
+            }
+
+            if (op1->opCode == OpCodes::LITERAL && op2->opCode == OpCodes::LITERAL)
+            {
+                delete[] (Token**) token->value;
+                token->value = op1->value * op2->value;
+                token->opCode = OpCodes::LITERAL;
+                delete op1;
+                delete op2;
+            }
+        }
+
+        break;
+    }
+
     case OpCodes::ARITHMETICAL_DIV:
+    {
+        binarySatisfy(token, TokenType::INT, TokenType::INT, statement);
+
+        if (doOptimize)
+        {
+            Token* op1 = ((Token**) (token->value))[0];
+            Token* op2 = ((Token**) (token->value))[1];
+
+            if (op2->value == 0)
+            {
+                errors::ZeroDivisionError(*token, *op1, *op2);
+            }
+
+            if (op1->opCode == OpCodes::LITERAL && op2->opCode == OpCodes::LITERAL)
+            {
+                delete[] (Token**) token->value;
+                token->value = op1->value / op2->value;
+                token->opCode = OpCodes::LITERAL;
+                delete op1;
+                delete op2;
+            }
+        }
+
+        break;
+    }
+
     case OpCodes::ARITHMETICAL_POW:
     {
         binarySatisfy(token, TokenType::INT, TokenType::INT, statement);
@@ -256,21 +356,198 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
 
     case OpCodes::LOGICAL_EQ:
+    {
+        binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
+
+        if (doOptimize)
+        {
+            Token* op1 = ((Token**) (token->value))[0];
+            Token* op2 = ((Token**) (token->value))[1];
+
+            if (op1->opCode == OpCodes::LITERAL && op2->opCode == OpCodes::LITERAL)
+            {
+                delete[] (Token**) token->value;
+                token->value = op1->value == op2->value;
+                token->opCode = OpCodes::LITERAL;
+                delete op1;
+                delete op2;
+            }
+        }
+
+        break;
+    }
+
     case OpCodes::LOGICAL_NOT_EQ:
+    {
+        binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
+
+        if (doOptimize)
+        {
+            Token* op1 = ((Token**) (token->value))[0];
+            Token* op2 = ((Token**) (token->value))[1];
+
+            if (op1->opCode == OpCodes::LITERAL && op2->opCode == OpCodes::LITERAL)
+            {
+                delete[] (Token**) token->value;
+                token->value = op1->value != op2->value;
+                token->opCode = OpCodes::LITERAL;
+                delete op1;
+                delete op2;
+            }
+        }
+
+        break;
+    }
+
     case OpCodes::LOGICAL_AND:
+    {
+        binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
+
+        if (doOptimize)
+        {
+            Token* op1 = ((Token**) (token->value))[0];
+            Token* op2 = ((Token**) (token->value))[1];
+
+            if (op1->opCode == OpCodes::LITERAL && op2->opCode == OpCodes::LITERAL)
+            {
+                delete[] (Token**) token->value;
+                token->value = op1->value && op2->value;
+                token->opCode = OpCodes::LITERAL;
+                delete op1;
+                delete op2;
+            }
+        }
+
+        break;
+    }
+
     case OpCodes::LOGICAL_OR:
+    {
+        binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
+
+        if (doOptimize)
+        {
+            Token* op1 = ((Token**) (token->value))[0];
+            Token* op2 = ((Token**) (token->value))[1];
+
+            if (op1->opCode == OpCodes::LITERAL && op2->opCode == OpCodes::LITERAL)
+            {
+                delete[] (Token**) token->value;
+                token->value = op1->value || op2->value;
+                token->opCode = OpCodes::LITERAL;
+                delete op1;
+                delete op2;
+            }
+        }
+
+        break;
+    }
+
     case OpCodes::LOGICAL_LESS:
+    {
+        binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
+
+        if (doOptimize)
+        {
+            Token* op1 = ((Token**) (token->value))[0];
+            Token* op2 = ((Token**) (token->value))[1];
+
+            if (op1->opCode == OpCodes::LITERAL && op2->opCode == OpCodes::LITERAL)
+            {
+                delete[] (Token**) token->value;
+                token->value = op1->value < op2->value;
+                token->opCode = OpCodes::LITERAL;
+                delete op1;
+                delete op2;
+            }
+        }
+
+        break;
+    }
+
     case OpCodes::LOGICAL_LESS_EQ:
+    {
+        binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
+
+        if (doOptimize)
+        {
+            Token* op1 = ((Token**) (token->value))[0];
+            Token* op2 = ((Token**) (token->value))[1];
+
+            if (op1->opCode == OpCodes::LITERAL && op2->opCode == OpCodes::LITERAL)
+            {
+                delete[] (Token**) token->value;
+                token->value = op1->value <= op2->value;
+                token->opCode = OpCodes::LITERAL;
+                delete op1;
+                delete op2;
+            }
+        }
+
+        break;
+    }
+
     case OpCodes::LOGICAL_GREATER:
+    {
+        binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
+
+        if (doOptimize)
+        {
+            Token* op1 = ((Token**) (token->value))[0];
+            Token* op2 = ((Token**) (token->value))[1];
+
+            if (op1->opCode == OpCodes::LITERAL && op2->opCode == OpCodes::LITERAL)
+            {
+                delete[] (Token**) token->value;
+                token->value = op1->value > op2->value;
+                token->opCode = OpCodes::LITERAL;
+                delete op1;
+                delete op2;
+            }
+        }
+
+        break;
+    }
+
     case OpCodes::LOGICAL_GREATER_EQ:
     {
         binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
+
+        if (doOptimize)
+        {
+            Token* op1 = ((Token**) (token->value))[0];
+            Token* op2 = ((Token**) (token->value))[1];
+
+            if (op1->opCode == OpCodes::LITERAL && op2->opCode == OpCodes::LITERAL)
+            {
+                delete[] (Token**) token->value;
+                token->value = op1->value >= op2->value;
+                token->opCode = OpCodes::LITERAL;
+                delete op1;
+                delete op2;
+            }
+        }
+
         break;
     }
     
     case OpCodes::LOGICAL_NOT:
     {
         unarySatisfy(token, TokenType::BOOL, RIGHT, statement);
+
+        if (doOptimize)
+        {
+            Token* op = ((Token**) (token->value))[0];
+
+            if (op->opCode == OpCodes::LITERAL)
+            {
+                delete[] (Token**) token->value;
+                token->value = !(bool) op->value;
+                token->opCode = OpCodes::LITERAL;
+                delete op;
+            }
+        }
+
         break;
     }
 

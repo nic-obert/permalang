@@ -97,7 +97,7 @@ namespace pvm
 
     // enum of Pvm registers
     // enum values must be constant for lookup tables
-    typedef enum class Registers : Byte
+    typedef enum class Registers
     {
         GENERAL_A           = 0,
         GENERAL_B           = 1,

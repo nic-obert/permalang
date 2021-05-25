@@ -75,3 +75,11 @@ void errors::ExpectedTokenError(Tokens::Token& caller, OpCodes expected, const c
     exit(EXIT_FAILURE);
 }
 
+
+void errors::ZeroDivisionError(Tokens::Token& caller, Tokens::Token& op1, Tokens::Token& op2)
+{
+    std::cerr << "[Zero Division Error] Zero division performed by operator "
+        << caller << " on operands: " << op1 << ", " << op2 << std::endl;
+    exit(EXIT_FAILURE);
+}
+

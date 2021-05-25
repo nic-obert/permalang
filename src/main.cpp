@@ -3,7 +3,7 @@
 
 #include "pch.hh"
 
-#include "timerpp.hh"
+#include "argparser.hh"
 
 
 void loadFile(const char* path, std::string& output)
@@ -31,27 +31,25 @@ int main(int argc, const char** argv)
     using namespace syntax_tree;
     using namespace pvm;
     using namespace timerpp;
+    using namespace argparser;
 
     if (argc < 2) {
         std::cerr << "No file specified" << std::endl;
         exit(EXIT_FAILURE);
     }
 
-    bool doOptimize = false;
-    for (unsigned char i = 0; i != argc; i++)
-    {
-        if (!strcmp(argv[i], "-O"))
-        {
-            doOptimize = true;
-            break;
-        }
-    }
+    bool doOptimize;
+    const char* fileName;
 
+    Parser parser = Parser();
+    parser.addBoolImplicit("-O", &doOptimize);
+    parser.addStringPositional(&fileName);
 
-    const char* filename = argv[1];
+    parser.parse(argc, argv);
+
 
     std::string file;
-    loadFile(filename, file);
+    loadFile(fileName, file);
 
     Timer timer = Timer();
 

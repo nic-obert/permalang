@@ -26,5 +26,7 @@ namespace errors
     void ExpectedTokenError(Tokens::Token& caller, Tokens::TokenType expected, const char* side);
     void ExpectedTokenError(Tokens::Token& caller, OpCodes expected, const char* side);
 
+    void ZeroDivisionError(Tokens::Token& caller, Tokens::Token& op1, Tokens::Token& op2);
+
 };
 

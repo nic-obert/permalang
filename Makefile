@@ -12,7 +12,7 @@ TARGET=target/perma
 
 
 C_FLAGS=-std=$(STD) -I headers
-LINKS=-ltimerpp
+LINKS=-ltimerpp -largparser
 WARNINGS=-Wall -Wno-switch -Wno-reorder
 WARNINGS_ALL=-Wall
 COMMON_ARGS=$(C_FLAGS) $(SOURCES) $(LINKS)

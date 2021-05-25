@@ -160,29 +160,27 @@ std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
             continue;
         
         case OpCode::REG_MOV:
-            stream << "reg mov: "
-                << (Registers) bytes[i]
-                << ", [";
+            stream << "reg mov: ["
+                << longArray
+                << "], ";
             
-            i ++;
-
-            stream << longArray
-                << "]\n";
-
             i += sizeof(long);
+
+            stream << (Registers) bytes[i] << "\n";
+
+            i ++;
             continue;
         
         case OpCode::REG_MOV_BIT:
-            stream << "reg mov bit: "
-                << (Registers) bytes[i]
-                << ", [";
+            stream << "reg mov bit: ["
+                << longArray
+                << "], ";
             
-            i ++;
-
-            stream << longArray
-                << "]\n";
-
             i += sizeof(long);
+
+            stream << (Registers) bytes[i] << "\n";
+
+            i ++;
             continue;
         
         case OpCode::REG_TO_REG:
