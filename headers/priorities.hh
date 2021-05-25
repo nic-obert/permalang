@@ -4,6 +4,7 @@
 #define LITERAL_P 0
 
 #define SCOPE_P 1
+#define SYSTEM_P 1
 
 #define ELSE_P 2
 #define IF_P 2

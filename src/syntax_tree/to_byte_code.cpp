@@ -1,5 +1,6 @@
 #include "syntax_tree.hh"
 #include "pvm.hh"
+#include "errors.hh"
 
 
 #define hasReturnValueInRegister(token) (token->priority == 1)
@@ -11,6 +12,13 @@
 
 
 using namespace syntax_tree;
+
+
+// lookup table for system interrupts
+static const pvm::OpCode systemInterrupts[] =
+{
+    pvm::OpCode::PRINT,
+};
 
 
 static unsigned int symbolNumber = 0;
@@ -92,6 +100,37 @@ void SyntaxTree::parseTokenOperator(Tokens::Token* token)
 }
 
 
+static void byteCodeForUnaryOperation(Tokens::Token** operands, pvm::OpCode opCode, pvm::ByteList& byteList)
+{
+    using namespace pvm;
+    using namespace symbol_table;
+
+    if (hasReturnValueInRegister(operands[0]))
+    {
+        byteList.add(new ByteNode(OpCode::REG_MOV));
+        byteList.add(new ByteNode(Registers::GENERAL_A));
+        byteList.add(new ByteNode(Registers::RESULT));
+    }
+    else if (operands[0]->opCode == OpCodes::REFERENCE)
+    {
+        
+        byteList.add(new ByteNode(OpCode::LD_A));
+        byteList.add(new ByteNode(SymbolTable::get((std::string*) operands[0]->value)->stackPosition));
+    }
+    else
+    {
+        byteList.add(new ByteNode(OpCode::LD_CONST_A));
+        byteList.add(new ByteNode(operands[0]->value)); 
+    }
+
+    if (opCode != OpCode::NO_OP)
+    {
+        byteList.add(new ByteNode(opCode));
+    }
+
+}
+
+
 // operation size: 19 bytes
 static void byteCodeForBinaryOperation(Tokens::Token** operands, pvm::OpCode opCode, pvm::ByteList& byteList)
 {
@@ -134,7 +173,10 @@ static void byteCodeForBinaryOperation(Tokens::Token** operands, pvm::OpCode opC
         byteList.add(new ByteNode(operands[1]->value)); 
     }
 
-    byteList.add(new ByteNode(opCode));
+    if (opCode != OpCode::NO_OP)
+    {
+        byteList.add(new ByteNode(opCode));
+    }
 
 }
 
@@ -424,11 +466,29 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
         return 0;
     }
 
+
+    case OpCodes::SYSTEM:
+    {
+        OpCode code = systemInterrupts[operands[0]->value];
+
+        byteList.add(new ByteNode(code));
+
+        return 0;
+    }
+
+
+    case OpCodes::SYSTEM_LOAD:
+    {
+        byteCodeForUnaryOperation(operands, OpCode::NO_OP, byteList);
+        return 0;
+    }
+
     } // switch(token->opCode)
 
 
-    std::cerr << "unhandled opcodes: " << token->opCode << std::endl;
-    exit(1);
-
+    std::string msg("Unhandled OpCodes in byte code generation: ");
+    msg += (unsigned int) token->opCode;
+    errors::UnexpectedBehaviourError(std::move(msg));
+    return 0;
 }
 

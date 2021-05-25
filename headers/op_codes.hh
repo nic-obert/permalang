@@ -86,7 +86,10 @@ typedef enum class OpCodes
     FLOW_FOR,
     FLOW_WHILE,
 
-    NO_OP
+    NO_OP,
+
+    SYSTEM,
+    SYSTEM_LOAD,
 
 } OpCodes;
 

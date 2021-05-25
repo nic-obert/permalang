@@ -1,4 +1,5 @@
 #include "keywords.hh"
+#include "errors.hh"
 
 
 using namespace keywords;
@@ -15,6 +16,8 @@ const std::unordered_map<std::string, OpCodes> keywords::keywordsMap
     {"float",   OpCodes::DECLARATION_FLOAT},
     {"string",  OpCodes::DECLARATION_STRING},
     {"double",  OpCodes::DECLARATION_DOUBLE},
+    {"system",  OpCodes::SYSTEM},
+    {"sysload", OpCodes::SYSTEM_LOAD},
 });
 
 
@@ -51,9 +54,18 @@ const char* keywords::keywordName(OpCodes keyword)
     case OpCodes::DECLARATION_DOUBLE:
         return "double";
     
+    case OpCodes::SYSTEM:
+        return "system";
+    
+    case OpCodes::SYSTEM_LOAD:
+        return "sysload";
+    
     }
     
-    return "";
+    std::string error("Undefined keyword: ");
+    error += (int) keyword;
+    errors::UnexpectedBehaviourError(std::move(error));
+    return nullptr;
 }
 
 
@@ -73,6 +85,10 @@ int keywords::keywordPriority(OpCodes keyword)
     case OpCodes::FLOW_WHILE:
         return WHILE_P;
     
+    case OpCodes::SYSTEM:
+    case OpCodes::SYSTEM_LOAD:
+        return SYSTEM_P;
+
     }
 
     if (isDeclarationOp(keyword))

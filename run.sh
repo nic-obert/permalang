@@ -1,2 +1,2 @@
 #!/bin/bash
-./target/perma script.pf
+./target/perma script.pf $1

@@ -59,6 +59,10 @@ namespace pvm
 
         CALL,       // calls a function
 
+        PRINT,      // prints the content of register A
+
+        NO_OP,      // does nothing
+
 
     } OpCode;
 

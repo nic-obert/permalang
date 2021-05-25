@@ -37,6 +37,17 @@ int main(int argc, const char** argv)
         exit(EXIT_FAILURE);
     }
 
+    bool doOptimize = false;
+    for (unsigned char i = 0; i != argc; i++)
+    {
+        if (!strcmp(argv[i], "-O"))
+        {
+            doOptimize = true;
+            break;
+        }
+    }
+
+
     const char* filename = argv[1];
 
     std::string file;
@@ -52,7 +63,7 @@ int main(int argc, const char** argv)
     std::cout << tokens << '\n' << std::endl;
 
     timer.start();
-    SyntaxTree syntaxTree = SyntaxTree(tokens);
+    SyntaxTree syntaxTree = SyntaxTree(tokens, doOptimize);
     ByteCode byteCode = syntaxTree.parseToByteCode();
     timer.stop();
 

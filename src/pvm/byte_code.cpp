@@ -212,6 +212,10 @@ std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
         case OpCode::CALL:
             stream << "call (unhandled)\n";
             continue;
+        
+        case OpCode::PRINT:
+            stream << "print:\n";
+            continue;
 
         } // switch ((OpCode) byteCode[i])
 

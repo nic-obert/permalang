@@ -271,6 +271,13 @@ Byte Pvm::execute(const Byte* byteCode)
         }
 
 
+        case OpCode::PRINT:
+        {
+            std::cout << rGeneralA;
+            break;
+        }
+
+
         } // switch ((OpCode) byte)
 
     } // while (executing)

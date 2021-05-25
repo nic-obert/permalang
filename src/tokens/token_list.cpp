@@ -450,6 +450,14 @@ TokenList::TokenList(std::string& script)
             continue;
         }
 
+        case ' ':
+        case '\n':
+        case '\r':
+        case '\t':
+        {
+            continue;
+        }
+
         default:
         {
             if (isDigit(c))
@@ -464,32 +472,32 @@ TokenList::TokenList(std::string& script)
                 continue;
             }
 
+
+            // character isn't handled
+            // extract the line of the invalid character
+
+            // use C strings for convenience
+            const char* cString = script.c_str();
+
+            // find the start of the string
+            size_t tmpIndex = i - 1;
+            for (; cString[tmpIndex] != '\n'; tmpIndex--);
+
+            unsigned int length = i - tmpIndex;
+            const char* start = cString + tmpIndex;
+
+            // find the end of the string
+            tmpIndex = i + 1;
+            for (; cString[tmpIndex] != '\n'; tmpIndex++);
+
+            length = tmpIndex - i;
+
+            errors::InvalidCharacterError(std::string(start, length), cString[i]);
+    
+
         } // default
 
         } // switch (c)    
-
-
-        // character isn't handled
-        // extract the line of the invalid character
-
-        // use C strings for convenience
-        const char* cString = script.c_str();
-
-        // find the start of the string
-        size_t tmpIndex = i - 1;
-        for (; cString[tmpIndex] != '\n'; tmpIndex--);
-
-        unsigned int length = i - tmpIndex;
-        const char* start = cString + tmpIndex;
-
-        // find the end of the string
-        tmpIndex = i + 1;
-        for (; cString[tmpIndex] != '\n'; tmpIndex++);
-
-        length = tmpIndex - i;
-
-        errors::InvalidCharacterError(std::string(start, length), cString[i]);
-    
 
     } // for (uint i = 0; (c = script[i]) != 0; i++)
 

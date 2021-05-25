@@ -13,6 +13,6 @@ Symbol::Symbol(Value value, Tokens::TokenType type)
 
 std::ostream& operator<<(std::ostream& stream, const symbol_table::Symbol& symbol)
 {
-    stream << '{' << symbol.type << ' ' << symbol.value << '}';
+    return stream << '{' << symbol.type << ' ' << symbol.value << '}';
 }
 

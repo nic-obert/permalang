@@ -10,7 +10,7 @@
 namespace errors
 {
     
-    void GenericError(std::string&& message);
+    void UnexpectedBehaviourError(std::string&& message);
 
     void SyntaxError(std::string&& message);
 
@@ -25,7 +25,6 @@ namespace errors
 
     void ExpectedTokenError(Tokens::Token& caller, Tokens::TokenType expected, const char* side);
     void ExpectedTokenError(Tokens::Token& caller, OpCodes expected, const char* side);
-
 
 };
 

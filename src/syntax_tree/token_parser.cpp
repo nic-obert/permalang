@@ -399,7 +399,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
         }
         
         // create a temporary SyntaxTree for the scope and move it to the SyntaxTree
-        SyntaxTree scopeTree = SyntaxTree(std::move(scopeStatements));
+        SyntaxTree scopeTree = SyntaxTree(std::move(scopeStatements), doOptimize);
 
         // parse the new SyntaxTree recursively
         //scopeTree.parse(DO_POP_SCOPE);
@@ -517,6 +517,15 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
         exit(EXIT_FAILURE);
         break;
     }
+
+
+    case OpCodes::SYSTEM:
+    case OpCodes::SYSTEM_LOAD:
+    {
+        unarySatisfy(token, TokenType::INT, RIGHT, statement);
+        break;
+    }
+
 
     } // switch (token->opCode)
 

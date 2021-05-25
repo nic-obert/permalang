@@ -4,9 +4,9 @@
 using namespace errors;
 
 
-void errors::GenericError(std::string&& message)
+void errors::UnexpectedBehaviourError(std::string&& message)
 {
-    std::cerr << "[Error] " << message << std::endl;
+    std::cerr << "[Unexpected Behaviour Error] " << message << std::endl;
     exit(EXIT_FAILURE);
 }
 

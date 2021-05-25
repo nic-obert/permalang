@@ -5,15 +5,16 @@ using namespace syntax_tree;
 
 
 
-SyntaxTree::SyntaxTree(Statements&& statements)
-: statements(std::move(statements))
+SyntaxTree::SyntaxTree(Statements&& statements, bool doOptimize)
+: statements(std::move(statements)), doOptimize(doOptimize)
 {
 	
 }
 
 
 
-SyntaxTree::SyntaxTree(Tokens::TokenList& tokens)
+SyntaxTree::SyntaxTree(Tokens::TokenList& tokens, bool doOptimize)
+: doOptimize(doOptimize)
 {
 	using namespace Tokens;
 

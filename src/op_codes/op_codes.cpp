@@ -54,7 +54,10 @@ static const char* const opCodeRepr[] =
     "FLOW FOR",
     "FLOW WHILE",
     
-    "NO OP"
+    "NO OP",
+
+    "SYSTEM",
+    "SYSTEM LOAD",
 };
 
 
@@ -99,6 +102,8 @@ OpType operatorType(OpCodes op)
     case OpCodes::DECLARATION_STRING:
     case OpCodes::PARENTHESIS:
     case OpCodes::PUSH_SCOPE:
+    case OpCodes::SYSTEM:
+    case OpCodes::SYSTEM_LOAD:
         return OpType::UNARY;
     
     default:
