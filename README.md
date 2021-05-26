@@ -1,6 +1,6 @@
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-
 # **Permalang**
+
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 A **toolchain** for the Permalang language including:
 - **permalang compiler**
@@ -21,6 +21,7 @@ Inspired by the C programming language
   - [**Usage**](#usage)
   - [**Syntax and features**](#syntax-and-features)
   - [**Data types**](#data-types)
+  - [**License**](#license)
 
 <br>
 
@@ -113,4 +114,6 @@ double d = 0; // still work in progress
 ---
 <br>
 
+## **License**
 
+[**GNU GPLv3**](LICENSE)
