@@ -39,6 +39,10 @@
         "sstream": "cpp",
         "stdexcept": "cpp",
         "streambuf": "cpp",
-        "map": "cpp"
+        "map": "cpp",
+        "chrono": "cpp",
+        "ctime": "cpp",
+        "list": "cpp",
+        "ratio": "cpp"
     }
 }

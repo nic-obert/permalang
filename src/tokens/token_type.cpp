@@ -18,6 +18,7 @@ static const char* const tokenTypeRepr[] =
     "PARENTHESIS",
     "ENDS",
     "DOUBLE",
+    "LONG"
 };
 
 
@@ -40,6 +41,7 @@ size_t Tokens::typeSize(TokenType type)
     
     case TokenType::STRING:
     case TokenType::DOUBLE:
+    case TokenType::LONG:
         return 8;
 
     default:

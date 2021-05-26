@@ -35,6 +35,7 @@ static const char* const opCodeRepr[] =
     "DECLARATION STRING",
     "DECLARATION BOOL",
     "DECLARATION DOUBLE",
+    "DECLARATION LONG",
     
     "LITERAL",
 
@@ -100,6 +101,8 @@ OpType operatorType(OpCodes op)
     case OpCodes::DECLARATION_FLOAT:
     case OpCodes::DECLARATION_INT:
     case OpCodes::DECLARATION_STRING:
+    case OpCodes::DECLARATION_DOUBLE:
+    case OpCodes::DECLARATION_LONG:
     case OpCodes::PARENTHESIS:
     case OpCodes::PUSH_SCOPE:
     case OpCodes::SYSTEM:

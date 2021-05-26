@@ -28,5 +28,9 @@ namespace errors
 
     void ZeroDivisionError(Tokens::Token& caller, Tokens::Token& op1, Tokens::Token& op2);
 
+    void InvalidPreprocessorError(const char* name);
+
+    void InvalidIncludeEnclosureError(char c);
+
 };
 

@@ -29,6 +29,7 @@ namespace Tokens
         PARENTHESIS = 8,
         ENDS        = 9, // end of statement
         DOUBLE      = 10,
+        LONG        = 11,
 
     } TokenType;
 

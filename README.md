@@ -1,3 +1,116 @@
-# permalang
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-A compiler for a statically typed language
+# **Permalang**
+
+A **toolchain** for the Permalang language including:
+- **permalang compiler**
+- **permalang virtual machine**
+
+Inspired by the C programming language
+
+<br>
+
+---
+<br>
+
+## **Table of contents**
+
+- [**Permalang**](#permalang)
+  - [**Table of contents**](#table-of-contents)
+  - [**Installation**](#installation)
+  - [**Usage**](#usage)
+  - [**Syntax and features**](#syntax-and-features)
+  - [**Data types**](#data-types)
+
+<br>
+
+---
+<br>
+
+## **Installation**
+
+Build toolchain
+```bash
+make
+```
+Install toolchain
+```bash
+make installl
+```
+Uninstall toolchain
+```bash
+make uninstall
+```
+
+<br>
+
+---
+<br>
+
+## **Usage**
+
+Compile
+```bash
+pcc <source.pf>
+```
+Compile with optimizations
+```bash
+pcc -O <source.pf>
+```
+Run executable
+```bash
+pcc <executable>
+```
+
+<br>
+
+---
+<br>
+
+## **Syntax and features**
+
+Most of the syntax is borrowed from C
+
+Variable declaration and assignment
+```c
+int i;
+int i = 0;
+```
+
+If statements
+```c
+if (/* condition */)
+{
+    // code
+}
+```
+
+While loop
+```c
+while (/* condition */)
+{
+    // code
+}
+```
+
+<br>
+
+---
+<br>
+
+## **Data types**
+
+```c
+int i = 0;
+bool b = false;
+long l = 0;
+float f = 0;  // still work in progress
+double d = 0; // still work in progress
+```
+
+<br>
+
+---
+<br>
+
+

@@ -67,6 +67,7 @@ typedef enum class OpCodes
     DECLARATION_STRING,
     DECLARATION_BOOL,
     DECLARATION_DOUBLE,
+    DECLARATION_LONG,
 
     LITERAL,
 

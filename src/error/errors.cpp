@@ -83,3 +83,19 @@ void errors::ZeroDivisionError(Tokens::Token& caller, Tokens::Token& op1, Tokens
     exit(EXIT_FAILURE);
 }
 
+
+void errors::InvalidPreprocessorError(const char* name)
+{
+    std::cerr << "[Invalid Preprocessor Error] \"" << name
+        << "\" is not a preprocessor " << std::endl;
+    exit(EXIT_FAILURE);
+}
+
+
+void errors::InvalidIncludeEnclosureError(char c)
+{
+    std::cerr << "[Invalid Include Enclosure Error] Character '" << c
+        << "' is not a valid file name enclosure. Please use either '</>' or '\"/\"'" << std::endl;
+    exit(EXIT_FAILURE);
+}
+

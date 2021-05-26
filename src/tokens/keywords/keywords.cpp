@@ -42,6 +42,9 @@ const char* keywords::keywordName(OpCodes keyword)
     case OpCodes::DECLARATION_INT:
         return "int";
     
+    case OpCodes::DECLARATION_LONG:
+        return "long";
+    
     case OpCodes::DECLARATION_BOOL:
         return "bool";
 
