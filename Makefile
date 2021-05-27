@@ -24,7 +24,7 @@ C_FLAGS=-std=$(STD) -I $(HEADERS_DIR)
 
 LINKS=-ltimerpp -largparser
 
-WARNINGS=-Wall -Wno-switch -Wno-reorder
+WARNINGS=-Wall -Wno-switch -Wno-reorder -Wconversion
 WARNINGS_ALL=-Wall
 
 COMMON_ARGS=$(C_FLAGS) $(SOURCES) $(LINKS)
@@ -43,7 +43,7 @@ $(TARGET_DIR):
 
 
 build: $(PCH) $(SOURCES) $(HEADERS) $(TARGET_DIR)
-	$(CC) $(WARNINGS) $(COMMON_ARGS) -o $(TARGET)
+	$(CC) $(COMMON_ARGS) -o $(TARGET)
 	@echo "Build successful"
 
 

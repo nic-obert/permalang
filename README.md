@@ -36,7 +36,7 @@ make
 ```
 Install toolchain
 ```bash
-make installl
+make install
 ```
 Uninstall toolchain
 ```bash

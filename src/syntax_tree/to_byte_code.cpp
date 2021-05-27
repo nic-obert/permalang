@@ -27,14 +27,14 @@ static std::string* getTmpSymbolName()
 {
     // 10 is the number of numeric characters in ASCII
     // +1 is to round the result up in integer division
-    const unsigned char length = symbolNumber / 10 + 1;
+    const unsigned char length = (unsigned char) (symbolNumber / 10 + 1);
     std::string* string = new std::string(length, '0');
 
     unsigned int n = symbolNumber;
 
     for (unsigned char i = 0; i != length; i++)
     {
-        (*string)[i] = n % 10 + '0';
+        (*string)[i] = (char) (n % 10 + '0');
         // integer division discards rightmost digit (e.g. 325 -> 32)
         n /= 10;
     }
@@ -487,7 +487,7 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
 
     std::string msg("Unhandled OpCodes in byte code generation: ");
-    msg += (unsigned int) token->opCode;
+    msg += (char) token->opCode;
     errors::UnexpectedBehaviourError(std::move(msg));
     return 0;
 }

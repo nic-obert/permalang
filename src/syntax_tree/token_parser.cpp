@@ -241,7 +241,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     {
         binarySatisfy(token, TokenType::INT, TokenType::INT, statement);
 
-        if (doOptimize)
+        if (globals::doOptimize)
         {
             Token* op1 = ((Token**) (token->value))[0];
             Token* op2 = ((Token**) (token->value))[1];
@@ -263,7 +263,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     {
         binarySatisfy(token, TokenType::INT, TokenType::INT, statement);
 
-        if (doOptimize)
+        if (globals::doOptimize)
         {
             Token* op1 = ((Token**) (token->value))[0];
             Token* op2 = ((Token**) (token->value))[1];
@@ -285,7 +285,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     {
         binarySatisfy(token, TokenType::INT, TokenType::INT, statement);
 
-        if (doOptimize)
+        if (globals::doOptimize)
         {
             Token* op1 = ((Token**) (token->value))[0];
             Token* op2 = ((Token**) (token->value))[1];
@@ -318,7 +318,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     {
         binarySatisfy(token, TokenType::INT, TokenType::INT, statement);
 
-        if (doOptimize)
+        if (globals::doOptimize)
         {
             Token* op1 = ((Token**) (token->value))[0];
             Token* op2 = ((Token**) (token->value))[1];
@@ -359,7 +359,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     {
         binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
 
-        if (doOptimize)
+        if (globals::doOptimize)
         {
             Token* op1 = ((Token**) (token->value))[0];
             Token* op2 = ((Token**) (token->value))[1];
@@ -381,7 +381,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     {
         binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
 
-        if (doOptimize)
+        if (globals::doOptimize)
         {
             Token* op1 = ((Token**) (token->value))[0];
             Token* op2 = ((Token**) (token->value))[1];
@@ -403,7 +403,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     {
         binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
 
-        if (doOptimize)
+        if (globals::doOptimize)
         {
             Token* op1 = ((Token**) (token->value))[0];
             Token* op2 = ((Token**) (token->value))[1];
@@ -425,7 +425,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     {
         binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
 
-        if (doOptimize)
+        if (globals::doOptimize)
         {
             Token* op1 = ((Token**) (token->value))[0];
             Token* op2 = ((Token**) (token->value))[1];
@@ -447,7 +447,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     {
         binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
 
-        if (doOptimize)
+        if (globals::doOptimize)
         {
             Token* op1 = ((Token**) (token->value))[0];
             Token* op2 = ((Token**) (token->value))[1];
@@ -469,7 +469,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     {
         binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
 
-        if (doOptimize)
+        if (globals::doOptimize)
         {
             Token* op1 = ((Token**) (token->value))[0];
             Token* op2 = ((Token**) (token->value))[1];
@@ -491,7 +491,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     {
         binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
 
-        if (doOptimize)
+        if (globals::doOptimize)
         {
             Token* op1 = ((Token**) (token->value))[0];
             Token* op2 = ((Token**) (token->value))[1];
@@ -513,7 +513,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     {
         binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
 
-        if (doOptimize)
+        if (globals::doOptimize)
         {
             Token* op1 = ((Token**) (token->value))[0];
             Token* op2 = ((Token**) (token->value))[1];
@@ -535,7 +535,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     {
         unarySatisfy(token, TokenType::BOOL, RIGHT, statement);
 
-        if (doOptimize)
+        if (globals::doOptimize)
         {
             Token* op = ((Token**) (token->value))[0];
 
@@ -676,7 +676,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
         }
         
         // create a temporary SyntaxTree for the scope and move it to the SyntaxTree
-        SyntaxTree scopeTree = SyntaxTree(std::move(scopeStatements), doOptimize);
+        SyntaxTree scopeTree = SyntaxTree(std::move(scopeStatements));
 
         // parse the new SyntaxTree recursively
         //scopeTree.parse(DO_POP_SCOPE);

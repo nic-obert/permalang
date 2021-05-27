@@ -62,9 +62,6 @@ namespace syntax_tree
         pvm::ByteList byteList;
 
 
-        bool doOptimize;
-
-
         void parseStatement(Statement* statement);
 
         // satisfy the requirements of a Token
@@ -88,8 +85,8 @@ namespace syntax_tree
         
         Statements statements;
         
-        SyntaxTree(Tokens::TokenList& tokens, bool doOptimize = false);
-        SyntaxTree(Statements&& statements, bool doOptimize = false);
+        SyntaxTree(Tokens::TokenList& tokens);
+        SyntaxTree(Statements&& statements);
        
         Tokens::Token* getHighestPriority(Tokens::Token* root);
 

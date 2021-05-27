@@ -7,23 +7,10 @@
 
 
 using namespace preprocessor;
+using namespace string_utils;
 
 
-static inline size_t indexOfChar(std::string& string, size_t beginning, char c)
-{
-    for (; string[beginning] != c; beginning++);
-    return beginning;
-}
-
-
-static inline size_t indexOfNotChar(std::string& string, size_t beginning, char c)
-{
-    for (; string[beginning] == c; beginning++);
-    return beginning;
-}
-
-
-static const std::unordered_map<std::string, Preps> preprocessorMap = std::unordered_map<std::string, Preps>
+static const auto preprocessorMap = std::unordered_map<std::string, Preps>
 ({
     {"define",  Preps::DEFINE},
     {"include", Preps::INCLUDE},
@@ -32,25 +19,89 @@ static const std::unordered_map<std::string, Preps> preprocessorMap = std::unord
 });
 
 
-static void preprocessorInclude(std::string& script, size_t& index)
+static void preprocessorInclude(std::string& script, size_t& hashIndex)
 {
     #define INCLUDE_LENGTH 8
     
     // search for the first character after spaces
-    size_t enclosureIndex = indexOfNotChar(script, index + INCLUDE_LENGTH, ' ');
+    const size_t enclosureIndex = indexOfNotChar(script, hashIndex + INCLUDE_LENGTH, ' ');
+
+    // content of the file to include
+    std::string file;
 
     if (script[enclosureIndex] == '<')
     {
         // search in global include directory
+
+    // get file path
+
+        const size_t enclosureClose = indexOfChar(script, enclosureIndex + 1, '>');
+
+        // allocate a char array with the size of the file name
+        const size_t nameLength = enclosureClose - enclosureIndex - 1;
+
+        const size_t includePathLength = strlen(globals::INCLUDE_PATH);
+
+        // + 2 to make space for the null termination character and the / in the path name
+        const size_t filePathLength = includePathLength + nameLength + 2;
+        char filePath[filePathLength];
+
+        strcpy(filePath, globals::INCLUDE_PATH);
+        filePath[includePathLength] = '/';
+
+        // extract file name from enclosure
+        strncpy(filePath + includePathLength + 1, script.c_str() + enclosureIndex + 1, nameLength);
+        filePath[filePathLength] = '\0';
+
+    // read file
+
+        if (!file_utils::loadFile(filePath, file))
+        {
+            errors::FileReadError(filePath);
+        }
+
+    // remove the #include statement until the end of the line
+
+        const size_t lineEnd = indexOfChar(script, enclosureClose, '\n');
+        script.erase(hashIndex, lineEnd - hashIndex);
+
     }
     else if (script[enclosureIndex] == '"')
     {
         // search in relative path
+    
+    // get file path
+
+        const size_t enclosureClose = indexOfChar(script, enclosureIndex, '"');
+
+        const size_t filePathLength = enclosureClose - enclosureIndex - 1;
+        char filePath[filePathLength + 1];
+
+        strncpy(filePath, script.c_str() + enclosureIndex + 1, filePathLength);
+        filePath[filePathLength] = '\0';
+
+    // read file
+
+        if (!file_utils::loadFile(filePath, file))
+        {
+            errors::FileReadError(filePath);
+        }
+
+    // remove the #include statement until the end of the line
+
+        const size_t lineEnd = indexOfChar(script, enclosureClose, '\n');
+        script.erase(hashIndex, lineEnd - hashIndex);
+
     }
     else
     {
         errors::InvalidIncludeEnclosureError(script[enclosureIndex]);
     }
+
+    // include the loaded file
+
+    script.insert(hashIndex, file);    
+
 }
 
 
@@ -59,16 +110,17 @@ void preprocessor::process(std::string& script)
     for (size_t i = 0; script[i] != '\0'; i++)
     {   
         // search for a '#' after a newline
-        if (script[i] != '#' || script[i-1] != '\n')
+        if ((script[i] != '#' || script[i-1] != '\n')
+            && i != 0)
         {
             continue;
         }
 
         // get the preprocessor name
 
-        size_t pIndex = i+1;
-        size_t spaceIndex = indexOfChar(script, pIndex, ' ');
-        size_t length = spaceIndex - pIndex;
+        const size_t pIndex = i+1;
+        const size_t spaceIndex = indexOfChar(script, pIndex, ' ');
+        const size_t length = spaceIndex - pIndex;
 
         char pName[length + 1];
         strncpy(pName, script.c_str() + pIndex, length);
@@ -88,6 +140,7 @@ void preprocessor::process(std::string& script)
         
         } // switch(Preps)
 
-    }
+    } // for (char in script)
+    
 }
 

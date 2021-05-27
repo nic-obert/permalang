@@ -66,7 +66,7 @@ const char* keywords::keywordName(OpCodes keyword)
     }
     
     std::string error("Undefined keyword: ");
-    error += (int) keyword;
+    error += (char) keyword;
     errors::UnexpectedBehaviourError(std::move(error));
     return nullptr;
 }

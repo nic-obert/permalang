@@ -62,9 +62,11 @@ std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
         
         case OpCode::EXIT:
         {
-            const char* exitCode = charToASCII(bytes[i]);
+            std::string exitCode;
+            string_utils::byteToString(bytes[i], exitCode);
+
             stream << "exit: " << exitCode << '\n';
-            free((void*) exitCode);
+            
             i ++;
             // breaking the switch statement means breaking the while loop
             break;

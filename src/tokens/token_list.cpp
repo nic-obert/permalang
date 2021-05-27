@@ -483,7 +483,7 @@ TokenList::TokenList(std::string& script)
             size_t tmpIndex = i - 1;
             for (; cString[tmpIndex] != '\n'; tmpIndex--);
 
-            unsigned int length = i - tmpIndex;
+            size_t length = i - tmpIndex;
             const char* start = cString + tmpIndex;
 
             // find the end of the string

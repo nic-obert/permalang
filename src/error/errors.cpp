@@ -99,3 +99,10 @@ void errors::InvalidIncludeEnclosureError(char c)
     exit(EXIT_FAILURE);
 }
 
+
+void errors::FileReadError(const char* file)
+{
+    std::cerr << "[File Read Error] Could not read file \"" << file << '"' << std::endl;
+    exit(EXIT_FAILURE);
+}
+

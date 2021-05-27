@@ -5,14 +5,14 @@
 using namespace Tokens;
 
 
-Token::Token(TokenType type, unsigned int priority, OpCodes opCode, Value value) 
+Token::Token(TokenType type, size_t priority, OpCodes opCode, Value value) 
 : type(type), priority(priority), value(value), opCode(opCode)
 {
     
 }
 
 
-Token::Token(TokenType type, unsigned int priority, OpCodes opCode) 
+Token::Token(TokenType type, size_t priority, OpCodes opCode) 
 : type(type), priority(priority), value(0), opCode(opCode)
 {
     

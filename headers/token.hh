@@ -44,7 +44,7 @@ namespace Tokens
     public:
 
         TokenType type;
-        unsigned int priority;
+        size_t priority;
         Value value;
 
         OpCodes opCode;
@@ -52,8 +52,8 @@ namespace Tokens
         Token* prev = nullptr;
         Token* next = nullptr;
 
-        Token(TokenType type, unsigned int priority, OpCodes opCode, Value value);
-        Token(TokenType type, unsigned int priority, OpCodes opCode);
+        Token(TokenType type, size_t priority, OpCodes opCode, Value value);
+        Token(TokenType type, size_t priority, OpCodes opCode);
 
         ~Token();
 
