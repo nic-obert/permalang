@@ -8,7 +8,7 @@
 using namespace Tokens;
 
 
-#define AddToken add(token); token = nullptr;
+#define AddToken() add(token); token = nullptr;
 
 
 
@@ -71,11 +71,11 @@ TokenList::TokenList(std::string& script)
                 {
                     token->opCode = OpCodes::LOGICAL_AND;
                     token->priority = AND_P + currentPriority;
-                    AddToken;
+                    AddToken();
                     continue;
                 }
 
-                AddToken;
+                AddToken();
                 break;
 
             } // case ADDRESS_OF
@@ -101,7 +101,7 @@ TokenList::TokenList(std::string& script)
                         }
                         
                         // char is not a digit
-                        AddToken;               
+                        AddToken();               
 
                         break;
                     } // case INT
@@ -112,7 +112,7 @@ TokenList::TokenList(std::string& script)
                         // terminate string
                         if (c == '"')
                         {
-                            AddToken;
+                            AddToken();
                             continue;
                         }
 
@@ -162,13 +162,13 @@ TokenList::TokenList(std::string& script)
                                 delete (std::string*) token->value;
 
                                 token->value = _value;
-                                AddToken;
+                                AddToken();
                                 break;
                             }
 
                             // if word is not a keyword it's a reference
                             token->opCode = OpCodes::REFERENCE;
-                            AddToken;
+                            AddToken();
                         } else {
                             // if word is a keyword instead
                             token->type = TokenType::KEYWORD;
@@ -178,7 +178,7 @@ TokenList::TokenList(std::string& script)
                             // delete the string value since it won't be used anymore
                             delete (std::string*) token->value;
 
-                            AddToken;
+                            AddToken();
                         }
 
                         break;
@@ -191,7 +191,7 @@ TokenList::TokenList(std::string& script)
                         {
                             token->priority = OR_P + currentPriority;
                             token->opCode = OpCodes::LOGICAL_OR;
-                            AddToken;
+                            AddToken();
                             continue;
                         }
 
@@ -211,17 +211,17 @@ TokenList::TokenList(std::string& script)
                     token->type = TokenType::NONE;
                     token->priority = ASSIGNMENT_P + currentPriority;
                     token->opCode = OpCodes::ASSIGNMENT_ADD;
-                    AddToken;
+                    AddToken();
                     continue;
                 } else if (c == '+')
                 {
                     token->type = TokenType::NONE;
                     token->priority = INCREMEN_P + currentPriority;
                     token->opCode = OpCodes::ARITHMETICAL_INC;
-                    AddToken;
+                    AddToken();
                     continue;
                 }
-                AddToken;
+                AddToken();
                 break;
             } // case ARITHMETICAL_SUM
             
@@ -232,17 +232,17 @@ TokenList::TokenList(std::string& script)
                     token->type = TokenType::NONE;
                     token->priority = ASSIGNMENT_P + currentPriority;
                     token->opCode = OpCodes::ARITHMETICAL_SUB;
-                    AddToken;
+                    AddToken();
                     continue;
                 } else if (c == '-')
                 {
                     token->type = TokenType::NONE;
                     token->priority = DECREMENT_P + currentPriority;
                     token->opCode = OpCodes::ARITHMETICAL_DEC;
-                    AddToken;
+                    AddToken();
                     continue;
                 }
-                AddToken;
+                AddToken();
                 break;
             } // case ARITHMETICAL_SUB
             
@@ -253,10 +253,10 @@ TokenList::TokenList(std::string& script)
                     token->type = TokenType::NONE;
                     token->priority = ASSIGNMENT_P + currentPriority;
                     token->opCode = OpCodes::ASSIGNMENT_MUL;
-                    AddToken;
+                    AddToken();
                     continue;
                 }
-                AddToken;
+                AddToken();
                 break;
             } // case ARITHMETICAL_MUL
 
@@ -267,10 +267,10 @@ TokenList::TokenList(std::string& script)
                     token->type = TokenType::NONE;
                     token->priority = ASSIGNMENT_P + currentPriority;
                     token->opCode = OpCodes::ASSIGNMENT_DIV;
-                    AddToken;
+                    AddToken();
                     continue;
                 }
-                AddToken;
+                AddToken();
                 break;
             } // case ARITHMETICAL_DIV
 
@@ -281,10 +281,10 @@ TokenList::TokenList(std::string& script)
                     token->type = TokenType::NONE;
                     token->priority = ASSIGNMENT_P + currentPriority;
                     token->opCode = OpCodes::ASSIGNMENT_POW;
-                    AddToken;
+                    AddToken();
                     continue;
                 }
-                AddToken;
+                AddToken();
                 break;
             }
 
@@ -298,11 +298,11 @@ TokenList::TokenList(std::string& script)
                     token->type = TokenType::NONE;
                     token->priority = EQUALITY_P + currentPriority;
                     token->opCode = OpCodes::LOGICAL_EQ;
-                    AddToken;
+                    AddToken();
                     continue;
                 }
                 
-                AddToken;
+                AddToken();
                 break;
             } // case ASSIGNMENT_ASSIGN
 
@@ -316,11 +316,11 @@ TokenList::TokenList(std::string& script)
                     token->type = TokenType::NONE;
                     token->priority = INEQUALITY_P + currentPriority;
                     token->opCode = OpCodes::LOGICAL_NOT_EQ;
-                    AddToken;
+                    AddToken();
                     continue;
                 }
                 
-                AddToken;
+                AddToken();
                 break;
             } // case LOGICAL_NOT
 
@@ -390,7 +390,7 @@ TokenList::TokenList(std::string& script)
         case ';':
         {
             token = new Token(TokenType::ENDS, LITERAL_P, OpCodes::NO_OP);
-            AddToken;
+            AddToken();
             continue;
         }
         
@@ -406,7 +406,7 @@ TokenList::TokenList(std::string& script)
             currentPriority += PARENTHESIS_P;
 
             token = new Token(TokenType::SCOPE, SCOPE_P + currentPriority, OpCodes::PUSH_SCOPE);
-            AddToken;
+            AddToken();
             continue;
         }
         
@@ -416,7 +416,7 @@ TokenList::TokenList(std::string& script)
 
             currentPriority -= PARENTHESIS_P;
 
-            AddToken;
+            AddToken();
             continue;
         }
         
@@ -425,28 +425,30 @@ TokenList::TokenList(std::string& script)
             // increment token priority to evaluate stuff in parenthesis first
             currentPriority += PARENTHESIS_P;
 
-            // function call
+            // function call when text token before open parenthesis
             if (last->type == TokenType::TEXT)
             {
                 token = new Token(TokenType::NONE, currentPriority, OpCodes::CALL);
+                AddToken();
                 continue;
             }
 
             // ordinary parenthesis
             token = new Token(TokenType::PARENTHESIS, currentPriority, OpCodes::PARENTHESIS, '(');
             
-            AddToken;
+            AddToken();
             continue;
         }
 
         case ')':
         {
-            // decrement token priority
+            // decrement token priority after parenthesis
             currentPriority -= PARENTHESIS_P;
 
+            // use a closing parentheis token for both ordinary parenthesis and function calls
             token = new Token(TokenType::PARENTHESIS, 0, OpCodes::PARENTHESIS, ')');
             
-            AddToken;
+            AddToken();
             continue;
         }
 

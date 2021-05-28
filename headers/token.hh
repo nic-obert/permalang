@@ -30,6 +30,7 @@ namespace Tokens
         ENDS        = 9, // end of statement
         DOUBLE      = 10,
         LONG        = 11,
+        FUNCTION    = 12,
 
     } TokenType;
 

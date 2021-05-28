@@ -43,18 +43,21 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         case TokenType::TEXT:
         case TokenType::STRING: 
         {
-            stream << '<' << token.type << ": " << *((std::string*) token.value) << " (" << token.priority << ")>";
+            stream << '<' << token.type << ": " << *((std::string*) token.value)
+                << " (" << token.priority << ")>";
             return stream;
         }
 
         case TokenType::BOOL:
         {
-            stream << '<' << token.type << ": " << ((token.value == 0) ? "false" : "true") << " (" << token.priority << ")>";
+            stream << '<' << token.type << ": " << ((token.value == 0) ? "false" : "true")
+                << " (" << token.priority << ")>";
             return stream;
         }
 
         default:
-            return stream << '<' << token.type << ": " << token.value << " (" << token.priority << ")>";
+            return stream << '<' << token.type << ": " << token.value << " ("
+                << token.priority << ")>";
 
         } // switch (token.type)
 
@@ -79,11 +82,13 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         case TokenType::FLOAT:
         case TokenType::DOUBLE:
         case TokenType::LONG:
-            stream << '<' << token.type << "*: " << *(std::string*) token.value << " (" << token.priority << ")>";
+            stream << '<' << token.type << "*: " << *(std::string*) token.value
+                << " (" << token.priority << ")>";
             return stream;
         
         case TokenType::TEXT:
-            stream << '<' << TokenType::NONE << "*: " << *(std::string*) token.value << " (" << token.priority << ")>";
+            stream << '<' << TokenType::NONE << "*: " << *(std::string*) token.value
+                << " (" << token.priority << ")>";
             return stream;
         }
 
@@ -183,7 +188,8 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         switch (token.type)
         {
         case TokenType::KEYWORD:
-            return stream << '<' << TokenType::KEYWORD << ": " << keywords::keywordName(token.opCode) << " (" << token.priority << ")>";
+            return stream << '<' << TokenType::KEYWORD << ": "
+                << keywords::keywordName(token.opCode) << " (" << token.priority << ")>";
     
         case TokenType::ENDS:
             return stream;
@@ -198,7 +204,8 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
     } // switch (token.opCode)
 
     // if token hasn't been already handled, throw error
-    std::cerr << "Undefined Token: <type=" << token.type << ", value=" << token.value << ", opCode=" << token.opCode << ", priority=" << token.priority << '>' << std::endl;
+    std::cerr << "Undefined Token: <type=" << token.type << ", value=" << token.value
+        << ", opCode=" << token.opCode << ", priority=" << token.priority << '>' << std::endl;
     exit(EXIT_FAILURE);
 }
 

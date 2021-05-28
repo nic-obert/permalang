@@ -1,5 +1,6 @@
 #include "syntax_tree.hh"
 #include "errors.hh"
+#include "symbol_table.hh"
 
 
 // for unary operators
@@ -22,6 +23,35 @@ static const char* const sides[2] =
 
 using namespace Tokens;
 using namespace syntax_tree;
+using namespace symbol_table;
+
+
+static inline void assertToken(Token* caller, Token* got, TokenType required, Side side)
+{
+    if (got == nullptr)
+    {
+        errors::ExpectedTokenError(*caller, required, sides[side]);
+    }
+    
+    if (got->type != required)
+    {
+        errors::TypeError(*caller, required, *got, sides[side]);
+    }
+}
+
+
+static inline void assertToken(Token* caller, Token* got, OpCodes required, Side side)
+{
+    if (got == nullptr)
+    {
+        errors::ExpectedTokenError(*caller, required, sides[side]);
+    }
+    
+    if (got->opCode != required)
+    {
+        errors::TypeError(*caller, required, *got, sides[side]);
+    }
+}
 
 
 /*
@@ -33,7 +63,7 @@ static TokenType tokenTypeOf(const Token* token)
 {
     if (token->opCode == OpCodes::REFERENCE)
     {
-        return symbol_table::SymbolTable::get((std::string*) token->value)->type;
+        return SymbolTable::get((std::string*) token->value)->type;
     }
     
     return token->type;
@@ -141,9 +171,9 @@ static void declarationSatisfy(Token* token, TokenType type, Statement* statemen
 
     token->opCode = OpCodes::REFERENCE;
 
-    symbol_table::SymbolTable::declare(
+    SymbolTable::declare(
         (std::string*) token->value,
-        new symbol_table::Symbol(0, token->type)
+        new Symbol(0, token->type)
     );
 
 }
@@ -152,31 +182,16 @@ static void declarationSatisfy(Token* token, TokenType type, Statement* statemen
 static void assignSatisfy(Token* token, Statement* statement)
 {
 
-    if (token->prev == nullptr)
-    {
-        errors::ExpectedTokenError(*token, OpCodes::REFERENCE, sides[LEFT]);
-    }    
-    else if (token->next == nullptr)
-    {
-        errors::ExpectedTokenError(*token, OpCodes::REFERENCE, sides[RIGHT]);
-    }
-
-    if (token->prev->opCode != OpCodes::REFERENCE)
-    {
-        errors::TypeError(*token, OpCodes::REFERENCE, *token->prev, sides[LEFT]);
-    }
-    else if (tokenTypeOf(token->next) != tokenTypeOf(token->prev))
-    {
-        errors::TypeError(*token, OpCodes::REFERENCE, *token->next, sides[RIGHT]);
-    }
+    assertToken(token, token->prev, OpCodes::REFERENCE, LEFT);
+    assertToken(token, token->next, tokenTypeOf(token->prev), RIGHT);
 
     // set token's value to an array of its operands
     token->value = toValue((new Token*[2] {token->prev, token->next}));
 
     // update symbol table
-    symbol_table::SymbolTable::assign(
+    SymbolTable::assign(
         (std::string*) token->prev->value,
-        new symbol_table::Symbol(token->next->value, token->prev->type)
+        new Symbol(token->next->value, token->prev->type)
     );
 
     // type of assignment operator is the type of the variable it has assigned a value to
@@ -192,15 +207,7 @@ static void assignSatisfy(Token* token, Statement* statement)
 // increment ++, decrement -- operators
 static void incDecSatisfy(Token* token, Statement* statement)
 {
-    if (token->prev == nullptr)
-    {
-        errors::ExpectedTokenError(*token, OpCodes::REFERENCE, sides[LEFT]);
-    }
-    if (token->prev->opCode != OpCodes::REFERENCE)
-    {
-        errors::TypeError(*token, OpCodes::REFERENCE, *token->prev, sides[LEFT]);
-    }
-
+    assertToken(token, token->prev, OpCodes::REFERENCE, LEFT);
 
     token->value = toValue(new Token*[1] { token->prev });
     token->type = tokenTypeOf(token->prev);
@@ -212,14 +219,7 @@ static void incDecSatisfy(Token* token, Statement* statement)
 
 static void addressOfSatisfy(Token* token, Statement* statement)
 {
-    if (token->next == nullptr)
-    {
-        errors::ExpectedTokenError(*token, OpCodes::REFERENCE, sides[RIGHT]);
-    }
-    if (token->next->opCode != OpCodes::REFERENCE)
-    {
-        errors::TypeError(*token, OpCodes::REFERENCE, *token->next, sides[RIGHT]);
-    } 
+    assertToken(token, token->next, OpCodes::REFERENCE, RIGHT);
     
     token->value = toValue(new Token*[1] { token->next });
     token->type = tokenTypeOf(token->next);
@@ -588,7 +588,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     case OpCodes::PUSH_SCOPE:
     {
         // first push the scope to the SymbolTable
-        symbol_table::SymbolTable::pushScope(DO_INHERIT);
+        SymbolTable::pushScope(DO_INHERIT);
 
         // transfer the part of the statement which is in the new scope
         // to another statement
@@ -683,7 +683,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
 
         // pop the Scope once parsed its SyntaxTree
-        symbol_table::SymbolTable::popScope();
+        SymbolTable::popScope();
 
         // set the token's value to the newly generated tac
         //token->value = toValue(scopeTac);
@@ -728,20 +728,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     case OpCodes::FLOW_WHILE:
     {
         Token* condition = token->next;
-
-        // check if a boolean condition is provided
-        if (condition == nullptr)
-        {
-            std::cerr << "Missing boolean condidion after if keyword" << std::endl;
-            exit(1);
-        }
-
-        // check if condition is actually a boolean statement
-        if (condition->type != TokenType::BOOL)
-        {
-            std::cerr << "Expected token of type " << TokenType::BOOL << " after " << token->opCode << " keyword, but " << condition << " was provided" << std::endl;
-            exit(EXIT_FAILURE);
-        }
+        assertToken(token, condition, TokenType::BOOL, RIGHT);
 
         Token* body = condition->next;
 
@@ -800,6 +787,108 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     case OpCodes::SYSTEM_LOAD:
     {
         unarySatisfy(token, TokenType::INT, RIGHT, statement);
+        break;
+    }
+
+
+    case OpCodes::CALL:
+    {
+        Token* name = token->prev;
+        assertToken(token, name, TokenType::TEXT, LEFT);
+
+        Token* returnType = name->prev;
+        assertToken(name, returnType, TokenType::KEYWORD, LEFT);
+        
+        // TODO get eventual modifiers
+
+    // get the function parameters
+
+        auto params = std::vector<Parameter>();
+
+        // push the new scope the parameters will belong to
+        SymbolTable::pushScope(false);
+
+        // extract parameters
+        Token* tok = token->next;
+        for (size_t depth = 1; tok != nullptr;)
+        {
+            // increase depth for every opening parentheies
+            if (tok->opCode == OpCodes::CALL
+                || (tok->opCode == OpCodes::PARENTHESIS && tok->value == '('))
+            {
+                depth ++;
+            }
+            else if (tok->opCode == OpCodes::PARENTHESIS
+                    && tok->value == ')')
+            {
+                depth --;
+
+                if (depth == 0)
+                {
+                    // on break variable tok is the closing parenthesis
+                    break;
+                }
+            }
+
+            // declare symbols for parameters and
+            // add parameters to the parameter list
+
+            if (isDeclarationOp(tok->opCode))
+            {
+                satisfyToken(statement, tok);
+                params.emplace_back(
+                    Parameter(
+                        Symbol(0, tok->type),
+                        std::move(*(std::string*) tok->value)
+                    )
+                );
+                
+                // to prevent token destructor from deleting string value
+                tok->opCode = OpCodes::NO_OP;
+                Token* tmpTok = tok->next;
+                delete tok;
+
+                tok = tmpTok; 
+            }
+
+            tok = tok->next;
+            
+        }
+        
+        // check if end of statement is reached and a closing parenthesis
+        // hasn't been found
+        if (tok == nullptr)
+        {
+            errors::MissingClosingParenthesisError(
+                *token,
+                std::string("Function named ") + *(std::string*) name->value
+                    + " is missing closing parenthesis in function call");
+        }
+
+        Token* body = tok->next;
+        assertToken(tok, body, OpCodes::PUSH_SCOPE, RIGHT);
+
+        Function* function = new Function(
+            returnType->type,
+            std::move(*(SyntaxTree*) body->value),
+            std::move(params)
+        );
+
+        SymbolTable::declare(
+            (std::string*) name->value,
+            new Symbol(toValue(function), TokenType::FUNCTION)
+        );
+
+        
+        delete returnType;
+
+        name->opCode = OpCodes::NO_OP;
+        delete name;
+
+        delete token;
+
+        delete tok;
+
         break;
     }
 

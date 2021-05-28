@@ -35,16 +35,19 @@ INSTALL_DIR_LIB=/usr/lib/permalang
 INSTALL_PCC=/usr/bin/pcc
 
 
-all: build
+all: $(TARGET)
+
 
 
 $(TARGET_DIR):
-	mkdir $(TARGET_DIR)
+	mkdir -p $(TARGET_DIR)
 
 
-build: $(PCH) $(SOURCES) $(HEADERS) $(TARGET_DIR)
+
+$(TARGET): $(PCH) $(SOURCES) $(HEADERS) $(TARGET_DIR)
 	$(CC) $(COMMON_ARGS) -o $(TARGET)
 	@echo "Build successful"
+
 
 
 builddb: $(PCH) $(SOURCES) $(HEADERS) $(TARGET_DIR)
@@ -63,9 +66,11 @@ builddb-wall: $(PCH) $(SOURCES) $(HEADERS) $(TARGET_DIR)
 	$(CC) -g $(WARNINGS_ALL) $(COMMON_ARGS_TEST) -o $(TARGET)
 
 
+
 $(PCH): $(HH)
 	@echo "Compiling headers"
 	$(CC) $(C_FLAGS) $(WARNINGS) $(HH) -o $(PCH)
+
 
 
 clean:
@@ -73,15 +78,26 @@ clean:
 	rm -f $(TARGET_DIR)/*
 
 
-install: $(TARGET)
-	sudo mkdir $(INSTALL_DIR_LIB)
-	sudo cp -f $(LIB_DIR)/* $(INSTALL_DIR_LIB)
+
+install-pcc: $(TARGET)
+	@echo "Installing pcc toolchain"
 	sudo cp -f $(TARGET) $(INSTALL_PCC)
+
+
+install-lib:
+	@echo "Installing libraries"
+	sudo mkdir -p $(INSTALL_DIR_LIB)
+	sudo cp -f $(LIB_DIR)/* $(INSTALL_DIR_LIB)
+
+
+install: install-lib install-pcc	
 	@echo "Installed successfully"
 
 
 uninstall:
+	@echo "Uninstalling libraries"
 	sudo rm -fr $(INSTALL_DIR_LIB)
+	@echo "Uninstalling pcc toolchain"
 	sudo rm -f $(INSTALL_PCC)
 	@echo "Uninstalled successfully"
 

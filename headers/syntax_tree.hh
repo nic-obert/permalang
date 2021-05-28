@@ -1,7 +1,7 @@
 #pragma once
 
-#include "symbol_table.hh"
 #include "pvm.hh"
+#include "token.hh"
 
 
 namespace syntax_tree
@@ -85,6 +85,7 @@ namespace syntax_tree
         
         Statements statements;
         
+        SyntaxTree();
         SyntaxTree(Tokens::TokenList& tokens);
         SyntaxTree(Statements&& statements);
        

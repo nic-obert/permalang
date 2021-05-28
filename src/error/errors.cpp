@@ -1,24 +1,21 @@
 #include "errors.hh"
 
 
-using namespace errors;
-
-
-void errors::UnexpectedBehaviourError(std::string&& message)
+void errors::UnexpectedBehaviourError(const std::string&& message)
 {
     std::cerr << "[Unexpected Behaviour Error] " << message << std::endl;
     exit(EXIT_FAILURE);
 }
 
 
-void errors::SyntaxError(std::string&& message)
+void errors::SyntaxError(const std::string&& message)
 {
     std::cerr << "[Syntax Error] " << message << std::endl;
     exit(EXIT_FAILURE);
 }
 
 
-void errors::TypeError(Tokens::Token& caller, Tokens::TokenType expected, const Tokens::Token& provided, const char* side)
+void errors::TypeError(const Tokens::Token& caller, Tokens::TokenType expected, const Tokens::Token& provided, const char* side)
 {
     std::cerr << "[Type Error] Expected type "
         << expected << " to the " << side << " of " << caller
@@ -27,7 +24,7 @@ void errors::TypeError(Tokens::Token& caller, Tokens::TokenType expected, const 
 }
 
 
-void errors::TypeError(Tokens::Token& caller, OpCodes expected, const Tokens::Token& provided, const char* side)
+void errors::TypeError(const Tokens::Token& caller, OpCodes expected, const Tokens::Token& provided, const char* side)
 {
     std::cerr << "[Type Error] Expected type "
         << expected << " to the " << side << " of " << caller
@@ -44,7 +41,7 @@ void errors::SymbolRedeclarationError(const symbol_table::Symbol& symbol)
 }
 
 
-void errors::UndefinedSymbolError(std::string&& name)
+void errors::UndefinedSymbolError(const std::string&& name)
 {
     std::cerr << "[Undefined Symbol Error] Symbol name " << name
         << " hasn't been declared in any reachable scope" << std::endl;
@@ -52,7 +49,7 @@ void errors::UndefinedSymbolError(std::string&& name)
 }
 
 
-void errors::InvalidCharacterError(std::string&& line, char character)
+void errors::InvalidCharacterError(const std::string&& line, char character)
 {
     std::cerr << "[Invalid Character Error] Invalid character '" << character
         << "' in line:\n" << line << std::endl;
@@ -60,7 +57,7 @@ void errors::InvalidCharacterError(std::string&& line, char character)
 }
 
 
-void errors::ExpectedTokenError(Tokens::Token& caller, Tokens::TokenType expected, const char* side)
+void errors::ExpectedTokenError(const Tokens::Token& caller, Tokens::TokenType expected, const char* side)
 {
     std::cerr << "[Expected Token Error] Expected type " << expected
         << " to the " << side << " of " << caller << std::endl;
@@ -68,7 +65,7 @@ void errors::ExpectedTokenError(Tokens::Token& caller, Tokens::TokenType expecte
 }
 
 
-void errors::ExpectedTokenError(Tokens::Token& caller, OpCodes expected, const char* side)
+void errors::ExpectedTokenError(const Tokens::Token& caller, OpCodes expected, const char* side)
 {
     std::cerr << "[Expected Token Error] Expected type " << expected
         << " to the " << side << " of " << caller << std::endl;
@@ -76,7 +73,7 @@ void errors::ExpectedTokenError(Tokens::Token& caller, OpCodes expected, const c
 }
 
 
-void errors::ZeroDivisionError(Tokens::Token& caller, Tokens::Token& op1, Tokens::Token& op2)
+void errors::ZeroDivisionError(const Tokens::Token& caller, const Tokens::Token& op1, const Tokens::Token& op2)
 {
     std::cerr << "[Zero Division Error] Zero division performed by operator "
         << caller << " on operands: " << op1 << ", " << op2 << std::endl;
@@ -105,4 +102,13 @@ void errors::FileReadError(const char* file)
     std::cerr << "[File Read Error] Could not read file \"" << file << '"' << std::endl;
     exit(EXIT_FAILURE);
 }
+
+
+void errors::MissingClosingParenthesisError(const Tokens::Token& caller, const std::string&& message)
+{
+    std::cerr << "[Missing Closing Parenthesis Error] Missing closing parenthesis required by "
+        << caller << '\n' << message << std::endl;
+    exit(EXIT_FAILURE);
+}
+
 

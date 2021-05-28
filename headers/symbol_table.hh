@@ -3,6 +3,7 @@
 #include "pch.hh"
 
 #include "token.hh"
+#include "syntax_tree.hh"
 
 
 namespace symbol_table
@@ -104,6 +105,36 @@ namespace symbol_table
         static void clear();
 
         static size_t getStackPointer();
+
+    };
+
+
+    typedef struct Parameter
+    {
+        Symbol symbol;
+        std::string name;
+
+        Parameter(Symbol&& symbol, std::string&& name);
+
+    } Parameter;
+
+
+    class Function
+    {
+    private:
+
+        Tokens::TokenType returnType;
+        
+        syntax_tree::SyntaxTree body;
+
+        std::vector<Parameter> parameters;
+
+        // modifiers
+
+    public:
+
+        Function();
+        Function(Tokens::TokenType returnType, syntax_tree::SyntaxTree&& body, std::vector<Parameter>&& parameters);
 
     };
 

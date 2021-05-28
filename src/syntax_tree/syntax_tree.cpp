@@ -1,8 +1,15 @@
 #include "syntax_tree.hh"
+#include "symbol_table.hh"
 
 
 using namespace syntax_tree;
+using namespace symbol_table;
 
+
+SyntaxTree::SyntaxTree()
+{
+	
+}
 
 
 SyntaxTree::SyntaxTree(Statements&& statements)
@@ -15,8 +22,6 @@ SyntaxTree::SyntaxTree(Statements&& statements)
 
 SyntaxTree::SyntaxTree(Tokens::TokenList& tokens)
 {
-	using namespace Tokens;
-
 	if (tokens.first == nullptr)
 	{
 		// TODO implement errors
@@ -27,14 +32,14 @@ SyntaxTree::SyntaxTree(Tokens::TokenList& tokens)
 	// start of script
 	statements = Statements(); // linked list of Statement
 	Statement* statement = nullptr;
-	Token* token;
+	Tokens::Token* token;
 
 	// transform the TokenList to a list of Statement
-	for (Token* tok = tokens.first; tok != nullptr; tok = tok->next)
+	for (Tokens::Token* tok = tokens.first; tok != nullptr; tok = tok->next)
 	{
 
 		// end of statement --> add statement to list of statements
-		if (tok->type == TokenType::ENDS)
+		if (tok->type == Tokens::TokenType::ENDS)
 		{
 			// don't add empty statements
 			if (statement != nullptr && statement->root != nullptr)
@@ -64,8 +69,6 @@ SyntaxTree::SyntaxTree(Tokens::TokenList& tokens)
 // returns the token with the highest priority in the statement
 Tokens::Token* SyntaxTree::getHighestPriority(Tokens::Token* root) 
 {
-	using namespace Tokens;
-
 	// check for empty statements
 	if (root == nullptr)
 	{
@@ -92,8 +95,6 @@ Tokens::Token* SyntaxTree::getHighestPriority(Tokens::Token* root)
 
 pvm::ByteCode SyntaxTree::parseToByteCode()
 {
-	using namespace symbol_table;
-
 	byteList = pvm::ByteList();
 
 	SymbolTable::init();
@@ -113,29 +114,21 @@ pvm::ByteCode SyntaxTree::parseToByteCode()
 // pushes the size of the scope onto the stack
 static void insertInitialPushInstructions(pvm::ByteList& byteList)
 {
-	using namespace symbol_table;
-	using namespace pvm;
-
 	// insert in reverse order
-	byteList.insertFisrt(new ByteNode(SymbolTable::getScope()->localSymbolsSize));
-	byteList.insertFisrt(new ByteNode(OpCode::PUSH_BYTES));
+	byteList.insertFisrt(new pvm::ByteNode(SymbolTable::getScope()->localSymbolsSize));
+	byteList.insertFisrt(new pvm::ByteNode(pvm::OpCode::PUSH_BYTES));
 }
 
 
 static void appendFinalPopInstructions(pvm::ByteList& byteList)
 {
-	using namespace symbol_table;
-	using namespace pvm;
-
-	byteList.add(new ByteNode(OpCode::POP));	
-	byteList.add(new ByteNode(SymbolTable::getScope()->localSymbolsSize));
+	byteList.add(new pvm::ByteNode(pvm::OpCode::POP));	
+	byteList.add(new pvm::ByteNode(SymbolTable::getScope()->localSymbolsSize));
 }
 
 
 void SyntaxTree::parseToByteCode(bool doPopScope)
 {
-	using namespace symbol_table;
-
 	/*
 		loop through every statement
 		for every statement, parse it and build a tree out of it
@@ -193,7 +186,6 @@ std::ostream& operator<<(std::ostream& stream, SyntaxTree const& tree)
 
 void SyntaxTree::generateByteCode(bool doPopScope)
 {
-	using namespace symbol_table;
 	using namespace Tokens;
 
 	for (Statement* statement = statements.start; statement != nullptr; statement = statement->next)

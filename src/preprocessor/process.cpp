@@ -51,7 +51,7 @@ static void preprocessorInclude(std::string& script, size_t& hashIndex)
 
         // extract file name from enclosure
         strncpy(filePath + includePathLength + 1, script.c_str() + enclosureIndex + 1, nameLength);
-        filePath[filePathLength] = '\0';
+        filePath[filePathLength - 1] = '\0';
 
     // read file
 
@@ -89,7 +89,8 @@ static void preprocessorInclude(std::string& script, size_t& hashIndex)
 
     // remove the #include statement until the end of the line
 
-        const size_t lineEnd = indexOfChar(script, enclosureClose, '\n');
+        // + 1 to remove the newline character
+        const size_t lineEnd = indexOfChar(script, enclosureClose, '\n') + 1;
         script.erase(hashIndex, lineEnd - hashIndex);
 
     }
