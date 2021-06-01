@@ -10,7 +10,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/target/pcc",
-            "args": ["script.pf"],
+            "args": ["impl/script.pf"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
@@ -28,11 +28,32 @@
           },
 
           {
-            "name": "Debug",
+            "name": "Debug Compile",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/target/pcc",
-            "args": ["script.pf"],
+            "args": ["impl/script.pf"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+              {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+              }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+          },
+
+          {
+            "name": "Debug Execute",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/target/pcc",
+            "args": ["impl/script.pf.pfx", "-x"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

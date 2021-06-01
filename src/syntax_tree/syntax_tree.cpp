@@ -66,19 +66,19 @@ SyntaxTree::SyntaxTree(Tokens::TokenList& tokens)
 }
 
 
-// returns the token with the highest priority in the statement
 Tokens::Token* SyntaxTree::getHighestPriority(Tokens::Token* root) 
 {
-	// check for empty statements
-	if (root == nullptr)
-	{
-		return nullptr;
-	}
+	// empty statements are checked by the calling function
 
 	for (Tokens::Token* token = root; token != nullptr; token = token->next)
 	{   
-		// evaluate the scope first since they are required as operands by certain operators
-		if (isScope(token->opCode) && token->priority != 0)
+		// evaluate scope operators first since they are required as operands by certain operators
+		// evaluate function declaration operators first since they must have higher priority
+		// than their parameters
+		if (
+			(isScope(token->opCode) || token->opCode == OpCodes::FUNC_DECLARARION)
+			&& token->priority != 0
+			)
 		{
 			return token;
 		}
@@ -101,8 +101,6 @@ pvm::ByteCode SyntaxTree::parseToByteCode()
 
 	// since this is the global scope, pop the symbols at the end
 	parseToByteCode(DONT_POP_SCOPE);
-
-
 
 	SymbolTable::clear();
 

@@ -60,7 +60,7 @@ pcc -O <source.pf>
 ```
 Run executable
 ```bash
-pcc <executable>
+pcc <executable> -x
 ```
 
 <br>

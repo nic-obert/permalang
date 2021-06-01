@@ -45,6 +45,9 @@ namespace errors
     void FileReadError(const char* file);
 
 
+    void FileWriteError(const char* file);
+
+
     void MissingClosingParenthesisError(const Tokens::Token& caller, const std::string&& message);
 
 };

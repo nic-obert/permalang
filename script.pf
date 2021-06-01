@@ -1,4 +1,0 @@
-#include <stdlib.pf>
-
-int i = 2+2;
-int b = i - 1;

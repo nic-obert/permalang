@@ -10,7 +10,7 @@ using namespace preprocessor;
 using namespace string_utils;
 
 
-static const auto preprocessorMap = std::unordered_map<std::string, Preps>
+static const auto preprocessorMap = std::unordered_map<std::string_view, Preps>
 ({
     {"define",  Preps::DEFINE},
     {"include", Preps::INCLUDE},
@@ -110,9 +110,13 @@ void preprocessor::process(std::string& script)
 {
     for (size_t i = 0; script[i] != '\0'; i++)
     {   
-        // search for a '#' after a newline
-        if ((script[i] != '#' || script[i-1] != '\n')
-            && i != 0)
+        // search for a '#' after a newline or at the beginning of the file
+        if (!(
+            script[i] == '#'
+            && (i == 0
+                || script[i - 1] == '\n'
+                )
+            ))
         {
             continue;
         }
@@ -123,14 +127,12 @@ void preprocessor::process(std::string& script)
         const size_t spaceIndex = indexOfChar(script, pIndex, ' ');
         const size_t length = spaceIndex - pIndex;
 
-        char pName[length + 1];
-        strncpy(pName, script.c_str() + pIndex, length);
-        pName[length] = '\0';
+        const std::string_view pName(script.c_str() + pIndex, length);
 
         auto it = preprocessorMap.find(pName);
         if (it == preprocessorMap.end())
         {
-            errors::InvalidPreprocessorError(pName);
+            errors::InvalidPreprocessorError(pName.data());
         }
 
         switch (it->second)

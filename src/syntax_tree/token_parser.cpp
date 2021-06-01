@@ -1,6 +1,7 @@
 #include "syntax_tree.hh"
 #include "errors.hh"
 #include "symbol_table.hh"
+#include "keywords.hh"
 
 
 // for unary operators
@@ -574,21 +575,49 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     case OpCodes::DECLARATION_INT:
         declarationSatisfy(token, TokenType::INT, statement);
         break;
+
     case OpCodes::DECLARATION_STRING:
         declarationSatisfy(token, TokenType::STRING, statement);
         break;
+
     case OpCodes::DECLARATION_FLOAT:
         declarationSatisfy(token, TokenType::FLOAT, statement);
         break;
+
+    case OpCodes::DECLARATION_DOUBLE:
+        declarationSatisfy(token, TokenType::DOUBLE, statement);
+        break;
+
+    case OpCodes::DECLARATION_LONG:
+        declarationSatisfy(token, TokenType::LONG, statement);
+        break;
+
     case OpCodes::DECLARATION_BOOL:
         declarationSatisfy(token, TokenType::BOOL, statement);
         break;
+    
+    case OpCodes::DECLARATION_VOID:
+    {
+        // TODO check if it's a pointer declaration
+        // otherwise throw error since a variable cannot be void
+        
+        assertToken(token, token->next, OpCodes::ADDRESS_OF, RIGHT);
+
+        break;
+    }
 
     
     case OpCodes::PUSH_SCOPE:
+    case OpCodes::FUNC_BODY:
     {
-        // first push the scope to the SymbolTable
-        SymbolTable::pushScope(DO_INHERIT);
+        // push a new scope only if it's a standalone scope
+        // function bodies' scopes are pushed and popped by the function
+        // declaration operator
+        if (token->opCode == OpCodes::PUSH_SCOPE)
+        {
+            // first push the scope to the SymbolTable
+            SymbolTable::pushScope(DO_INHERIT);
+        }
 
         // transfer the part of the statement which is in the new scope
         // to another statement
@@ -675,18 +704,19 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
             }
         }
         
-        // create a temporary SyntaxTree for the scope and move it to the SyntaxTree
-        SyntaxTree scopeTree = SyntaxTree(std::move(scopeStatements));
+        // create a new SyntaxTree for the scope
+        SyntaxTree* scopeTree = new SyntaxTree(std::move(scopeStatements));
 
-        // parse the new SyntaxTree recursively
-        //scopeTree.parse(DO_POP_SCOPE);
+        scopeTree->parseToByteCode(DONT_POP_SCOPE); 
 
+        // if token is a standalone scope, pop it function
+        // bodies are popped by the function declaration operator
+        if (token->opCode == OpCodes::PUSH_SCOPE)
+        {     
+            SymbolTable::popScope();
+        }
 
-        // pop the Scope once parsed its SyntaxTree
-        SymbolTable::popScope();
-
-        // set the token's value to the newly generated tac
-        //token->value = toValue(scopeTac);
+        token->value = toValue(scopeTree);
 
         break;
     }
@@ -791,7 +821,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     }
 
 
-    case OpCodes::CALL:
+    case OpCodes::FUNC_DECLARARION:
     {
         Token* name = token->prev;
         assertToken(token, name, TokenType::TEXT, LEFT);
@@ -806,13 +836,13 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
         auto params = std::vector<Parameter>();
 
         // push the new scope the parameters will belong to
-        SymbolTable::pushScope(false);
+        SymbolTable::pushScope(DONT_INHERIT);
 
         // extract parameters
         Token* tok = token->next;
-        for (size_t depth = 1; tok != nullptr;)
+        for (size_t depth = 1; tok != nullptr; )
         {
-            // increase depth for every opening parentheies
+            // increase depth for every opening parentheies (except for function definition)
             if (tok->opCode == OpCodes::CALL
                 || (tok->opCode == OpCodes::PARENTHESIS && tok->value == '('))
             {
@@ -835,7 +865,17 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
             if (isDeclarationOp(tok->opCode))
             {
-                satisfyToken(statement, tok);
+                // satisfy each parameter before adding to the parameter list
+                // here the parameters will be declared in the symbol table
+                declarationSatisfy(
+                    tok,
+                    keywords::declarationType(tok->opCode),
+                    statement
+                );
+
+                // create a new Parameter object that will represent the just declared
+                // parameter in the symbol table.
+                // the symbol name's string is moved since it won't be used anymore by the token
                 params.emplace_back(
                     Parameter(
                         Symbol(0, tok->type),
@@ -844,11 +884,15 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
                 );
                 
                 // to prevent token destructor from deleting string value
+                // set the op code to NO_OP (whose destructor does nothing)
                 tok->opCode = OpCodes::NO_OP;
                 Token* tmpTok = tok->next;
-                delete tok;
+
+                statement->remove(tok, DELETE);
 
                 tok = tmpTok; 
+
+                continue;
             }
 
             tok = tok->next;
@@ -868,26 +912,45 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
         Token* body = tok->next;
         assertToken(tok, body, OpCodes::PUSH_SCOPE, RIGHT);
 
+        // change the op code of body to a function body operator to 
+        // satisfy it properly
+        body->opCode = OpCodes::FUNC_BODY;
+
+        // satisfy the function body's token
+        // its SyntaxTree value is needed when creating a Function object
+        satisfyToken(statement, body);
+
+        // pop the function's body's scope
+        SymbolTable::popScope();
+
+
         Function* function = new Function(
-            returnType->type,
+            keywords::declarationType(returnType->opCode),
             std::move(*(SyntaxTree*) body->value),
             std::move(params)
         );
 
+        // declare the function in the outer (usually global) scope
         SymbolTable::declare(
             (std::string*) name->value,
             new Symbol(toValue(function), TokenType::FUNCTION)
         );
 
+        // delete tokens since they won't be needed anymore
         
-        delete returnType;
+        statement->remove(returnType, DELETE);
 
+        // name is a TEXT token (hold a heap-allocated std::string* as value)
+        // changing its op code to NO_OP prevents the string to be deleted in the
+        // token's destructor
         name->opCode = OpCodes::NO_OP;
-        delete name;
+        statement->remove(name, DELETE);
 
-        delete token;
+        // remove and delete function declaration operator
+        statement->remove(token, DELETE);
 
-        delete tok;
+        // remove and delete closing parenthesis token
+        statement->remove(tok, DELETE);
 
         break;
     }
@@ -900,26 +963,15 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
 void SyntaxTree::parseStatement(Statement* statement)
 {
-    Tokens::Token* root = statement->root;
+    for (
+        Tokens::Token* root = getHighestPriority(statement->root);
+        // 0 priority or less means the statement has finished evaluating
+        root != nullptr && root->priority > 1;
+        root = getHighestPriority(statement->root)
+        )
+    {          
 
-    // parse statement
-    while (true)
-    {   
-        
-        // return to the beginning of the statement
-        while (root->prev != nullptr)
-        {
-            root = root->prev;
-        }
-
-        root = getHighestPriority(root);
-
-        if (root->priority < 1) // 0 or less
-        {
-            break;
-        }
-
-        // evaluate the Token    
+        // evaluate the Token, satisfy its requirements, declare eventual symbols   
         satisfyToken(statement, root);
 
     }

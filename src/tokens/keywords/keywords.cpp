@@ -16,6 +16,7 @@ const std::unordered_map<std::string, OpCodes> keywords::keywordsMap
     {"float",   OpCodes::DECLARATION_FLOAT},
     {"string",  OpCodes::DECLARATION_STRING},
     {"double",  OpCodes::DECLARATION_DOUBLE},
+    {"void",    OpCodes::DECLARATION_VOID},
     {"system",  OpCodes::SYSTEM},
     {"sysload", OpCodes::SYSTEM_LOAD},
 });
@@ -56,6 +57,9 @@ const char* keywords::keywordName(OpCodes keyword)
     
     case OpCodes::DECLARATION_DOUBLE:
         return "double";
+    
+    case OpCodes::DECLARATION_VOID:
+        return "void";
     
     case OpCodes::SYSTEM:
         return "system";
@@ -127,4 +131,21 @@ bool keywords::hasValue(std::string const& word, Value& value, Tokens::TokenType
 }
 
 
+static const Tokens::TokenType declarationTypes[] =
+{
+    Tokens::TokenType::INT,
+    Tokens::TokenType::FLOAT,
+    Tokens::TokenType::STRING,
+    Tokens::TokenType::BOOL,
+    Tokens::TokenType::DOUBLE,
+    Tokens::TokenType::LONG,
+    Tokens::TokenType::NONE
+};
+
+
+Tokens::TokenType keywords::declarationType(OpCodes keyword)
+{
+    // operation used to find the declaration index in the lookup table above
+    return declarationTypes[(unsigned char) keyword - (unsigned char) OpCodes::DECLARATION_INT];
+}
 

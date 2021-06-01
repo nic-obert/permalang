@@ -425,17 +425,27 @@ TokenList::TokenList(std::string& script)
             // increment token priority to evaluate stuff in parenthesis first
             currentPriority += PARENTHESIS_P;
 
-            // function call when text token before open parenthesis
+            // function call or declaration when text token before open parenthesis
             if (last->type == TokenType::TEXT)
             {
-                token = new Token(TokenType::NONE, currentPriority, OpCodes::CALL);
-                AddToken();
-                continue;
+                // differentiate between function declaration and function call
+                if (isDeclarationOp(last->prev->opCode))
+                {
+                    // function declaration (declaration operator before function name)
+                    token = new Token(TokenType::NONE, currentPriority, OpCodes::FUNC_DECLARARION);
+                }
+                else
+                {   
+                    // function call (no declaration operator before function name)
+                    token = new Token(TokenType::NONE, currentPriority, OpCodes::CALL);
+                }
+            }
+            else
+            {
+                // ordinary parenthesis
+                token = new Token(TokenType::PARENTHESIS, currentPriority, OpCodes::PARENTHESIS, '(');
             }
 
-            // ordinary parenthesis
-            token = new Token(TokenType::PARENTHESIS, currentPriority, OpCodes::PARENTHESIS, '(');
-            
             AddToken();
             continue;
         }
@@ -456,6 +466,7 @@ TokenList::TokenList(std::string& script)
         case '\n':
         case '\r':
         case '\t':
+        case ',':
         {
             continue;
         }

@@ -104,6 +104,13 @@ void errors::FileReadError(const char* file)
 }
 
 
+void errors::FileWriteError(const char* file)
+{
+    std::cerr << "[File Write Error] Could not write to file \"" << file << '"' << std::endl;
+    exit(EXIT_FAILURE);
+}
+
+
 void errors::MissingClosingParenthesisError(const Tokens::Token& caller, const std::string&& message)
 {
     std::cerr << "[Missing Closing Parenthesis Error] Missing closing parenthesis required by "

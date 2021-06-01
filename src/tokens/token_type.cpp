@@ -19,7 +19,8 @@ static const char* const tokenTypeRepr[] =
     "ENDS",
     "DOUBLE",
     "LONG",
-    "FUNCTION"
+    "FUNCTION",
+    "COMMA"
 };
 
 

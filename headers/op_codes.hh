@@ -68,6 +68,7 @@ typedef enum class OpCodes
     DECLARATION_BOOL,
     DECLARATION_DOUBLE,
     DECLARATION_LONG,
+    DECLARATION_VOID,
 
     LITERAL,
 
@@ -79,6 +80,8 @@ typedef enum class OpCodes
     POP_SCOPE,
 
     CALL,
+    FUNC_DECLARARION,
+    FUNC_BODY,
 
     PARENTHESIS,
 

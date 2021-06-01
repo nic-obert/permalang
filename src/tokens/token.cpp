@@ -69,6 +69,12 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
     {
         return stream << "<CALL: (" << token.priority << ")>";
     } // case CALL
+
+
+    case OpCodes::FUNC_DECLARARION:
+    {
+        return stream << "<FUNCTION: ( (" << token.priority << ")>";
+    }
     
 
     case OpCodes::REFERENCE:
@@ -172,6 +178,7 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         return stream << "<ADDRESS OF: & (" << token.priority << ")>";
 
     case OpCodes::PUSH_SCOPE:
+    case OpCodes::FUNC_BODY:
         return stream << "< { (" << token.priority << ")>";
 
     case OpCodes::POP_SCOPE:
@@ -192,6 +199,7 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
                 << keywords::keywordName(token.opCode) << " (" << token.priority << ")>";
     
         case TokenType::ENDS:
+        case TokenType::COMMA:
             return stream;
         
         default:

@@ -89,6 +89,8 @@ namespace syntax_tree
         SyntaxTree(Tokens::TokenList& tokens);
         SyntaxTree(Statements&& statements);
        
+        // returns the token with the highest priority in the statement
+        // does not check for empty statements
         Tokens::Token* getHighestPriority(Tokens::Token* root);
 
         pvm::ByteCode parseToByteCode();

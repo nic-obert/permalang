@@ -44,10 +44,9 @@ void Statement::remove(Tokens::Token* token, bool del)
         return;
     }
 
-    if (token->prev != nullptr)
-    {
-        token->prev->next = token->next;
-    }
+    // token->prev is never nullptr since token is not the root token
+    token->prev->next = token->next;
+    
     if (token->next != nullptr)
     {
         token->next->prev = token->prev;

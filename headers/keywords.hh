@@ -40,6 +40,9 @@ namespace keywords
 
     OpCodes isKeyword(std::string const& word);
 
+
+    Tokens::TokenType declarationType(OpCodes keyword);
+
 };
 
 

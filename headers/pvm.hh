@@ -213,6 +213,14 @@ namespace pvm
     };
 
 
+    // loads byte code from an executable file
+    ByteCode loadByteCode(const char* executable);
+
+
+    // writes the byte code to an executable file
+    void generateExecutable(ByteCode byteCode, const char* name);
+
+
 };
 
 

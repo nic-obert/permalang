@@ -36,6 +36,7 @@ static const char* const opCodeRepr[] =
     "DECLARATION BOOL",
     "DECLARATION DOUBLE",
     "DECLARATION LONG",
+    "DECLARATION VOID",
     
     "LITERAL",
 
@@ -47,6 +48,8 @@ static const char* const opCodeRepr[] =
     "POP SCOPE",
 
     "CALL",
+    "FUNC_DECLARATION",
+    "FUNC_BODY",
 
     "PARENTHESIS",
 
@@ -103,10 +106,12 @@ OpType operatorType(OpCodes op)
     case OpCodes::DECLARATION_STRING:
     case OpCodes::DECLARATION_DOUBLE:
     case OpCodes::DECLARATION_LONG:
+    case OpCodes::DECLARATION_VOID:
     case OpCodes::PARENTHESIS:
     case OpCodes::PUSH_SCOPE:
     case OpCodes::SYSTEM:
     case OpCodes::SYSTEM_LOAD:
+    case OpCodes::FUNC_BODY:
         return OpType::UNARY;
     
     default:
