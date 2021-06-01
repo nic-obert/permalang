@@ -83,9 +83,11 @@ void SyntaxTree::parseTokenOperator(Tokens::Token* token)
 
     // if token is a unary operator the result stored in the result register of an
     // eventual operation performed in the evaluation of its operand will not be overwritten 
-    if (opType == OpType::UNARY ||
-        opType == OpType::STANDALONE ||
-        isAssignmentOp(token->opCode)
+    if (
+        opType == OpType::UNARY
+        || opType == OpType::STANDALONE
+        || isAssignmentOp(token->opCode)
+        || isFlowOp(token->opCode)
         )
     {
         token->value = toValue(byteCodeFor(token, operands, DONT_STORE_RESULT));
@@ -486,8 +488,12 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
     } // switch(token->opCode)
 
 
+    std::string number;
+    string_utils::byteToString((unsigned char) token->opCode, number);
+
     std::string msg("Unhandled OpCodes in byte code generation: ");
-    msg += (char) token->opCode;
+    
+    msg += number;
     errors::UnexpectedBehaviourError(std::move(msg));
     return 0;
 }

@@ -1,1 +1,5 @@
-int i = 0;
+bool b = true;
+if (b)
+{
+    int res = 3;
+}

@@ -716,7 +716,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
             SymbolTable::popScope();
         }
 
-        token->value = toValue(scopeTree);
+        token->value = toValue(new Token*[1] {(Token*) scopeTree});
 
         break;
     }

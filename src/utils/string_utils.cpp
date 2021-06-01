@@ -30,18 +30,15 @@ void string_utils::byteToString(unsigned char number, std::string& output)
         n /= 10;
     } while(n != 0);
 
+    output.resize(length + 1, '\0');
 
-    output.reserve(length);
-
-    for (n = 0; n != length; n++)
+    for (n = (unsigned char) (length - 1); number != 0; n--)
     {
         // extract rightmost digit and add to the string
-        output += (char) (number % 10 + '0');
+        output[n] = (char) (number % 10 + '0');
         // drop rightmost digit
         number /= 10;
     }
 
 }
-
-
 
