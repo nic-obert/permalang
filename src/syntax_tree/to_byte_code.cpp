@@ -10,6 +10,8 @@
 // extracts the std::string* identifier from a Token
 #define IdOf(token) ((std::string*) token->value)
 
+#define AddNode(...) byteList.add(new ByteNode(__VA_ARGS__))
+
 #define DO_STORE_RESULT true
 #define DONT_STORE_RESULT false
 
@@ -134,25 +136,25 @@ static void byteCodeForUnaryOperation(Tokens::Token** operands, pvm::OpCode opCo
 
     if (hasReturnValueInRegister(operands[0]))
     {
-        byteList.add(new ByteNode(OpCode::REG_MOV));
-        byteList.add(new ByteNode(Registers::GENERAL_A));
-        byteList.add(new ByteNode(Registers::RESULT));
+        AddNode(OpCode::REG_MOV);
+        AddNode(Registers::GENERAL_A);
+        AddNode(Registers::RESULT);
     }
     else if (operands[0]->opCode == OpCodes::REFERENCE)
     {
         
-        byteList.add(new ByteNode(OpCode::LD_A));
-        byteList.add(new ByteNode(SymbolTable::get(IdOf(operands[0]))->stackPosition));
+        AddNode(OpCode::LD_A);
+        AddNode(SymbolTable::get(IdOf(operands[0]))->stackPosition);
     }
     else
     {
-        byteList.add(new ByteNode(OpCode::LD_CONST_A));
-        byteList.add(new ByteNode(operands[0]->value)); 
+        AddNode(OpCode::LD_CONST_A);
+        AddNode(operands[0]->value); 
     }
 
     if (opCode != OpCode::NO_OP)
     {
-        byteList.add(new ByteNode(opCode));
+        AddNode(opCode);
     }
 
 }
@@ -166,43 +168,43 @@ static void byteCodeForBinaryOperation(Tokens::Token** operands, pvm::OpCode opC
 
     if (hasReturnValueInRegister(operands[0]))
     {
-        byteList.add(new ByteNode(OpCode::REG_MOV));
-        byteList.add(new ByteNode(Registers::GENERAL_A));
-        byteList.add(new ByteNode(Registers::RESULT));
+        AddNode(OpCode::REG_MOV);
+        AddNode(Registers::GENERAL_A);
+        AddNode(Registers::RESULT);
     }
     else if (operands[0]->opCode == OpCodes::REFERENCE)
     {
         
-        byteList.add(new ByteNode(OpCode::LD_A));
-        byteList.add(new ByteNode(SymbolTable::get(IdOf(operands[0]))->stackPosition));
+        AddNode(OpCode::LD_A);
+        AddNode(SymbolTable::get(IdOf(operands[0]))->stackPosition);
     }
     else
     {
-        byteList.add(new ByteNode(OpCode::LD_CONST_A));
-        byteList.add(new ByteNode(operands[0]->value)); 
+        AddNode(OpCode::LD_CONST_A);
+        AddNode(operands[0]->value); 
     }
 
     if (hasReturnValueInRegister(operands[1]))
     {
-        byteList.add(new ByteNode(OpCode::REG_MOV));
-        byteList.add(new ByteNode(Registers::GENERAL_B));
-        byteList.add(new ByteNode(Registers::RESULT));
+        AddNode(OpCode::REG_MOV);
+        AddNode(Registers::GENERAL_B);
+        AddNode(Registers::RESULT);
     }
     else if (operands[1]->opCode == OpCodes::REFERENCE)
     {
         
-        byteList.add(new ByteNode(OpCode::LD_B));
-        byteList.add(new ByteNode(SymbolTable::get(IdOf(operands[1]))->stackPosition));
+        AddNode(OpCode::LD_B);
+        AddNode(SymbolTable::get(IdOf(operands[1]))->stackPosition);
     }
     else
     {
-        byteList.add(new ByteNode(OpCode::LD_CONST_B));
-        byteList.add(new ByteNode(operands[1]->value)); 
+        AddNode(OpCode::LD_CONST_B);
+        AddNode(operands[1]->value); 
     }
 
     if (opCode != OpCode::NO_OP)
     {
-        byteList.add(new ByteNode(opCode));
+        AddNode(opCode);
     }
 
 }
@@ -226,9 +228,9 @@ static std::string* storeLiteral(Value value, Tokens::TokenType type, pvm::ByteL
         new Symbol(0, type)
     );
 
-    byteList.add(new ByteNode(OpCode::MEM_SET));
-    byteList.add(new ByteNode(SymbolTable::get(name)->stackPosition));
-    byteList.add(new ByteNode(value));
+    AddNode(OpCode::MEM_SET);
+    AddNode(SymbolTable::get(name)->stackPosition);
+    AddNode(value);
 
     return name;
 }
@@ -252,9 +254,9 @@ static std::string* storeResult(pvm::Registers reg, Tokens::TokenType type, pvm:
         new Symbol(0, type)
     );
 
-    byteList.add(new ByteNode(OpCode::REG_MOV));
-    byteList.add(new ByteNode(SymbolTable::get(name)->stackPosition));
-    byteList.add(new ByteNode(reg));
+    AddNode(OpCode::REG_MOV);
+    AddNode(SymbolTable::get(name)->stackPosition);
+    AddNode(reg);
 
     return name;
 }
@@ -275,22 +277,22 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         if (hasReturnValueInRegister(operands[1]))
         {
-            byteList.add(new ByteNode(OpCode::REG_MOV));
-            byteList.add(new ByteNode(lValue->stackPosition));
-            byteList.add(new ByteNode(Registers::RESULT));
+            AddNode(OpCode::REG_MOV);
+            AddNode(lValue->stackPosition);
+            AddNode(Registers::RESULT);
         }
         else if (operands[1]->opCode == OpCodes::REFERENCE)
         {
-            byteList.add(new ByteNode(OpCode::MEM_MOV));
-            byteList.add(new ByteNode(lValue->stackPosition));
-            byteList.add(new ByteNode(SymbolTable::get(IdOf(operands[1]))->stackPosition));
+            AddNode(OpCode::MEM_MOV);
+            AddNode(lValue->stackPosition);
+            AddNode(SymbolTable::get(IdOf(operands[1]))->stackPosition);
         }
         else // token is a literal
         {
-            byteList.add(new ByteNode(OpCode::MEM_SET));
-            byteList.add(new ByteNode(lValue->stackPosition));
+            AddNode(OpCode::MEM_SET);
+            AddNode(lValue->stackPosition);
             // pass as second operand the token's literal value
-            byteList.add(new ByteNode(operands[1]->value));
+            AddNode(operands[1]->value);
         }
 
         // these operands won't be accessed anymore after compilation
@@ -476,12 +478,12 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         byteCodeForBinaryOperation(operands, OpCode::SUB, byteList);
 
-        byteList.add(new ByteNode(OpCode::IF_JUMP));
-        byteList.add(new ByteNode(SymbolTable::getStackPointer() + 3));
+        AddNode(OpCode::IF_JUMP);
+        AddNode(SymbolTable::getStackPointer() + 3);
 
-        byteList.add(new ByteNode(OpCode::REG_TO_REG));
-        byteList.add(new ByteNode(Registers::ZERO_FLAG));
-        byteList.add(new ByteNode(Registers::SIGN_FLAG));
+        AddNode(OpCode::REG_TO_REG);
+        AddNode(Registers::ZERO_FLAG);
+        AddNode(Registers::SIGN_FLAG);
 
         deleteOperands(operands, OpType::BINARY);
 
@@ -510,12 +512,12 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         byteCodeForBinaryOperation(ops, OpCode::SUB, byteList);
 
-        byteList.add(new ByteNode(OpCode::IF_JUMP));
-        byteList.add(new ByteNode(SymbolTable::getStackPointer() + 3));
+        AddNode(OpCode::IF_JUMP);
+        AddNode(SymbolTable::getStackPointer() + 3);
 
-        byteList.add(new ByteNode(OpCode::REG_TO_REG));
-        byteList.add(new ByteNode(Registers::ZERO_FLAG));
-        byteList.add(new ByteNode(Registers::SIGN_FLAG));
+        AddNode(OpCode::REG_TO_REG);
+        AddNode(Registers::ZERO_FLAG);
+        AddNode(Registers::SIGN_FLAG);
 
         deleteOperands(operands, OpType::BINARY);
 
@@ -593,9 +595,9 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         byteCodeForBinaryOperation(ops, OpCode::CMP_REVERSE, byteList);
 
-        byteList.add(new ByteNode(OpCode::IF_JUMP));
+        AddNode(OpCode::IF_JUMP);
         // address to jump to = current stack pointer + size of instructions to jump over
-        byteList.add(new ByteNode(SymbolTable::getStackPointer() + 19));
+        AddNode(SymbolTable::getStackPointer() + 19);
 
         Token zero = Token(TokenType::INT, 0, OpCodes::LITERAL, 1);
         ops[0] = operands[1];
@@ -630,9 +632,9 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         byteCodeForBinaryOperation(ops, OpCode::CMP_REVERSE, byteList);
 
-        byteList.add(new ByteNode(OpCode::IF_JUMP));
+        AddNode(OpCode::IF_JUMP);
         // address to jump to = current stack pointer + size of instructions to jump over
-        byteList.add(new ByteNode(SymbolTable::getStackPointer() + 19));
+        AddNode(SymbolTable::getStackPointer() + 19);
 
         ops[0] = operands[1];
 
@@ -655,7 +657,7 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
     {
         OpCode code = systemInterrupts[operands[0]->value];
 
-        byteList.add(new ByteNode(code));
+        AddNode(code);
 
         deleteOperands(operands, OpType::UNARY);
 
@@ -675,28 +677,30 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
     case OpCodes::PARENTHESIS:
     {
+        // save operand's properties to avoid accessing freed memory
+        const TokenType contentType = tokenTypeOf(operands[0]);
 
         if (doStoreResult)
         {
+            Value contentValue = operands[0]->value;
+
+            deleteOperands(operands, OpType::UNARY);
+
             if (hasReturnValueInRegister(operands[0]))
             {
                 // copy return value from register to memory
-                return (size_t) storeResult(Registers::RESULT, tokenTypeOf(operands[0]), byteList);
+                return (size_t) storeResult(Registers::RESULT, contentType, byteList);
             }
 
             if (token->opCode == OpCodes::REFERENCE)
             {
-                return SymbolTable::get(IdOf(operands[0]))->stackPosition;
+                return SymbolTable::get((std::string*) contentValue)->stackPosition;
             }
-
-            // token is a literal value
             
-            return (size_t) storeLiteral(operands[0]->value, tokenTypeOf(operands[0]), byteList);
+            return (size_t) storeLiteral(contentValue, contentType, byteList);
         }
 
         // if not storeResult:
-
-        TokenType contentType = tokenTypeOf(operands[0]);
 
         if (operands[0]->opCode == OpCodes::REFERENCE)
         {
@@ -705,18 +709,21 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
             if (contentType == TokenType::BOOL)
             {
                 // if bool --> load result into a bit register (ZERO FLAG)
-                byteList.add(new ByteNode(OpCode::LD_ZERO_FLAG));
-                byteList.add(new ByteNode(SymbolTable::get(IdOf(operands[0]))->stackPosition));
+                AddNode(OpCode::LD_ZERO_FLAG);
+                AddNode(SymbolTable::get(IdOf(operands[0]))->stackPosition);
             }
             else
             {   
                 // treat token as a long
-                byteList.add(new ByteNode(OpCode::LD_RESULT));
-                byteList.add(new ByteNode(SymbolTable::get(IdOf(operands[0]))->stackPosition));
+                AddNode(OpCode::LD_RESULT);
+                AddNode(SymbolTable::get(IdOf(operands[0]))->stackPosition);
             }
 
             // to have the content's result readily available for the next operator
             setReturnValueToRegister(token);
+
+            deleteOperands(operands, OpType::UNARY);
+
             return 0;
         }
         
@@ -742,20 +749,54 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
             - conditional jump based on condition
             - if body block
         */
+    
+    // compile boolean condition
 
         parseTokenOperator(operands[0]);
 
-        byteList.add(new ByteNode(OpCode::IF_JUMP));
+    // invert boolean condition
+
+        // load the boolean condition
+        AddNode(OpCode::REG_TO_REG);
+        AddNode(Registers::GENERAL_A);
+        AddNode(Registers::ZERO_FLAG);
+        // load 0 to compare the condition with (to invert condition)
+        AddNode(OpCode::LD_CONST_B);
+        AddNode(1);
+
+        AddNode(OpCode::CMP);
+        
+    // conditional jump instruction
+
+        AddNode(OpCode::IF_JUMP);
         // bodySizeNode will be set later when the actual if body is compiled
         ByteNode* bodySizeNode = new ByteNode(SymbolTable::getStackPointer());
         byteList.add(bodySizeNode);
 
-        parseTokenOperator(operands[1]);
+        // if the if's body is a whole scope, extraxt its SyntaxTree and extend
+        // this' byteList with the scope tree's
+        if (operands[1]->opCode == OpCodes::PUSH_SCOPE)
+        {
+            SyntaxTree* body = (SyntaxTree*) operands[1]->value;
+            // body has already been parsed to byte code
+            byteList.extend(body->byteList);
+
+            // body's SyntaxTree won't be used anymore
+            delete body;
+        }
+        else // if operand is just a statement without scope
+        {
+            parseTokenOperator(operands[1]);
+
+            delete operands[1];
+        }
 
         // update the number of bytes to jump over (size of the if's body)
         bodySizeNode->data += SymbolTable::getStackPointer() - bodySizeNode->data;
 
-        deleteOperands(operands, OpType::BINARY);
+        // delete just the first operand (bool condition) since the if's body has already
+        // been deleted after being handled
+        delete operands[0];
 
         return 0;
     }

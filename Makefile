@@ -6,6 +6,7 @@ SRC_DIR=src
 HEADERS_DIR=headers
 LIB_DIR=lib
 TARGET_DIR=target
+IMPL_DIR=impl
 
 
 SOURCES=$(shell find $(SRC_DIR) -type f -name "*.cpp")
@@ -76,6 +77,7 @@ $(PCH): $(HH)
 clean:
 	rm -f $(PCH)
 	rm -f $(TARGET_DIR)/*
+	rm -f $(IMPL_DIR)/*.pfx
 
 
 

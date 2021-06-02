@@ -64,6 +64,36 @@ void ByteList::insertFisrt(ByteNode* node)
 }
 
 
+void ByteList::extend(ByteList& other)
+{
+    if (other.start != nullptr)
+    {
+        other.start->prev = end;
+    }
+
+    if (end != nullptr)
+    {
+        end->next = other.start;
+    }
+
+    end = other.end;
+
+    nodeCount += other.nodeCount;
+    byteSize += other.byteSize;
+
+    other.clear();
+}
+
+
+void ByteList::clear()
+{
+    start = nullptr;
+    end = nullptr;
+    byteSize = 0;
+    nodeCount = 0;
+}
+
+
 ByteCode ByteList::toByteCode() const
 {
 

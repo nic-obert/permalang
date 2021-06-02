@@ -207,9 +207,23 @@ namespace pvm
         
         ~ByteList();
 
+        // add a new ByteNode to the list
+        // update nodeCount and byteSize counters
         void add(ByteNode* node);
 
+        // insert a new ByteNode to the beginning of the list
+        // update nodeCount and byteSize counters
         void insertFisrt(ByteNode* node);
+
+        // extends this ByteList with the elements of the other ByteList
+        // destructive for the other ByteList, don't use it afterwards
+        // updates nodeCount and byteSize counters
+        void extend(ByteList& other);
+
+        // resets the ByteList to its default values
+        // - sets size counters to 0
+        // - sets pointers to nullptr
+        void clear();
 
         ByteCode toByteCode() const;
 

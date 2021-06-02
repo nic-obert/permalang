@@ -141,9 +141,9 @@ std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
             continue;
         
         case OpCode::LD_ZERO_FLAG:
-            stream << "ld ZERO FLAG: "
+            stream << "ld ZERO FLAG: ["
                 << longArray
-                << '\n';
+                << "]\n";
 
             i += sizeof(long);
             continue;

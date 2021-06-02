@@ -32,13 +32,17 @@ void string_utils::byteToString(unsigned char number, std::string& output)
 
     output.resize(length + 1, '\0');
 
-    for (n = (unsigned char) (length - 1); number != 0; n--)
+    // start reverse iteration using do-while loop
+    n = (unsigned char) (length - 1);
+    do
     {
         // extract rightmost digit and add to the string
         output[n] = (char) (number % 10 + '0');
         // drop rightmost digit
         number /= 10;
-    }
+
+        n--;
+    } while (number != 0);
 
 }
 
