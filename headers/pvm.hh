@@ -8,7 +8,8 @@
 typedef unsigned long size_t;
 
 // whether the given register is a bit register
-#define isBitRegister(reg) (reg == Registers::ZERO_FLAG || reg == Registers::SIGN_FLAG)
+// dependant on constant enum values
+#define isBitRegister(reg) (reg > Registers::RESULT)
 
 
 // Perma Virtual Machine
@@ -102,12 +103,14 @@ namespace pvm
     // enum values must be constant for lookup tables
     typedef enum class Registers
     {
+        // long registers
         GENERAL_A           = 0,
         GENERAL_B           = 1,
         DIVISION_REMAINDER  = 2,
+        RESULT              = 5,
+        // bit registers
         ZERO_FLAG           = 3,
         SIGN_FLAG           = 4,
-        RESULT              = 5,
 
     } Registers;
 
@@ -131,15 +134,15 @@ namespace pvm
 
         // division remainder register, remainder of the last division operation
         long rDivisionRemainder;
+
+        // stack pointer, points to the last used address in the stack
+        long rStackPointer;
         
         // zero flag register, whether the result of the last operation was 0 (see x86 assembly for reference)
         bool rZeroFlag;
 
         // sign flag register, holds the sign of the last operation (see x86 assembly for reference)
         bool rSignFlag;
-
-        // stack pointer, points to the last used address in the stack
-        long rStackPointer;
 
 
         // returns a pointer to the requested register

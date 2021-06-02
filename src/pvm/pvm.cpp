@@ -4,7 +4,6 @@
 using namespace pvm;
 
 
-
 Pvm::Pvm(size_t memSize)
 :   memory(memSize), rGeneralA(0), rGeneralB(0),
     rResult(0), rDivisionRemainder(0), rZeroFlag(0),
@@ -19,7 +18,7 @@ Pvm::Pvm(size_t memSize)
 // updates the offset by + sizeof(long)
 static inline long getLongValue(const Byte* byteCode, size_t& offset)
 {
-    long value = *((long*) (byteCode + offset));
+    const long value = *((long*) (byteCode + offset));
     offset += sizeof(long);
     return value;
 }
@@ -30,7 +29,7 @@ static inline long getLongValue(const Byte* byteCode, size_t& offset)
 // updates the offset by +1
 static inline Byte getByteValue(const Byte* byteCode, size_t& offset)
 {
-    Byte value = byteCode[offset];
+    const Byte value = byteCode[offset];
     offset ++;
     return value;
 }
@@ -159,9 +158,9 @@ Byte Pvm::execute(const Byte* byteCode)
 
         case OpCode::MEM_MOV:
         {
-            Address addr1 = getLongValue(byteCode, offset);
+            const Address addr1 = getLongValue(byteCode, offset);
 
-            Address addr2 = getLongValue(byteCode, offset);
+            const Address addr2 = getLongValue(byteCode, offset);
 
             memory.set(addr1, memory.getLong(addr2));
 
@@ -171,9 +170,9 @@ Byte Pvm::execute(const Byte* byteCode)
 
         case OpCode::REG_MOV:
         {
-            Address address = getLongValue(byteCode, offset);
+            const Address address = getLongValue(byteCode, offset);
 
-            Registers reg = (Registers) getByteValue(byteCode, offset);
+            const Registers reg = (Registers) getByteValue(byteCode, offset);
 
             memory.set(address, *((long*) getRegister(reg)));
             
@@ -183,9 +182,9 @@ Byte Pvm::execute(const Byte* byteCode)
 
         case OpCode::REG_MOV_BIT:
         {
-            Address address = getLongValue(byteCode, offset);
+            const Address address = getLongValue(byteCode, offset);
 
-            Registers reg = (Registers) getByteValue(byteCode, offset);
+            const Registers reg = (Registers) getByteValue(byteCode, offset);
 
             memory.set(address, *((bool*) getRegister(reg)));
 
@@ -193,11 +192,30 @@ Byte Pvm::execute(const Byte* byteCode)
         }
 
 
+        case OpCode::REG_TO_REG:
+        {
+            const Registers regDest = (Registers) getByteValue(byteCode, offset);
+
+            const Registers regSrc = (Registers) getByteValue(byteCode, offset);
+
+            if (isBitRegister(regSrc))
+            {
+                *(long*) getRegister(regDest) = *(bool*) getRegister(regSrc);
+            }
+            else
+            {
+                *(long*) getRegister(regDest) = *(long*) getRegister(regSrc);
+            }
+
+            break;
+        }
+
+
         case OpCode::MEM_SET:
         {
-            Address address = getLongValue(byteCode, offset);
+            const Address address = getLongValue(byteCode, offset);
 
-            long value = getLongValue(byteCode, offset);
+            const long value = getLongValue(byteCode, offset);
 
             memory.set(address, value);
 
@@ -240,7 +258,7 @@ Byte Pvm::execute(const Byte* byteCode)
 
         case OpCode::PUSH_REG:
         {
-            long value = *(long*) getRegister(
+            const long value = *(long*) getRegister(
                 (Registers) getByteValue(byteCode, offset)
             );
 

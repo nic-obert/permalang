@@ -33,9 +33,9 @@ static const char* const registerRepr[] =
     "A",
     "B",
     "DIVISION REMAINDER",
+    "RESULT",
     "ZERO FLAG",
     "SIGN FLAG",
-    "RESULT",
 };
 
 
