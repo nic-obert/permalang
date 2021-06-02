@@ -85,6 +85,14 @@ namespace Tokens
 
     };
 
+
+    /*
+    - returns the TokenType of a given token
+    - returns the TokenType of it's value if token is a variable
+    - throws exception if token is not declared
+    */
+    TokenType tokenTypeOf(const Token* token);
+
 };
 
 

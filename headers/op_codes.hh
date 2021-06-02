@@ -30,6 +30,7 @@ typedef enum class OpType
     STANDALONE = 0, // 0, requires zero operands
     UNARY = 1,      // 1, requires one operand
     BINARY = 2      // 2, requires two operands
+    
 } OpType;
 
 

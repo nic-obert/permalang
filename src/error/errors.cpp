@@ -1,14 +1,14 @@
 #include "errors.hh"
 
 
-void errors::UnexpectedBehaviourError(const std::string&& message)
+void errors::UnexpectedBehaviourError(const std::string& message)
 {
     std::cerr << "[Unexpected Behaviour Error] " << message << std::endl;
     exit(EXIT_FAILURE);
 }
 
 
-void errors::SyntaxError(const std::string&& message)
+void errors::SyntaxError(const std::string& message)
 {
     std::cerr << "[Syntax Error] " << message << std::endl;
     exit(EXIT_FAILURE);
@@ -41,7 +41,7 @@ void errors::SymbolRedeclarationError(const symbol_table::Symbol& symbol)
 }
 
 
-void errors::UndefinedSymbolError(const std::string&& name)
+void errors::UndefinedSymbolError(const std::string& name)
 {
     std::cerr << "[Undefined Symbol Error] Symbol name " << name
         << " hasn't been declared in any reachable scope" << std::endl;
@@ -49,7 +49,7 @@ void errors::UndefinedSymbolError(const std::string&& name)
 }
 
 
-void errors::InvalidCharacterError(const std::string&& line, char character)
+void errors::InvalidCharacterError(const std::string& line, char character)
 {
     std::cerr << "[Invalid Character Error] Invalid character '" << character
         << "' in line:\n" << line << std::endl;
@@ -111,7 +111,7 @@ void errors::FileWriteError(const char* file)
 }
 
 
-void errors::MissingClosingParenthesisError(const Tokens::Token& caller, const std::string&& message)
+void errors::MissingClosingParenthesisError(const Tokens::Token& caller, const std::string& message)
 {
     std::cerr << "[Missing Closing Parenthesis Error] Missing closing parenthesis required by "
         << caller << '\n' << message << std::endl;

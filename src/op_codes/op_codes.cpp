@@ -71,6 +71,8 @@ std::ostream& operator<<(std::ostream& stream, OpCodes const& opCode)
 }
 
 
+// operator type in terms of operand number
+// (STANDALONE, UNARY, BINARY)
 OpType operatorType(OpCodes op)
 {
     switch (op)

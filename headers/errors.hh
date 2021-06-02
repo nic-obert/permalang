@@ -10,10 +10,10 @@
 namespace errors
 {
     
-    void UnexpectedBehaviourError(const std::string&& message);
+    void UnexpectedBehaviourError(const std::string& message);
 
 
-    void SyntaxError(const std::string&& message);
+    void SyntaxError(const std::string& message);
 
 
     void TypeError(const Tokens::Token& caller, Tokens::TokenType expected, const Tokens::Token& provided, const char* side);
@@ -23,10 +23,10 @@ namespace errors
     void SymbolRedeclarationError(const symbol_table::Symbol& symbol);
     
 
-    void UndefinedSymbolError(const std::string&& name);
+    void UndefinedSymbolError(const std::string& name);
 
 
-    void InvalidCharacterError(const std::string&& line, char character);
+    void InvalidCharacterError(const std::string& line, char character);
 
 
     void ExpectedTokenError(const Tokens::Token& caller, Tokens::TokenType expected, const char* side);
@@ -48,7 +48,7 @@ namespace errors
     void FileWriteError(const char* file);
 
 
-    void MissingClosingParenthesisError(const Tokens::Token& caller, const std::string&& message);
+    void MissingClosingParenthesisError(const Tokens::Token& caller, const std::string& message);
 
 };
 

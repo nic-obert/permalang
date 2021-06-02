@@ -1,4 +1,5 @@
 #include "token.hh"
+#include "symbol_table.hh"
 
 
 using namespace Tokens;
@@ -50,5 +51,16 @@ size_t Tokens::typeSize(TokenType type)
     default:
         return 0;
     }
+}
+
+
+TokenType Tokens::tokenTypeOf(const Token* token)
+{
+    if (token->opCode == OpCodes::REFERENCE)
+    {
+        return symbol_table::SymbolTable::get((std::string*) token->value)->type;
+    }
+    
+    return token->type;
 }
 

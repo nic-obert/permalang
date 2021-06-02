@@ -71,8 +71,11 @@ namespace syntax_tree
 
         void generateByteCode(bool doPopScope);
 
+        // generates the byte code for a Token operator
+        // returns the stack pointer of the operation's result
         size_t byteCodeFor(Tokens::Token* token, Tokens::Token** operands, bool doStoreResult);
 
+        // parses the Token operator and its operands recursively
         void parseTokenOperator(Tokens::Token* token);
 
         // parse the tree and generate byte code for it recursively

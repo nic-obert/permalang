@@ -55,22 +55,6 @@ static inline void assertToken(Token* caller, Token* got, OpCodes required, Side
 }
 
 
-/*
- - returns the TokenType of a given token
- - returns the TokenType of it's value if token is a variable
- - throws exception if token is not declared
-*/
-static TokenType tokenTypeOf(const Token* token)
-{
-    if (token->opCode == OpCodes::REFERENCE)
-    {
-        return SymbolTable::get((std::string*) token->value)->type;
-    }
-    
-    return token->type;
-}
-
-
 static void binarySatisfy(Token* token, TokenType leftType, TokenType rightType, Statement* statement)
 {
 

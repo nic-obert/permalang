@@ -1,4 +1,5 @@
 #include "pvm.hh"
+#include "errors.hh"
 
 
 #define longArray *((long*) (bytes + i))
@@ -67,7 +68,6 @@ std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
 
             stream << "exit: " << exitCode << '\n';
             
-            i ++;
             // breaking the switch statement means breaking the while loop
             break;
         }
@@ -117,7 +117,7 @@ std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
             continue;
 
         case OpCode::LD_A:
-            stream << "ld a: ["
+            stream << "ld A: ["
                 << longArray
                 << "]\n";
 
@@ -125,15 +125,31 @@ std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
             continue;
 
         case OpCode::LD_B:
-            stream << "ld b: ["
+            stream << "ld B: ["
                 << longArray
                 << "]\n";
 
             i += sizeof(long);
             continue;
+        
+        case OpCode::LD_RESULT:
+            stream << "ld RESULT: ["
+                << longArray
+                << "]\n";
+
+            i += sizeof(long);
+            continue;
+        
+        case OpCode::LD_ZERO_FLAG:
+            stream << "ld ZERO FLAG: "
+                << longArray
+                << '\n';
+
+            i += sizeof(long);
+            continue;
 
         case OpCode::LD_CONST_A:
-            stream << "ld const a: "
+            stream << "ld const A: "
                 << longArray
                 << '\n';
 
@@ -141,7 +157,15 @@ std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
             continue;
         
         case OpCode::LD_CONST_B:
-            stream << "ld const b: "
+            stream << "ld const B: "
+                << longArray
+                << '\n';
+
+            i += sizeof(long);
+            continue;
+
+        case OpCode::LD_CONST_RESULT:
+            stream << "ld const RESULT: "
                 << longArray
                 << '\n';
 
@@ -220,6 +244,19 @@ std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
         } // switch ((OpCode) byteCode[i])
 
         // if flow reaches this line the while loop is terminated
+
+        if ((OpCode) bytes[i-1] != OpCode::EXIT)
+        {
+            std::string msg("Unhandled OpCode in byte code execution: ");
+
+            std::string strOpCode;
+            string_utils::byteToString(bytes[i-1], strOpCode);
+
+            msg += strOpCode;
+
+            errors::UnexpectedBehaviourError(msg);  
+        }
+
         break;
 
     } // while (true)

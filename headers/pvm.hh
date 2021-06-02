@@ -32,14 +32,17 @@ namespace pvm
         MUL,        // long integer multiply from registers A and B
         DIV,        // long integer divide from registers A and B
 
-        CMP,        // compare registers A and B, set the zero flag
-        CMP_REVERSE,// compare registers A and B, set the zero flag
+        CMP,        // compare registers A and B, set the ZERO FLAG
+        CMP_REVERSE,// compare registers A and B, set the ZERO FLAG
 
         LD_CONST_A, // load long integer constant into register A
         LD_CONST_B, // load long integer constant into register A
+        LD_CONST_RESULT,    // load long integer constant into register RESULT
 
         LD_A,       // load long integer from memory into register A
         LD_B,       // load long intefer from memory into register B
+        LD_RESULT,  // load long integer from memory into register RESULT
+        LD_ZERO_FLAG,   // load bit value from memory into register ZERO FLAG
 
         MEM_MOV,    // copy a long value from a memory address to another
         REG_MOV,    // copy a long value from a register into a memory address
@@ -49,13 +52,13 @@ namespace pvm
         MEM_SET,    // sets a memory address to a value
 
         JMP,        // unconditional jump to index   
-        IF_JUMP,    // conditional jump based on zero flag register's value (1 = true, 0 = false)
+        IF_JUMP,    // conditional jump based on ZERO FLAG register's value (1 = true, 0 = false)
 
         PUSH_CONST, // push a constant long value on the stack
         PUSH_REG,   // push a value on the stack from a specified register
-        PUSH_BYTES, // increments the stack pointer by a specified amount
+        PUSH_BYTES, // increments the STACK POINTER by a specified amount
 
-        POP,        // pop the stack pointer by a specified amount
+        POP,        // pop the STACK POINTER by a specified amount
 
         CALL,       // calls a function
 
