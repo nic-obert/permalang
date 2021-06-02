@@ -1,4 +1,4 @@
 *.out
-target/perma
+target/*
 *.pch
 *.pfx
