@@ -186,7 +186,6 @@ namespace pvm
         Value data;
         InstructionSize dataSize; 
 
-        ByteNode();
         ByteNode(OpCode data);
         ByteNode(Registers data);
         ByteNode(Value data, InstructionSize dataSize = sizeof(Value));       
@@ -214,10 +213,6 @@ namespace pvm
         // update nodeCount and byteSize counters
         void add(ByteNode* node);
 
-        // insert a new ByteNode to the beginning of the list
-        // update nodeCount and byteSize counters
-        void insertFisrt(ByteNode* node);
-
         // extends this ByteList with the elements of the other ByteList
         // destructive for the other ByteList, don't use it afterwards
         // updates nodeCount and byteSize counters
@@ -229,6 +224,9 @@ namespace pvm
         void clear();
 
         ByteCode toByteCode() const;
+
+
+        size_t getCurrentSize() const;
 
     };
 

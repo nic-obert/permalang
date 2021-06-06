@@ -88,6 +88,7 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         case TokenType::FLOAT:
         case TokenType::DOUBLE:
         case TokenType::LONG:
+        case TokenType::NUMERIC:
             stream << '<' << token.type << "*: " << *(std::string*) token.value
                 << " (" << token.priority << ")>";
             return stream;

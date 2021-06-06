@@ -34,7 +34,7 @@ static inline void assertToken(Token* caller, Token* got, TokenType required, Si
         errors::ExpectedTokenError(*caller, required, sides[side]);
     }
     
-    if (got->type != required)
+    if (!isCompatible(tokenTypeOf(got), required))
     {
         errors::TypeError(*caller, required, *got, sides[side]);
     }
@@ -67,11 +67,11 @@ static void binarySatisfy(Token* token, TokenType leftType, TokenType rightType,
         errors::ExpectedTokenError(*token, rightType, sides[RIGHT]);
     }
 
-    if (tokenTypeOf(token->prev) != leftType)
+    if (!isCompatible(tokenTypeOf(token->prev), leftType))
     {
        errors::TypeError(*token, leftType, *token->prev, sides[LEFT]);
     }
-    else if (tokenTypeOf(token->next) != rightType)
+    else if (!isCompatible(tokenTypeOf(token->next), rightType))
     {
         errors::TypeError(*token, rightType, *token->next, sides[RIGHT]);
     }
@@ -97,7 +97,7 @@ static void unarySatisfy(Token* token, TokenType type, Side side, Statement* sta
         {
             errors::ExpectedTokenError(*token, type, sides[LEFT]);
         }
-        if (tokenTypeOf(token->prev) != type)
+        if (!isCompatible(tokenTypeOf(token->prev), type))
         {
             errors::TypeError(*token, type, *token->prev, sides[LEFT]);
         }
@@ -114,7 +114,7 @@ static void unarySatisfy(Token* token, TokenType type, Side side, Statement* sta
         {
             errors::ExpectedTokenError(*token, type, sides[RIGHT]);
         }
-        if (tokenTypeOf(token->next) != type)
+        if (!isCompatible(tokenTypeOf(token->next), type))
         {
             errors::TypeError(*token, type, *token->next, sides[RIGHT]);
         }
@@ -142,7 +142,7 @@ static void declarationSatisfy(Token* token, TokenType type, Statement* statemen
         errors::TypeError(*token, type, *token->next, sides[RIGHT]);
     }
 
-    // inherit value form next Token
+    // inherit value form next Token (variable's name)
     token->value = token->next->value;
     // type is the TokenType that has been declared
     token->type = type;
@@ -173,14 +173,16 @@ static void assignSatisfy(Token* token, Statement* statement)
     // set token's value to an array of its operands
     token->value = toValue((new Token*[2] {token->prev, token->next}));
 
+    TokenType type = tokenTypeOf(token->prev);
+
     // update symbol table
     SymbolTable::assign(
         (std::string*) token->prev->value,
-        new Symbol(token->next->value, token->prev->type)
+        new Symbol(token->next->value, type)
     );
 
     // type of assignment operator is the type of the variable it has assigned a value to
-    token->type = tokenTypeOf(token->prev);
+    token->type = type;
 
     // remove tokens to the left and right
     statement->remove(token->prev);
@@ -224,7 +226,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     {
     case OpCodes::ARITHMETICAL_SUM:
     {
-        binarySatisfy(token, TokenType::INT, TokenType::INT, statement);
+        binarySatisfy(token, TokenType::NUMERIC, TokenType::NUMERIC, statement);
 
         if (globals::doOptimize)
         {
@@ -246,7 +248,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
     case OpCodes::ARITHMETICAL_SUB:
     {
-        binarySatisfy(token, TokenType::INT, TokenType::INT, statement);
+        binarySatisfy(token, TokenType::NUMERIC, TokenType::NUMERIC, statement);
 
         if (globals::doOptimize)
         {
@@ -268,7 +270,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
     case OpCodes::ARITHMETICAL_MUL:
     {
-        binarySatisfy(token, TokenType::INT, TokenType::INT, statement);
+        binarySatisfy(token, TokenType::NUMERIC, TokenType::NUMERIC, statement);
 
         if (globals::doOptimize)
         {
@@ -301,7 +303,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
     case OpCodes::ARITHMETICAL_DIV:
     {
-        binarySatisfy(token, TokenType::INT, TokenType::INT, statement);
+        binarySatisfy(token, TokenType::NUMERIC, TokenType::NUMERIC, statement);
 
         if (globals::doOptimize)
         {
@@ -328,7 +330,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
     case OpCodes::ARITHMETICAL_POW:
     {
-        binarySatisfy(token, TokenType::INT, TokenType::INT, statement);
+        binarySatisfy(token, TokenType::NUMERIC, TokenType::NUMERIC, statement);
         break;
     }
 
@@ -342,7 +344,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
     case OpCodes::LOGICAL_EQ:
     {
-        binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
+        binarySatisfy(token, TokenType::NUMERIC, TokenType::NUMERIC, statement);
 
         if (globals::doOptimize)
         {
@@ -364,7 +366,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
     case OpCodes::LOGICAL_NOT_EQ:
     {
-        binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
+        binarySatisfy(token, TokenType::NUMERIC, TokenType::NUMERIC, statement);
 
         if (globals::doOptimize)
         {
@@ -430,7 +432,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
     case OpCodes::LOGICAL_LESS:
     {
-        binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
+        binarySatisfy(token, TokenType::NUMERIC, TokenType::NUMERIC, statement);
 
         if (globals::doOptimize)
         {
@@ -452,7 +454,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
     case OpCodes::LOGICAL_LESS_EQ:
     {
-        binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
+        binarySatisfy(token, TokenType::NUMERIC, TokenType::NUMERIC, statement);
 
         if (globals::doOptimize)
         {
@@ -474,7 +476,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
     case OpCodes::LOGICAL_GREATER:
     {
-        binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
+        binarySatisfy(token, TokenType::NUMERIC, TokenType::NUMERIC, statement);
 
         if (globals::doOptimize)
         {
@@ -496,7 +498,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
     case OpCodes::LOGICAL_GREATER_EQ:
     {
-        binarySatisfy(token, TokenType::BOOL, TokenType::BOOL, statement);
+        binarySatisfy(token, TokenType::NUMERIC, TokenType::NUMERIC, statement);
 
         if (globals::doOptimize)
         {
@@ -691,7 +693,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
         // create a new SyntaxTree for the scope
         SyntaxTree* scopeTree = new SyntaxTree(std::move(scopeStatements));
 
-        scopeTree->parseToByteCode(DONT_POP_SCOPE); 
+        scopeTree->parseToByteCodePrivate(); 
 
         // if token is a standalone scope, pop it function
         // bodies are popped by the function declaration operator

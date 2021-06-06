@@ -100,32 +100,19 @@ pvm::ByteCode SyntaxTree::parseToByteCode()
 	SymbolTable::init();
 
 	// since this is the global scope, pop the symbols at the end
-	parseToByteCode(DONT_POP_SCOPE);
+	parseToByteCodePrivate();
 
 	SymbolTable::clear();
+
+	// add the last exit instruction to the byteList
+	byteList.add(new pvm::ByteNode(pvm::OpCode::EXIT));
+	byteList.add(new pvm::ByteNode(0));
 
 	return byteList.toByteCode();
 }
 
 
-// inserts the required push instructions at the beginnig of the scope
-// pushes the size of the scope onto the stack
-static void insertInitialPushInstructions(pvm::ByteList& byteList)
-{
-	// insert in reverse order
-	byteList.insertFisrt(new pvm::ByteNode(SymbolTable::getScope()->localSymbolsSize));
-	byteList.insertFisrt(new pvm::ByteNode(pvm::OpCode::PUSH_BYTES));
-}
-
-
-static void appendFinalPopInstructions(pvm::ByteList& byteList)
-{
-	byteList.add(new pvm::ByteNode(pvm::OpCode::POP));	
-	byteList.add(new pvm::ByteNode(SymbolTable::getScope()->localSymbolsSize));
-}
-
-
-void SyntaxTree::parseToByteCode(bool doPopScope)
+void SyntaxTree::parseToByteCodePrivate()
 {
 	/*
 		loop through every statement
@@ -154,16 +141,23 @@ void SyntaxTree::parseToByteCode(bool doPopScope)
 	// set linked list's last element to the last evaluated statement
 	statements.end = statement;
 
-	// at the end of tree generation, transform it into byte code
-	generateByteCode(doPopScope);
+	const size_t localSymbolsSize = SymbolTable::getScope()->localSymbolsSize;
 
-	// now that the byte code for the tree has been generated and the scope size determined,
-	// add the push instruction at the beginning of the scope
-	insertInitialPushInstructions(byteList);
-
-	if (!doPopScope)
+	// don't add push instructions if there's nothing to push
+	if (localSymbolsSize != 0)
 	{
-		appendFinalPopInstructions(byteList);
+		byteList.add(new pvm::ByteNode(pvm::OpCode::PUSH_BYTES));
+		byteList.add(new pvm::ByteNode(localSymbolsSize));
+	}
+
+	// at the end of tree generation, transform it into byte code
+	generateByteCode();
+
+	// don't pop form the stack if nothing was added in the first place
+	if (localSymbolsSize != 0)
+	{
+		byteList.add(new pvm::ByteNode(pvm::OpCode::POP));	
+		byteList.add(new pvm::ByteNode(localSymbolsSize));
 	}
 
 }
@@ -182,7 +176,7 @@ std::ostream& operator<<(std::ostream& stream, SyntaxTree const& tree)
 }
 
 
-void SyntaxTree::generateByteCode(bool doPopScope)
+void SyntaxTree::generateByteCode()
 {
 	using namespace Tokens;
 
@@ -196,12 +190,5 @@ void SyntaxTree::generateByteCode(bool doPopScope)
 			}
 		}
 	}
-
-	// pop the local scope symbols from the stack if required
-	if (doPopScope)
-	{
-		appendFinalPopInstructions(byteList);
-	}
-
 }
 

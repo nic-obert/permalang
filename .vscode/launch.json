@@ -32,7 +32,10 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/target/pcc",
-            "args": ["impl/script.pf"],
+            "args": [
+              "impl/script.pf",
+              "-v"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
@@ -53,7 +56,10 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/target/pcc",
-            "args": ["impl/script.pf.pfx", "-x"],
+            "args": [
+              "impl/script.pf.pfx",
+              "-x"
+            ],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],

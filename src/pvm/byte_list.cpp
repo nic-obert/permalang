@@ -43,27 +43,6 @@ void ByteList::add(ByteNode* node)
 }
 
 
-void ByteList::insertFisrt(ByteNode* node)
-{
-    node->next = start;
-    node->prev = nullptr;
-
-    if (start != nullptr)
-    {
-        start->prev = node;
-    }
-    else
-    {
-        end = node;
-    }
-
-    start = node;
-
-    nodeCount ++;
-    byteSize += node->dataSize;
-}
-
-
 void ByteList::extend(ByteList& other)
 {
     if (other.start != nullptr)
@@ -110,5 +89,11 @@ ByteCode ByteList::toByteCode() const
     }
 
     return byteCode;
+}
+
+
+size_t ByteList::getCurrentSize() const
+{
+    return byteSize;
 }
 

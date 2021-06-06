@@ -32,7 +32,7 @@ std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
     for (size_t line = 1, i = 0; true; line++)
     {
 
-        stream << '\t' << line << '\t';
+        stream << '#' << line << "\t@" << i << '\t';
 
         // switch byte and increment index
         switch ((OpCode) bytes[i++])
@@ -63,11 +63,7 @@ std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
         
         case OpCode::EXIT:
         {
-            std::string exitCode;
-            string_utils::byteToString(bytes[i], exitCode);
-
-            stream << "exit: " << exitCode << '\n';
-            
+            stream << "exit: " << (unsigned int) bytes[i] << '\n';            
             // breaking the switch statement means breaking the while loop
             break;
         }
@@ -247,7 +243,7 @@ std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
 
         if ((OpCode) bytes[i-1] != OpCode::EXIT)
         {
-            std::string msg("Unhandled OpCode in byte code execution: ");
+            std::string msg("Unhandled OpCode in byte code printing: ");
 
             std::string strOpCode;
             string_utils::byteToString(bytes[i-1], strOpCode);

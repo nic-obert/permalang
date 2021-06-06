@@ -32,8 +32,14 @@ namespace Tokens
         LONG,
         FUNCTION,
         COMMA,
+        NUMERIC,
+        NO_TOK,
 
     } TokenType;
+
+
+    // whether the first TokenType is compatible with the second
+    bool isCompatible(TokenType got, TokenType required);
 
 
     // returns the size of a TokenType

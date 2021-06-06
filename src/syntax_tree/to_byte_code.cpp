@@ -108,9 +108,12 @@ void SyntaxTree::parseTokenOperator(Tokens::Token* token)
     // if token is a unary operator the result stored in the result register of an
     // eventual operation performed in the evaluation of its operand will not be overwritten 
     if (
-        opType == OpType::UNARY
+        // store result only for unary increment and decrement operations
+        // don't store result for other unary operations
+        (opType == OpType::UNARY && (token->opCode != OpCodes::ARITHMETICAL_INC && token->opCode != OpCodes::ARITHMETICAL_DEC))
         || opType == OpType::STANDALONE
         || isAssignmentOp(token->opCode)
+        // flow operators do not have a result
         || isFlowOp(token->opCode)
         )
     {
@@ -294,10 +297,10 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
             // pass as second operand the token's literal value
             AddNode(operands[1]->value);
         }
-
+        
         // these operands won't be accessed anymore after compilation
         deleteOperands(operands, OpType::BINARY);
-        
+
         return lValue->stackPosition;
     }
 
@@ -324,7 +327,7 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
     case OpCodes::ARITHMETICAL_INC:
     {
 
-        Token one = Token(TokenType::INT, 0, OpCodes::LITERAL);
+        Token one = Token(TokenType::INT, 0, OpCodes::LITERAL, 1);
         Token* ops[2] = {operands[0], &one};
 
         byteCodeForBinaryOperation(ops, OpCode::ADD, byteList);
@@ -345,7 +348,7 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
     case OpCodes::ARITHMETICAL_DEC:
     {
 
-        Token one = Token(TokenType::INT, 0, OpCodes::LITERAL);
+        Token one = Token(TokenType::INT, 0, OpCodes::LITERAL, 1);
         Token* ops[2] = {operands[0], &one};
 
         byteCodeForBinaryOperation(ops, OpCode::SUB, byteList);
@@ -479,6 +482,7 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
         byteCodeForBinaryOperation(operands, OpCode::SUB, byteList);
 
         AddNode(OpCode::IF_JUMP);
+        // 3 is the size of the REG_TO_REG instruction along with its operands
         AddNode(SymbolTable::getStackPointer() + 3);
 
         AddNode(OpCode::REG_TO_REG);
@@ -513,6 +517,7 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
         byteCodeForBinaryOperation(ops, OpCode::SUB, byteList);
 
         AddNode(OpCode::IF_JUMP);
+        // 3 is the size of the REG_TO_REG instruction along with its operands
         AddNode(SymbolTable::getStackPointer() + 3);
 
         AddNode(OpCode::REG_TO_REG);
@@ -599,7 +604,7 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
         // address to jump to = current stack pointer + size of instructions to jump over
         AddNode(SymbolTable::getStackPointer() + 19);
 
-        Token zero = Token(TokenType::INT, 0, OpCodes::LITERAL, 1);
+        Token zero = Token(TokenType::INT, 0, OpCodes::LITERAL, 0);
         ops[0] = operands[1];
         ops[1] = &zero;
 
@@ -757,12 +762,26 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
     // invert boolean condition
 
         // load the boolean condition
-        AddNode(OpCode::REG_TO_REG);
-        AddNode(Registers::GENERAL_A);
-        AddNode(Registers::ZERO_FLAG);
+        if (hasReturnValueInRegister(operands[0]))
+        {
+            AddNode(OpCode::REG_TO_REG);
+            AddNode(Registers::GENERAL_A);
+            AddNode(Registers::ZERO_FLAG);
+        }
+        else if (operands[0]->opCode == OpCodes::LITERAL)
+        {
+            AddNode(OpCode::LD_CONST_A);
+            AddNode(operands[0]->value);
+        }
+        else if (operands[0]->opCode == OpCodes::REFERENCE)
+        {
+            AddNode(OpCode::LD_A);
+            AddNode(SymbolTable::get(IdOf(operands[0]))->stackPosition);
+        }
+
         // load 0 to compare the condition with (to invert condition)
         AddNode(OpCode::LD_CONST_B);
-        AddNode(1);
+        AddNode(0);
 
         AddNode(OpCode::CMP);
         
@@ -770,8 +789,8 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         AddNode(OpCode::IF_JUMP);
         // bodySizeNode will be set later when the actual if body is compiled
-        ByteNode* bodySizeNode = new ByteNode(SymbolTable::getStackPointer());
-        byteList.add(bodySizeNode);
+        ByteNode* exitIndexNode = new ByteNode(0);
+        byteList.add(exitIndexNode);
 
         // if the if's body is a whole scope, extraxt its SyntaxTree and extend
         // this' byteList with the scope tree's
@@ -791,11 +810,94 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
             delete operands[1];
         }
 
-        // update the number of bytes to jump over (size of the if's body)
-        bodySizeNode->data += SymbolTable::getStackPointer() - bodySizeNode->data;
+        // update the index to jump to
+        exitIndexNode->data = byteList.getCurrentSize();
 
         // delete just the first operand (bool condition) since the if's body has already
         // been deleted after being handled
+        delete operands[0];
+
+        return 0;
+    }
+
+
+    case OpCodes::FLOW_WHILE:
+    {
+        /*
+            - evaluate condition
+            - invert condition
+            - code for body
+            - jump to condition
+        
+        @l1:
+            // boolean condition
+            if not condition jump @l2
+            // while body
+            jump @l1
+        @l2:
+        */
+
+    // compile boolean operation
+
+        // save the boolean condition's instruction index
+        const size_t conditionInstructionIndex = byteList.getCurrentSize();
+
+        parseTokenOperator(operands[0]);
+
+    // invert boolean condition
+
+        // load the boolean condition
+        if (hasReturnValueInRegister(operands[0]))
+        {
+            AddNode(OpCode::REG_TO_REG);
+            AddNode(Registers::GENERAL_A);
+            AddNode(Registers::ZERO_FLAG);
+        }
+        else if (operands[0]->opCode == OpCodes::LITERAL)
+        {
+            AddNode(OpCode::LD_CONST_A);
+            AddNode(operands[0]->value);
+        }
+        else if (operands[0]->opCode == OpCodes::REFERENCE)
+        {
+            AddNode(OpCode::LD_A);
+            AddNode(SymbolTable::get(IdOf(operands[0]))->stackPosition);
+        }
+        
+        // load 0 to compare the condition with (to invert condition)
+        AddNode(OpCode::LD_CONST_B);
+        AddNode(0);
+
+        AddNode(OpCode::CMP);
+    
+    // conditional jump
+
+        AddNode(OpCode::IF_JUMP);
+        // save condidional jump's operand's pointer to set it later
+        ByteNode* exitIndexNode = new ByteNode(0);
+        byteList.add(exitIndexNode);
+
+    // while body
+
+        if (operands[1]->opCode == OpCodes::PUSH_SCOPE)
+        {
+            SyntaxTree* body = (SyntaxTree*) operands[1]->value;
+            byteList.extend(body->byteList);
+            delete body;
+        }
+        else
+        {
+            parseTokenOperator(operands[1]);
+            delete operands[1];
+        }
+
+        // add unconditional jump to condition evaluation
+        AddNode(OpCode::JMP);
+        AddNode(conditionInstructionIndex);
+
+        // set exit index to the byte next to the unconditional jump instruction
+        exitIndexNode->data = byteList.getCurrentSize();
+
         delete operands[0];
 
         return 0;
