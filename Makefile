@@ -41,12 +41,12 @@ all: $(TARGET)
 
 
 $(TARGET_DIR):
-	mkdir -p $(TARGET_DIR)
+	mkdir -p $@
 
 
 
 $(TARGET): $(PCH) $(SOURCES) $(HEADERS) $(TARGET_DIR)
-	$(CC) $(COMMON_ARGS) -o $(TARGET)
+	$(CC) $(COMMON_ARGS) -o $@
 	@echo "Build successful"
 
 
@@ -70,7 +70,7 @@ builddb-wall: $(PCH) $(SOURCES) $(HEADERS) $(TARGET_DIR)
 
 $(PCH): $(HH)
 	@echo "Compiling headers"
-	$(CC) $(C_FLAGS) $(WARNINGS) $(HH) -o $(PCH)
+	$(CC) $(C_FLAGS) $(WARNINGS) $^ -o $@
 
 
 
@@ -83,7 +83,7 @@ clean:
 
 install-pcc: $(TARGET)
 	@echo "Installing pcc toolchain"
-	sudo cp -f $(TARGET) $(INSTALL_PCC)
+	sudo cp -f $^ $(INSTALL_PCC)
 
 
 install-lib:

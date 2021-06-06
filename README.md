@@ -58,9 +58,17 @@ Compile with optimizations
 ```bash
 pcc -O <source.pf>
 ```
+Use the `-v` flag for verbose compilation
+
+<br>
+
 Run executable
 ```bash
 pcc <executable> -x
+```
+Help page
+```bash
+pcc --help
 ```
 
 <br>
