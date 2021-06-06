@@ -8,29 +8,62 @@
 #include "argparser.hh"
 
 
-int main(int argc, const char** argv) 
+typedef struct Options
 {
-
     const char* fileName;
-    const char* outputName = nullptr;
+    const char* outputName;
     bool execute;
     bool verbose;
 
-    // TODO add switch description and implement help page
+} Options;
 
-    argparser::Parser parser = argparser::Parser(4);
-    parser.addBoolImplicit("-O", &globals::doOptimize);
-    parser.addStringPositional(&fileName, true);
-    parser.addBoolImplicit("-x", &execute);
-    parser.addString("-o", &outputName);
-    parser.addBoolImplicit("-v", &verbose);
+
+static void initParser(argparser::Parser* parser, Options& options)
+{
+    *parser = argparser::Parser(
+        5,
+        "Permalang Compiler Collection\n"
+        "For anything email nchlsuba@gmail.com"
+    );
+
+    parser->addBoolImplicit(
+        "-O", &globals::doOptimize, false,
+        "apply optimizations to compiled byte code");
+
+    parser->addStringPositional(
+        &options.fileName, true,
+        "name of the file to load");
+
+    parser->addBoolImplicit(
+        "-x", &options.execute, false,
+        "execute the specified file instead of compiling");
+
+    parser->addString(
+        "-o", &options.outputName, false,
+        "compilation output file name");
+
+    parser->addBoolImplicit(
+        "-v", &options.verbose, false,
+        "verbose compilation");
+
+}
+
+
+int main(int argc, const char** argv) 
+{
+
+    Options options;
+    argparser::Parser parser;
+
+    initParser(&parser, options);
 
     parser.parse(argc, argv);
     
-    if (execute)
+
+    if (options.execute)
     {
 
-        pvm::ByteCode byteCode = pvm::loadByteCode(fileName);
+        pvm::ByteCode byteCode = pvm::loadByteCode(options.fileName);
         
         pvm::Pvm pvm = pvm::Pvm(1024);
         pvm::Byte exitCode = pvm.execute(byteCode.byteCode);
@@ -43,20 +76,20 @@ int main(int argc, const char** argv)
 
         timerpp::Timer timer;
 
-if (verbose)
+if (options.verbose)
     timer = timerpp::Timer();
 
         std::string file;
 
-if (verbose)
+if (options.verbose)
     timer.start();
 
-        if (!file_utils::loadFile(fileName, file))
+        if (!file_utils::loadFile(options.fileName, file))
         {
-            errors::FileReadError(fileName);
+            errors::FileReadError(options.fileName);
         }
 
-if (verbose)
+if (options.verbose)
 {
     timer.stop();
 
@@ -67,7 +100,7 @@ if (verbose)
 }
         preprocessor::process(file);
 
-if (verbose)
+if (options.verbose)
 {
     timer.stop();
 
@@ -78,7 +111,7 @@ if (verbose)
 }
         Tokens::TokenList tokens = Tokens::TokenList(file);
 
-if (verbose)
+if (options.verbose)
 {    
     timer.stop();
 
@@ -91,7 +124,7 @@ if (verbose)
         syntax_tree::SyntaxTree syntaxTree = syntax_tree::SyntaxTree(tokens);
         const pvm::ByteCode byteCode = syntaxTree.parseToByteCode();
 
-if (verbose)
+if (options.verbose)
 { 
     timer.stop();
 
@@ -100,23 +133,23 @@ if (verbose)
     std::cout << byteCode << '\n' << std::endl;
 }
         
-        if (outputName == nullptr)
+        if (options.outputName == nullptr)
         {
             // generate name for executable if not provided
-            const size_t nameLength = strlen(fileName);
+            const size_t nameLength = strlen(options.fileName);
             char outputName[nameLength + 5];
-            strncpy(outputName, fileName, nameLength);
+            strncpy(outputName, options.fileName, nameLength);
             strcpy(outputName + nameLength, ".pfx");    
 
             // outputName is a local variable, not the outer one
             // this prevents copying of the string outputName to extend
             // its lifetime beyond this local scope
-            pvm::generateExecutable(byteCode, outputName);
+            pvm::generateExecutable(byteCode, options.outputName);
         }
         else
         {
             // here outputName is the outer variable
-            pvm::generateExecutable(byteCode, outputName);
+            pvm::generateExecutable(byteCode, options.outputName);
         }
         
         
