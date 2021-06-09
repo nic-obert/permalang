@@ -18,12 +18,7 @@
 #define ASSIGNMENT_P 2
 #define AND_P 3
 #define OR_P 3
-#define EQUALITY_P 4
-#define INEQUALITY_P 4
-#define LESS_THAN_P 4
-#define GREATER_THAN_P 4
-#define GREATER_EQUAL_P 4
-#define LESS_EQUAL_P 4
+#define COMPARISON_P 4
 #define SUM_P 5
 #define SUBTRACTION_P 5
 #define MULTIPLICATION_P 6

@@ -13,9 +13,6 @@ Pvm::Pvm(size_t memSize)
 }
 
 
-// utility function
-// returns a long value from the byteCode
-// updates the offset by + sizeof(long)
 static inline long getLongValue(const Byte* byteCode, size_t& offset)
 {
     const long value = *((long*) (byteCode + offset));
@@ -23,10 +20,14 @@ static inline long getLongValue(const Byte* byteCode, size_t& offset)
     return value;
 }
 
+static inline int getIntValue(const Byte* byteCode, size_t& offset)
+{
+    const int value = *((int*) (byteCode + offset));
+    offset += sizeof(int);
+    return value;
+}
 
-// utility function
-// returns a long value from the byteCode
-// updates the offset by +1
+
 static inline Byte getByteValue(const Byte* byteCode, size_t& offset)
 {
     const Byte value = byteCode[offset];
@@ -128,22 +129,67 @@ Byte Pvm::execute(const Byte* byteCode)
             break;
 
 
-        case OpCode::LD_A:
+        case OpCode::LD_A_8:
             rGeneralA = memory.getLong(
+                getLongValue(byteCode, offset)
+            );
+            break;
+        case OpCode::LD_A_4:
+            rGeneralA = memory.getInt(
+                getLongValue(byteCode, offset)
+            );
+            break;
+        case OpCode::LD_A_1:
+            rGeneralA = memory.getByte(
+                getLongValue(byteCode, offset)
+            );
+            break;
+        case OpCode::LD_A_BIT:
+            rGeneralA = memory.getBit(
                 getLongValue(byteCode, offset)
             );
             break;
 
 
-        case OpCode::LD_B:
+        case OpCode::LD_B_8:
             rGeneralB = memory.getLong(
+                    getLongValue(byteCode, offset)
+                );
+                break;
+        case OpCode::LD_B_4:
+            rGeneralB = memory.getInt(
+                    getLongValue(byteCode, offset)
+                );
+                break;
+        case OpCode::LD_B_1:
+            rGeneralB = memory.getByte(
+                    getLongValue(byteCode, offset)
+                );
+                break;
+        case OpCode::LD_B_BIT:
+            rGeneralB = memory.getBit(
                     getLongValue(byteCode, offset)
                 );
                 break;
 
 
-        case OpCode::LD_RESULT:
+        case OpCode::LD_RESULT_8:
             rResult = memory.getLong(
+                getLongValue(byteCode, offset)
+            );
+            break;
+        case OpCode::LD_RESULT_4:
+            rResult = memory.getInt(
+                getLongValue(byteCode, offset)
+            );
+            break;    
+        case OpCode::LD_RESULT_1:
+            rResult = memory.getByte(
+                getLongValue(byteCode, offset)
+            );
+            break;    
+        case OpCode::LD_RESULT_BIT:
+            rResult = memory.getBit(
                 getLongValue(byteCode, offset)
             );
             break;       
@@ -156,7 +202,7 @@ Byte Pvm::execute(const Byte* byteCode)
             break;         
 
 
-        case OpCode::MEM_MOV:
+        case OpCode::MEM_MOV_8:
         {
             const Address addr1 = getLongValue(byteCode, offset);
 
@@ -166,9 +212,39 @@ Byte Pvm::execute(const Byte* byteCode)
 
             break;
         }
+        case OpCode::MEM_MOV_4:
+        {
+            const Address addr1 = getLongValue(byteCode, offset);
+
+            const Address addr2 = getLongValue(byteCode, offset);
+
+            memory.set(addr1, memory.getInt(addr2));
+
+            break;
+        }
+        case OpCode::MEM_MOV_1:
+        {
+            const Address addr1 = getLongValue(byteCode, offset);
+
+            const Address addr2 = getLongValue(byteCode, offset);
+
+            memory.set(addr1, memory.getByte(addr2));
+
+            break;
+        }
+        case OpCode::MEM_MOV_BIT:
+        {
+            const Address addr1 = getLongValue(byteCode, offset);
+
+            const Address addr2 = getLongValue(byteCode, offset);
+
+            memory.set(addr1, memory.getBit(addr2));
+
+            break;
+        }
 
 
-        case OpCode::REG_MOV:
+        case OpCode::REG_MOV_8:
         {
             const Address address = getLongValue(byteCode, offset);
 
@@ -177,9 +253,27 @@ Byte Pvm::execute(const Byte* byteCode)
             memory.set(address, *((long*) getRegister(reg)));
             
             break;
-        }   
+        }
+        case OpCode::REG_MOV_4:
+        {
+            const Address address = getLongValue(byteCode, offset);
 
+            const Registers reg = (Registers) getByteValue(byteCode, offset);
 
+            memory.set(address, *((int*) getRegister(reg)));
+            
+            break;
+        }
+        case OpCode::REG_MOV_1:
+        {
+            const Address address = getLongValue(byteCode, offset);
+
+            const Registers reg = (Registers) getByteValue(byteCode, offset);
+
+            memory.set(address, *((Byte*) getRegister(reg)));
+            
+            break;
+        }
         case OpCode::REG_MOV_BIT:
         {
             const Address address = getLongValue(byteCode, offset);
@@ -187,9 +281,9 @@ Byte Pvm::execute(const Byte* byteCode)
             const Registers reg = (Registers) getByteValue(byteCode, offset);
 
             memory.set(address, *((bool*) getRegister(reg)));
-
+            
             break;
-        }
+        }   
 
 
         case OpCode::REG_TO_REG:
@@ -211,11 +305,41 @@ Byte Pvm::execute(const Byte* byteCode)
         }
 
 
-        case OpCode::MEM_SET:
+        case OpCode::MEM_SET_8:
         {
             const Address address = getLongValue(byteCode, offset);
 
             const long value = getLongValue(byteCode, offset);
+
+            memory.set(address, value);
+
+            break;
+        }
+        case OpCode::MEM_SET_4:
+        {
+            const Address address = getLongValue(byteCode, offset);
+
+            const int value = getIntValue(byteCode, offset);
+
+            memory.set(address, value);
+
+            break;
+        }
+        case OpCode::MEM_SET_1:
+        {
+            const Address address = getLongValue(byteCode, offset);
+
+            const Byte value = getByteValue(byteCode, offset);
+
+            memory.set(address, value);
+
+            break;
+        }
+        case OpCode::MEM_SET_BIT:
+        {
+            const Address address = getLongValue(byteCode, offset);
+
+            const bool value = (bool) getByteValue(byteCode, offset);
 
             memory.set(address, value);
 
@@ -243,7 +367,19 @@ Byte Pvm::execute(const Byte* byteCode)
             offset += sizeof(long);
 
             break;
+        
+        
+        case OpCode::IF_NOT_JUMP:
+            if (!rZeroFlag)
+            {
+                offset = *((long*) (byteCode + offset));
+                break;
+            }
 
+            offset += sizeof(long);
+
+            break;
+            
 
         case OpCode::PUSH_CONST:
             memory.set(

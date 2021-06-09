@@ -5,6 +5,8 @@
 #include "utils.hh"
 
 
+// DEFINITIONS
+
 typedef unsigned long size_t;
 
 // whether the given register is a bit register
@@ -26,46 +28,69 @@ namespace pvm
     // PVM instruction set, similar to x86 assembly
     typedef enum class OpCode : Byte
     {
-        EXIT,       // end of the program
+        EXIT,           // end of the program, expects a 1 byte exit code
 
-        ADD,        // long integer add from registers A and B
-        SUB,        // long integer subtract from registers A and B
-        MUL,        // long integer multiply from registers A and B
-        DIV,        // long integer divide from registers A and B
+        ADD,            // long integer add from registers A and B
+        SUB,            // long integer subtract from registers A and B
+        MUL,            // long integer multiply from registers A and B
+        DIV,            // long integer divide from registers A and B
 
-        CMP,        // compare registers A and B, set the ZERO FLAG
-        CMP_REVERSE,// compare registers A and B, set the ZERO FLAG
+        CMP,            // compare registers A and B, set the ZERO FLAG
+        CMP_REVERSE,    // compare registers A and B, set the ZERO FLAG
 
-        LD_CONST_A, // load long integer constant into register A
-        LD_CONST_B, // load long integer constant into register A
-        LD_CONST_RESULT,    // load long integer constant into register RESULT
+        LD_CONST_A,     // load long integer constant into register A
+        LD_CONST_B,     // load long integer constant into register A
+        LD_CONST_RESULT,// load long integer constant into register RESULT
 
-        LD_A,       // load long integer from memory into register A
-        LD_B,       // load long intefer from memory into register B
-        LD_RESULT,  // load long integer from memory into register RESULT
-        LD_ZERO_FLAG,   // load bit value from memory into register ZERO FLAG
+        LD_A_8,         // load 8 bytes from memory into register A
+        LD_A_4,         // load 4 bytes from memory into register A
+        LD_A_1,         // load 1 byte from memory into register A
+        LD_A_BIT,       // load 1 bit from memory into register A
 
-        MEM_MOV,    // copy a long value from a memory address to another
-        REG_MOV,    // copy a long value from a register into a memory address
-        REG_MOV_BIT,// copy a bit value from a register into a memory address
-        REG_TO_REG, // copy a value from a register to another
+        LD_B_8,         // load 8 bytes from memory into register B
+        LD_B_4,         // load 4 bytes from memory into register B
+        LD_B_1,         // load 1 byte from memory into register B
+        LD_B_BIT,       // load 1 bit from memory into register B
 
-        MEM_SET,    // sets a memory address to a value
+        LD_RESULT_8,    // load 8 bytes from memory into register RESULT    
+        LD_RESULT_4,    // load 4 bytes from memory into register RESULT
+        LD_RESULT_1,    // load 1 byte from memory into register RESULT
+        LD_RESULT_BIT,  // load 1 bit from memory into register RESULT
 
-        JMP,        // unconditional jump to index   
-        IF_JUMP,    // conditional jump based on ZERO FLAG register's value (1 = true, 0 = false)
+        LD_ZERO_FLAG,   // load 1 bit from memory into register ZERO FLAG
 
-        PUSH_CONST, // push a constant long value on the stack
-        PUSH_REG,   // push a value on the stack from a specified register
-        PUSH_BYTES, // increments the STACK POINTER by a specified amount
+        MEM_MOV_8,      // copy 8 bytes from a memory address to another
+        MEM_MOV_4,      // copy 4 bytes from a memory address to another
+        MEM_MOV_1,      // copy 1 byte from a memory address to another
+        MEM_MOV_BIT,    // copy 1 bit from a memory address to another
 
-        POP,        // pop the STACK POINTER by a specified amount
+        REG_MOV_8,      // copy a 8 bytes from a register into a memory address
+        REG_MOV_4,      // copy an int value from a register into a memory address        
+        REG_MOV_1,      // copy 1 byte from a register into a memory address
+        REG_MOV_BIT,    // copy 1 bit from a register into a memory address
 
-        CALL,       // calls a function
+        REG_TO_REG,     // copy a value from a register to another
 
-        PRINT,      // prints the content of register A
+        MEM_SET_8,      // sets 8 bytes from a memory address to a value
+        MEM_SET_4,      // sets 4 bytes from a memory address to a value
+        MEM_SET_1,      // sets 1 byte from a memory address to a value
+        MEM_SET_BIT,    // sets 1 bit from a memory address to a value
 
-        NO_OP,      // does nothing
+        JMP,            // unconditional jump to index   
+        IF_JUMP,        // conditional jump based on ZERO FLAG register's value (1 = true, 0 = false)
+        IF_NOT_JUMP,    // conditional jump based on ZERO FLAG register's value (0 = true, 1 = false)
+
+        PUSH_CONST,     // push a constant long value on the stack
+        PUSH_REG,       // push a value on the stack from a specified register
+        PUSH_BYTES,     // increments the STACK POINTER by a specified amount
+
+        POP,            // pop the STACK POINTER by a specified amount
+
+        CALL,           // calls a function
+
+        PRINT,          // prints the content of register A
+
+        NO_OP,          // does nothing
 
 
     } OpCode;
@@ -89,11 +114,13 @@ namespace pvm
 
 
         void set(Address address, long value);
+        void set(Address address, int value);
         void set(Address address, Byte value);
         void set(Address address, bool value);
         
-        Byte getByte(Address address) const;
         long getLong(Address address) const;
+        int getInt(Address address) const;
+        Byte getByte(Address address) const;
         bool getBit(Address address) const;
 
     };
@@ -104,13 +131,13 @@ namespace pvm
     typedef enum class Registers
     {
         // long registers
-        GENERAL_A           = 0,
-        GENERAL_B           = 1,
-        DIVISION_REMAINDER  = 2,
-        RESULT              = 5,
+        GENERAL_A,
+        GENERAL_B,
+        DIVISION_REMAINDER,
+        RESULT,
         // bit registers
-        ZERO_FLAG           = 3,
-        SIGN_FLAG           = 4,
+        ZERO_FLAG,
+        SIGN_FLAG,
 
     } Registers;
 
@@ -188,7 +215,7 @@ namespace pvm
 
         ByteNode(OpCode data);
         ByteNode(Registers data);
-        ByteNode(Value data, InstructionSize dataSize = sizeof(Value));       
+        ByteNode(Value data, InstructionSize dataSize);       
 
     } ByteNode;
 
@@ -245,4 +272,6 @@ namespace pvm
 std::ostream& operator<<(std::ostream& stream, const pvm::ByteCode& byteCode);
 
 std::ostream& operator<<(std::ostream& stream, const pvm::Registers& reg);
+
+std::ostream& operator<<(std::ostream& stream, const pvm::OpCode opCode);
 

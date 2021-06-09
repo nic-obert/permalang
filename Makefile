@@ -10,6 +10,7 @@ IMPL_DIR=impl
 
 
 SOURCES=$(shell find $(SRC_DIR) -type f -name "*.cpp")
+MEM_TEST_SRC=$(shell find $(SRC_DIR) -type f \( -name "*.cpp" ! -name "pcc.cpp" \))
 
 
 HEADERS=$(shell find $(HEADERS_DIR) -type f \( -name "*.hh" ! -name "pch.hh" \))
@@ -29,7 +30,7 @@ WARNINGS=-Wall -Wno-switch -Wno-reorder -Wconversion
 WARNINGS_ALL=-Wall
 
 COMMON_ARGS=$(C_FLAGS) $(SOURCES) $(LINKS)
-COMMON_ARGS_TEST=$(C_FLAGS) $(SOURCES) $(TEST_CPP) $(LINKS)
+COMMON_ARGS_TEST=$(C_FLAGS) $(SOURCES) $(LINKS)
 
 
 INSTALL_DIR_LIB=/usr/lib/permalang
@@ -72,6 +73,11 @@ $(PCH): $(HH)
 	@echo "Compiling headers"
 	$(CC) $(C_FLAGS) $(WARNINGS) $^ -o $@
 
+
+# tests
+
+memtest: $(PCH) $(MEM_TEST_SRC) $(HEADERS) test/memtest.cpp
+	$(CC) -g $(WARNINGS) $(C_FLAGS) test/memtest.cpp $(MEM_TEST_SRC) $(LINKS) -o target/$@
 
 
 clean:

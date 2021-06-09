@@ -80,6 +80,29 @@ TokenList::TokenList(std::string& script)
 
             } // case ADDRESS_OF
 
+            
+            case OpCodes::LOGICAL_LESS:
+            {
+                if (c == '=')
+                {
+                    token->opCode = OpCodes::LOGICAL_LESS_EQ;
+                    token->priority = COMPARISON_P;
+                    AddToken();
+                    continue;
+                }
+            }
+
+            case OpCodes::LOGICAL_GREATER:
+            {
+                if (c == '=')
+                {
+                    token->opCode = OpCodes::LOGICAL_GREATER_EQ;
+                    token->priority = COMPARISON_P;
+                    AddToken();
+                    continue;
+                }
+            }
+
 
             case OpCodes::LITERAL:
             {
@@ -296,7 +319,7 @@ TokenList::TokenList(std::string& script)
                 if (c == '=')
                 {
                     token->type = TokenType::NONE;
-                    token->priority = EQUALITY_P + currentPriority;
+                    token->priority = COMPARISON_P + currentPriority;
                     token->opCode = OpCodes::LOGICAL_EQ;
                     AddToken();
                     continue;
@@ -314,7 +337,7 @@ TokenList::TokenList(std::string& script)
                 if (c == '=')
                 {
                     token->type = TokenType::NONE;
-                    token->priority = INEQUALITY_P + currentPriority;
+                    token->priority = COMPARISON_P + currentPriority;
                     token->opCode = OpCodes::LOGICAL_NOT_EQ;
                     AddToken();
                     continue;
@@ -397,6 +420,18 @@ TokenList::TokenList(std::string& script)
         case '!':
         {
             token = new Token(TokenType::NONE, NOT_P + currentPriority, OpCodes::LOGICAL_NOT);
+            continue;
+        }
+
+        case '<':
+        {
+            token = new Token(TokenType::NONE, COMPARISON_P, OpCodes::LOGICAL_LESS);
+            continue;
+        }
+
+        case '>':
+        {
+            token = new Token(TokenType::NONE, COMPARISON_P, OpCodes::LOGICAL_GREATER);
             continue;
         }
         

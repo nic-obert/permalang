@@ -43,7 +43,7 @@ namespace Tokens
 
 
     // returns the size of a TokenType
-    size_t typeSize(TokenType type);
+    unsigned char typeSize(TokenType type);
 
 
     // syntactical element of a program

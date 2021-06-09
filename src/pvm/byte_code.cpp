@@ -2,11 +2,29 @@
 #include "errors.hh"
 
 
-#define longArray *((long*) (bytes + i))
-
-
-
 using namespace pvm;
+
+
+static inline long getLong(const Byte* bytes, size_t& i)
+{
+    const long value = *((long*) (bytes + i));
+    i += sizeof(long);
+    return value;
+}
+
+
+static inline int getInt(const Byte* bytes, size_t& i)
+{
+    const int value = *((int*) (bytes + i));
+    i += sizeof(int);
+    return value;
+}
+
+
+static inline Byte getByte(const Byte* bytes, size_t& i)
+{
+    return bytes[i++];
+}
 
 
 ByteCode::ByteCode(Byte* byteCode, size_t size)
@@ -29,212 +47,212 @@ std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
 
     stream << "ByteCode (" << byteCode.size << "): {\n";
 
-    for (size_t line = 1, i = 0; true; line++)
+    for (size_t line = 1, i = 0; i != byteCode.size; line++)
     {
 
-        stream << '#' << line << "\t@" << i << '\t';
+        OpCode opCode = (OpCode) bytes[i];
+
+        stream << '#' << line << "\t@" << i << '\t' << opCode << ": ";
+
+        // increment only after printing
+        i++;
 
         // switch byte and increment index
-        switch ((OpCode) bytes[i++])
+        switch (opCode)
         {
         case OpCode::ADD:
-            stream << "add:\n";
+            stream << '\n';
             continue;
         
         case OpCode::SUB:
-            stream << "sub:\n";
+            stream << '\n';
             continue;
         
         case OpCode::MUL:
-            stream << "mul:\n";
+            stream << '\n';
             continue;
 
         case OpCode::DIV:
-            stream << "div:\n";
+            stream << '\n';
             continue;
         
         case OpCode::CMP:
-            stream << "cmp:\n";
+            stream << '\n';
             continue;
         
         case OpCode::CMP_REVERSE:
-            stream << "cmp reverse:\n";
+            stream << '\n';
             continue;
         
         case OpCode::EXIT:
         {
-            stream << "exit: " << (unsigned int) bytes[i] << '\n';            
-            // breaking the switch statement means breaking the while loop
-            break;
+            stream << (unsigned int) getByte(bytes, i) << '\n';            
+            continue;
         }
         
         case OpCode::JMP:
-            stream << "jmp: @["
-                << longArray
-                << "]\n";
-                
-            i += sizeof(long);
+            stream << "@[" << getLong(bytes, i) << "]\n";
             continue;
         
         case OpCode::IF_JUMP:
-            stream << "if jmp: @["
-                << longArray
-                << "]\n";
-                
-            i += sizeof(long);
+            stream << "@[" << getLong(bytes, i) << "]\n";                
+            continue;
+        
+        case OpCode::IF_NOT_JUMP:
+            stream << "@[" << getLong(bytes, i) << "]\n";
             continue;
 
         case OpCode::PUSH_CONST:
-            stream << "push const: ";
-            
-            stream << longArray << '\n';
-            i += sizeof(long);
+            stream << getLong(bytes, i) << '\n';
             continue;
         
         case OpCode::PUSH_REG:
-            stream << "push reg: ";
-
-            stream << (Registers) bytes[i] << '\n';
-            i++;
+            stream << (Registers) getByte(bytes, i) << '\n';
             continue;
         
         case OpCode::PUSH_BYTES:
-            stream << "push bytes: ";
-            
-            stream << longArray << '\n';
-            i += sizeof(long);
+            stream << getLong(bytes, i) << '\n';
             continue;
         
         case OpCode::POP:
-            stream << "pop: ";
-
-            stream << longArray << '\n';
-            i += sizeof(long);
+            stream << getLong(bytes, i) << '\n';
             continue;
 
-        case OpCode::LD_A:
-            stream << "ld A: ["
-                << longArray
-                << "]\n";
-
-            i += sizeof(long);
-            continue;
-
-        case OpCode::LD_B:
-            stream << "ld B: ["
-                << longArray
-                << "]\n";
-
-            i += sizeof(long);
+        case OpCode::LD_A_8:
+            stream << '[' << getLong(bytes, i) << "]\n";
             continue;
         
-        case OpCode::LD_RESULT:
-            stream << "ld RESULT: ["
-                << longArray
-                << "]\n";
+        case OpCode::LD_A_4:
+            stream << '[' << getLong(bytes, i) << "]\n";
+            continue;
+        
+        case OpCode::LD_A_1:
+            stream << '[' << getLong(bytes, i) << "]\n";
+            continue;
+        
+        case OpCode::LD_A_BIT:
+            stream << '[' << getLong(bytes, i) << "]\n";
+            continue;
 
-            i += sizeof(long);
+        case OpCode::LD_B_8:
+            stream << '[' << getLong(bytes, i) << "]\n";
+            continue;
+        
+        case OpCode::LD_B_4:
+            stream << '[' << getLong(bytes, i) << "]\n";
+            continue;
+        
+        case OpCode::LD_B_1:
+            stream << '[' << getLong(bytes, i) << "]\n";
+            continue;
+        
+        case OpCode::LD_B_BIT:
+            stream << '[' << getLong(bytes, i) << "]\n";
+            continue;
+        
+        case OpCode::LD_RESULT_8:
+            stream << '[' << getLong(bytes, i) << "]\n";
+            continue;
+        
+        case OpCode::LD_RESULT_4:
+            stream << '[' << getLong(bytes, i) << "]\n";
+            continue;
+        
+        case OpCode::LD_RESULT_1:
+            stream << '[' << getLong(bytes, i) << "]\n";
+            continue;
+        
+        case OpCode::LD_RESULT_BIT:
+            stream << '[' << getLong(bytes, i) << "]\n";
             continue;
         
         case OpCode::LD_ZERO_FLAG:
-            stream << "ld ZERO FLAG: ["
-                << longArray
-                << "]\n";
-
-            i += sizeof(long);
+            stream << '[' << getLong(bytes, i) << "]\n";
             continue;
 
         case OpCode::LD_CONST_A:
-            stream << "ld const A: "
-                << longArray
-                << '\n';
-
-            i += sizeof(long);
+            stream << getLong(bytes, i) << '\n';
             continue;
         
         case OpCode::LD_CONST_B:
-            stream << "ld const B: "
-                << longArray
-                << '\n';
-
-            i += sizeof(long);
+            stream << getLong(bytes, i) << '\n';
             continue;
 
         case OpCode::LD_CONST_RESULT:
-            stream << "ld const RESULT: "
-                << longArray
-                << '\n';
-
-            i += sizeof(long);
+            stream << getLong(bytes, i) << '\n';
             continue;
         
-        case OpCode::MEM_MOV:
-            stream << "mem mov: ["
-                << longArray
-                << "], [";
-            
-            i += sizeof(long);
-
-            stream << longArray
-                << "]\n";
-
-            i += sizeof(long);
+        case OpCode::MEM_MOV_8:
+            stream << '[' << getLong(bytes, i) << "], ["
+                << getLong(bytes, i) << "]\n";
             continue;
         
-        case OpCode::REG_MOV:
-            stream << "reg mov: ["
-                << longArray
-                << "], ";
-            
-            i += sizeof(long);
-
-            stream << (Registers) bytes[i] << "\n";
-
-            i ++;
+        case OpCode::MEM_MOV_4:
+            stream << '[' << getLong(bytes, i) << "], ["
+                << getLong(bytes, i) << "]\n";
+            continue;
+        
+        case OpCode::MEM_MOV_1:
+            stream << '[' << getLong(bytes, i) << "], ["
+                << getLong(bytes, i) << "]\n";
+            continue;
+        
+        case OpCode::MEM_MOV_BIT:
+            stream << '[' << getLong(bytes, i) << "], ["
+                << getLong(bytes, i) << "]\n";
+            continue;
+        
+        case OpCode::REG_MOV_8:
+            stream << '[' << getLong(bytes, i) << "], "
+                << (Registers) getByte(bytes, i) << '\n';
+            continue;
+        
+        case OpCode::REG_MOV_4:
+            stream << '[' << getLong(bytes, i) << "], "
+                << (Registers) getByte(bytes, i) << '\n';
+            continue;
+        
+        case OpCode::REG_MOV_1:
+            stream << '[' << getLong(bytes, i) << "], "
+                << (Registers) getByte(bytes, i) << '\n';
             continue;
         
         case OpCode::REG_MOV_BIT:
-            stream << "reg mov bit: ["
-                << longArray
-                << "], ";
-            
-            i += sizeof(long);
-
-            stream << (Registers) bytes[i] << "\n";
-
-            i ++;
+            stream << '[' << getLong(bytes, i) << "], "
+                << (Registers) getByte(bytes, i) << '\n';
             continue;
         
         case OpCode::REG_TO_REG:
-            stream << "reg to reg: "
-                << (Registers) bytes[i] << ", ";
-
-            i ++;
-
-            stream << (Registers) bytes[i] << "\n";
-
-            i++;
+            stream << (Registers) getByte(bytes, i) << ", "
+                << (Registers) getByte(bytes, i) << '\n';
             continue;
         
-        case OpCode::MEM_SET:
-            stream << "mem set: ["
-                << longArray
-                << "], ";
-            
-            i += sizeof(long);
-
-            stream << longArray
-                << '\n';
-
-            i += sizeof(long);
+        case OpCode::MEM_SET_8:
+            stream << '[' << getLong(bytes, i) << "], "
+                << getLong(bytes, i) << '\n';
+            continue;
+        
+        case OpCode::MEM_SET_4:
+            stream << '[' << getLong(bytes, i) << "], "
+                << getInt(bytes, i) << '\n';
+            continue;
+        
+        case OpCode::MEM_SET_1:
+            stream << '[' << getLong(bytes, i) << "], "
+                << getByte(bytes, i) << '\n';
+            continue;
+        
+        case OpCode::MEM_SET_BIT:
+            stream << '[' << getLong(bytes, i) << "], "
+                << getByte(bytes, i) << '\n';
             continue;
         
         case OpCode::CALL:
-            stream << "call (unhandled)\n";
+            stream << "unhandled";
             continue;
         
         case OpCode::PRINT:
-            stream << "print:\n";
+            stream << ":\n";
             continue;
 
         } // switch ((OpCode) byteCode[i])
@@ -258,5 +276,62 @@ std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
     } // while (true)
 
     return stream << '}';
+}
+
+
+static const char* opCodeNames[] =
+{
+    "exit",
+    "add",
+    "sub",
+    "mul",
+    "div",
+    "cmp",
+    "cmp reverse",
+    "ld const A",
+    "ld const B",
+    "ld const RESULT",
+    "ld A 8",
+    "ld A 4",
+    "ld A 1",
+    "ld A bit",
+    "ld B 8",
+    "ld B 4",
+    "ld B 1",
+    "ld B bit",
+    "ld RESULT 8",
+    "ld RESULT 4",
+    "ld RESULT 1",
+    "ld RESULT bit",
+    "ld ZERO FLAG",
+    "mem mov 8",
+    "mem mov 4",
+    "mem mov 1",
+    "mem mov bit",
+    "reg mov 8",
+    "reg mov 4",
+    "reg mov 1",
+    "reg mov bit",
+    "reg to reg",
+    "mem set 8",
+    "mem set 4",
+    "mem set 1",
+    "mem set bit",
+    "jmp",
+    "if jump",
+    "if not jump",
+    "push const",
+    "push reg",
+    "push bytes",
+    "pop",
+    "call",
+    "print",
+    "no op"    
+};
+
+
+std::ostream& operator<<(std::ostream& stream, const OpCode opCode)
+{
+    return stream << opCodeNames[(unsigned char) opCode];
 }
 

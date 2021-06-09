@@ -10,8 +10,8 @@
 
 typedef struct Options
 {
-    const char* fileName;
-    const char* outputName;
+    const char* fileName = nullptr;
+    const char* outputName = nullptr;
     bool execute;
     bool verbose;
 
@@ -144,7 +144,7 @@ if (options.verbose)
             // outputName is a local variable, not the outer one
             // this prevents copying of the string outputName to extend
             // its lifetime beyond this local scope
-            pvm::generateExecutable(byteCode, options.outputName);
+            pvm::generateExecutable(byteCode, outputName);
         }
         else
         {

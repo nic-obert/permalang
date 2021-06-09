@@ -25,13 +25,19 @@ Byte Memory::getByte(Address address) const
 
 long Memory::getLong(Address address) const
 {
-    return *((long*) (stack + address));
+    return *(long*) (stack + address);
 }
 
 
 bool Memory::getBit(Address address) const
 {
-    return *((bool*) (stack + address));
+    return *(bool*) (stack + address);
+}
+
+
+int Memory::getInt(Address address) const
+{
+    return *(int*) (stack + address);
 }
 
 
@@ -43,12 +49,20 @@ void Memory::set(Address address, Byte value)
 
 void Memory::set(Address address, long value)
 {
-    *((long*) (stack + address)) = value;
+    *(long*) (stack + address) = value;
 }
 
 
 void Memory::set(Address address, bool value)
 {
-    *((bool*) (stack + address)) = value;
+    // do not fragment the stack in chunks smaller than 1 byte
+    // thus booleans (1 bit) are approximated to 1 byte
+    stack[address] = value;
+}
+
+
+void Memory::set(Address address, int value)
+{
+    *(int*) (stack + address) = value;
 }
 

@@ -32,7 +32,7 @@ std::ostream& operator<<(std::ostream& stream, TokenType const& type)
 }
 
 
-size_t Tokens::typeSize(TokenType type)
+unsigned char Tokens::typeSize(TokenType type)
 {
     switch (type)
     {

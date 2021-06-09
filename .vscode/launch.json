@@ -73,6 +73,27 @@
               }
             ],
             "miDebuggerPath": "/usr/bin/gdb"
+          },
+
+          {
+            "name": "Debug Memtest",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/target/memtest",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+              {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+              }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
           }
 
     ]

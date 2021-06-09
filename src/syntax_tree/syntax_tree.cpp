@@ -106,7 +106,7 @@ pvm::ByteCode SyntaxTree::parseToByteCode()
 
 	// add the last exit instruction to the byteList
 	byteList.add(new pvm::ByteNode(pvm::OpCode::EXIT));
-	byteList.add(new pvm::ByteNode(0));
+	byteList.add(new pvm::ByteNode(0, 1));
 
 	return byteList.toByteCode();
 }
@@ -147,7 +147,7 @@ void SyntaxTree::parseToByteCodePrivate()
 	if (localSymbolsSize != 0)
 	{
 		byteList.add(new pvm::ByteNode(pvm::OpCode::PUSH_BYTES));
-		byteList.add(new pvm::ByteNode(localSymbolsSize));
+		byteList.add(new pvm::ByteNode(localSymbolsSize, 8));
 	}
 
 	// at the end of tree generation, transform it into byte code
@@ -157,7 +157,7 @@ void SyntaxTree::parseToByteCodePrivate()
 	if (localSymbolsSize != 0)
 	{
 		byteList.add(new pvm::ByteNode(pvm::OpCode::POP));	
-		byteList.add(new pvm::ByteNode(localSymbolsSize));
+		byteList.add(new pvm::ByteNode(localSymbolsSize, 8));
 	}
 
 }
