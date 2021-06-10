@@ -34,6 +34,7 @@ namespace Tokens
         COMMA,
         NUMERIC,
         NO_TOK,
+        BYTE,
 
     } TokenType;
 
@@ -98,6 +99,10 @@ namespace Tokens
     - throws exception if token is not declared
     */
     TokenType tokenTypeOf(const Token* token);
+
+
+    // copies all releveant data during parsing from a token to another
+    void copyRelevantData(Token* dest, const Token* src);
 
 };
 

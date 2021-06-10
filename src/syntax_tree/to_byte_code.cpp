@@ -17,13 +17,93 @@ using namespace pvm;
 #define IdOf(token) ((std::string*) token->value)
 
 
+#define AddNode(...) byteList.add(new ByteNode(__VA_ARGS__))
+
+
 static inline size_t StackPositionOf(const Token* token)
 {
     return symbol_table::SymbolTable::get(IdOf(token))->stackPosition;
 }
 
 
-#define AddNode(...) byteList.add(new ByteNode(__VA_ARGS__))
+static void addConstLoad(Registers reg, Value value, ByteList& byteList)
+{
+    // TODO implement also negative values
+    switch (reg)
+    {
+    case Registers::GENERAL_A:
+        if (value < 2)
+        {
+            AddNode(OpCode::LD_CONST_A_BIT);
+            AddNode(value, 1);
+            break;
+        }
+        if (value < 256)
+        {
+            AddNode(OpCode::LD_CONST_A_1);
+            AddNode(value, 1);
+            break;
+        }
+        if (value < 4294967296)
+        {
+            AddNode(OpCode::LD_CONST_A_4);
+            AddNode(value, 4);
+            break;
+        }
+
+        AddNode(OpCode::LD_CONST_A_8);
+        AddNode(value, 8);
+        break;
+    
+    case Registers::GENERAL_B:
+        if (value < 2)
+        {
+            AddNode(OpCode::LD_CONST_B_BIT);
+            AddNode(value, 1);
+            break;
+        }
+        if (value < 256)
+        {
+            AddNode(OpCode::LD_CONST_B_1);
+            AddNode(value, 1);
+            break;
+        }
+        if (value < 4294967296)
+        {
+            AddNode(OpCode::LD_CONST_B_4);
+            AddNode(value, 4);
+            break;
+        }
+        
+        AddNode(OpCode::LD_CONST_B_8);
+        AddNode(value, 8);
+        break;
+    
+    case Registers::RESULT:
+        if (value < 2)
+        {
+            AddNode(OpCode::LD_CONST_RESULT_BIT);
+            AddNode(value, 1);
+            break;
+        }
+        if (value < 256)
+        {
+            AddNode(OpCode::LD_CONST_RESULT_1);
+            AddNode(value, 1);
+            break;
+        }
+        if (value < 4294967296)
+        {
+            AddNode(OpCode::LD_CONST_RESULT_4);
+            AddNode(value, 4);
+            break;
+        }
+        
+        AddNode(OpCode::LD_CONST_RESULT_8);
+        AddNode(value, 8);
+        break;
+    }
+}
 
 
 #define DO_STORE_RESULT true
@@ -86,7 +166,8 @@ void SyntaxTree::parseTokenOperator(Tokens::Token* token)
     OpType opType = operatorType(token->opCode);
     
     // control flow statements parse themselves their own operands
-    if (!isFlowOp(token->opCode))
+    // free scopes do not have operands
+    if (!isFlowOp(token->opCode) || token->opCode == OpCodes::PUSH_SCOPE)
     {
         /*
             loop over operands and evaluate those first
@@ -122,6 +203,8 @@ void SyntaxTree::parseTokenOperator(Tokens::Token* token)
         || isAssignmentOp(token->opCode)
         // flow operators do not have a result
         || isFlowOp(token->opCode)
+        // scopes do not have a result (and are not operations)
+        || token->opCode == OpCodes::PUSH_SCOPE
         )
     {
         token->value = toValue(byteCodeFor(token, operands, DONT_STORE_RESULT));
@@ -133,9 +216,14 @@ void SyntaxTree::parseTokenOperator(Tokens::Token* token)
         token->opCode = OpCodes::REFERENCE;
     }
 
-    // delete operands since they won't be accessed anymore after their compilation
-    delete[] operands;
-
+    // scope tokens do not have a Token** as value, they have a SyntaxTree* instead
+    // it will be deleted in the byteCodeFor() function
+    if (token->opCode != OpCodes::PUSH_SCOPE)
+    {
+        // delete operands since they won't be accessed anymore after their compilation
+        delete[] operands;
+    }
+    
 }
 
 
@@ -155,6 +243,10 @@ static void byteCodeForUnaryOperation(Tokens::Token** operands, OpCode opCode, B
         case TokenType::INT:
         case TokenType::FLOAT:
             AddNode(OpCode::REG_MOV_4);
+            break;
+        
+        case TokenType::BYTE:
+            AddNode(OpCode::REG_MOV_1);
             break;
         
         case TokenType::BOOL:
@@ -178,6 +270,10 @@ static void byteCodeForUnaryOperation(Tokens::Token** operands, OpCode opCode, B
             AddNode(OpCode::LD_A_4);
             break;
         
+        case TokenType::BYTE:
+            AddNode(OpCode::LD_A_1);
+            break;
+        
         case TokenType::BOOL:
             AddNode(OpCode::LD_A_BIT);
             break;
@@ -186,8 +282,7 @@ static void byteCodeForUnaryOperation(Tokens::Token** operands, OpCode opCode, B
     }
     else // literal
     {
-        AddNode(OpCode::LD_CONST_A);
-        AddNode(operands[0]->value, 8); 
+        addConstLoad(Registers::GENERAL_A, operands[0]->value, byteList);
     }
 
     if (opCode != OpCode::NO_OP)
@@ -217,6 +312,10 @@ static void byteCodeForBinaryOperation(Tokens::Token** operands, OpCode opCode, 
             AddNode(OpCode::REG_MOV_4);
             break;
         
+        case TokenType::BYTE:
+            AddNode(OpCode::REG_MOV_1);
+            break;
+        
         case TokenType::BOOL:
             AddNode(OpCode::REG_MOV_BIT);
             break;
@@ -239,6 +338,10 @@ static void byteCodeForBinaryOperation(Tokens::Token** operands, OpCode opCode, 
             AddNode(OpCode::LD_A_4);
             break;
         
+        case TokenType::BYTE:
+            AddNode(OpCode::LD_A_1);
+            break;
+        
         case TokenType::BOOL:
             AddNode(OpCode::LD_A_BIT);
             break;
@@ -247,8 +350,7 @@ static void byteCodeForBinaryOperation(Tokens::Token** operands, OpCode opCode, 
     }
     else // literal
     {
-        AddNode(OpCode::LD_CONST_A);
-        AddNode(operands[0]->value, 8); 
+        addConstLoad(Registers::GENERAL_A, operands[0]->value, byteList); 
     }
 
     if (hasReturnValueInRegister(operands[1]))
@@ -263,6 +365,10 @@ static void byteCodeForBinaryOperation(Tokens::Token** operands, OpCode opCode, 
         case TokenType::INT:
         case TokenType::FLOAT:
             AddNode(OpCode::REG_MOV_4);
+            break;
+        
+        case TokenType::BYTE:
+            AddNode(OpCode::REG_MOV_1);
             break;
         
         case TokenType::BOOL:
@@ -287,6 +393,10 @@ static void byteCodeForBinaryOperation(Tokens::Token** operands, OpCode opCode, 
             AddNode(OpCode::LD_B_4);
             break;
         
+        case TokenType::BYTE:
+            AddNode(OpCode::LD_B_1);
+            break;
+        
         case TokenType::BOOL:
             AddNode(OpCode::LD_B_BIT);
             break;
@@ -295,8 +405,7 @@ static void byteCodeForBinaryOperation(Tokens::Token** operands, OpCode opCode, 
     }
     else // literal
     {
-        AddNode(OpCode::LD_CONST_B);
-        AddNode(operands[1]->value, 8); 
+        addConstLoad(Registers::GENERAL_B, operands[1]->value, byteList);
     }
 
     if (opCode != OpCode::NO_OP)
@@ -335,6 +444,10 @@ static std::string* storeLiteral(Value value, Tokens::TokenType type, ByteList& 
     case TokenType::FLOAT:
         AddNode(OpCode::MEM_SET_4);
         break;
+    
+    case TokenType::BYTE:
+            AddNode(OpCode::MEM_SET_1);
+            break;
     
     case TokenType::BOOL:
         AddNode(OpCode::MEM_SET_BIT);
@@ -377,6 +490,10 @@ static std::string* storeResult(Registers reg, Tokens::TokenType type, ByteList&
         AddNode(OpCode::REG_MOV_4);
         break;
     
+    case TokenType::BYTE:
+            AddNode(OpCode::REG_MOV_1);
+            break;
+    
     case TokenType::BOOL:
         AddNode(OpCode::REG_MOV_BIT);
         break;
@@ -412,6 +529,11 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
             case TokenType::INT:
             case TokenType::FLOAT:
                 AddNode(OpCode::REG_MOV_4);
+                break;
+            
+            case TokenType::BYTE:
+                AddNode(OpCode::REG_MOV_1);
+                break;
             
             case TokenType::BOOL:
                 AddNode(OpCode::REG_MOV_BIT);
@@ -434,6 +556,10 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
                 AddNode(OpCode::MEM_MOV_4);
                 break;
             
+            case TokenType::BYTE:
+                AddNode(OpCode::MEM_MOV_1);
+                break;
+            
             case TokenType::BOOL:
                 AddNode(OpCode::MEM_MOV_BIT);
                 break;
@@ -454,6 +580,10 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
             case TokenType::INT:
             case TokenType::FLOAT:
                 AddNode(OpCode::MEM_SET_4);
+                break;
+            
+            case TokenType::BYTE:
+                AddNode(OpCode::MEM_SET_1);
                 break;
             
             case TokenType::BOOL:
@@ -515,7 +645,11 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
         case TokenType::FLOAT:
             AddNode(OpCode::REG_MOV_4);
             break;
-        
+
+        case TokenType::BYTE:
+            AddNode(OpCode::REG_MOV_1);
+            break;
+            
         case TokenType::BOOL:
             AddNode(OpCode::REG_MOV_BIT);
             break;
@@ -557,6 +691,10 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
         case TokenType::INT:
         case TokenType::FLOAT:
             AddNode(OpCode::REG_MOV_4);
+            break;
+        
+        case TokenType::BYTE:
+            AddNode(OpCode::REG_MOV_1);
             break;
         
         case TokenType::BOOL:
@@ -939,6 +1077,10 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
                 AddNode(OpCode::LD_ZERO_FLAG);
                 break;
             
+            case TokenType::BYTE:
+                AddNode(OpCode::LD_RESULT_1);
+                break;
+            
             case TokenType::INT:
             case TokenType::FLOAT:
                 AddNode(OpCode::LD_RESULT_4);
@@ -998,8 +1140,7 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
         }
         else if (operands[0]->opCode == OpCodes::LITERAL)
         {
-            AddNode(OpCode::LD_CONST_A);
-            AddNode(operands[0]->value, 8);
+            addConstLoad(Registers::GENERAL_A, operands[0]->value, byteList);
         }
         else if (operands[0]->opCode == OpCodes::REFERENCE)
         {
@@ -1015,6 +1156,10 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
                 AddNode(OpCode::LD_A_4);
                 break;      
             
+            case TokenType::BYTE:
+                AddNode(OpCode::LD_A_1);
+                break;
+            
             case TokenType::BOOL:
                 AddNode(OpCode::LD_A_BIT);
                 break;
@@ -1024,14 +1169,14 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
         }
 
         // invert condition (compare with 0)
-        AddNode(OpCode::LD_CONST_B);
-        AddNode(0, 8);
+        addConstLoad(Registers::GENERAL_B, 0, byteList);
         AddNode(OpCode::CMP);      
         
     // conditional jump instruction
 
         AddNode(OpCode::IF_JUMP);
         // bodySizeNode will be set later when the actual if body is compiled
+        // 8 is the size in bytes of size_t, 0 is just to initialize it
         ByteNode* exitIndexNode = new ByteNode(0, 8);
         byteList.add(exitIndexNode);
 
@@ -1098,8 +1243,7 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
         }
         else if (operands[0]->opCode == OpCodes::LITERAL)
         {
-            AddNode(OpCode::LD_CONST_A);
-            AddNode(operands[0]->value, 8);
+            addConstLoad(Registers::GENERAL_A, operands[0]->value, byteList);
         }
         else if (operands[0]->opCode == OpCodes::REFERENCE)
         {
@@ -1115,6 +1259,10 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
                 AddNode(OpCode::LD_A_4);
                 break;
             
+            case TokenType::BYTE:
+                AddNode(OpCode::LD_A_1);
+                break;
+            
             case TokenType::BOOL:
                 AddNode(OpCode::LD_A_BIT);
                 break;
@@ -1124,8 +1272,7 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
         }
 
         // invert condition (compare with 0)
-        AddNode(OpCode::LD_CONST_B);
-        AddNode(0, 8);
+        addConstLoad(Registers::GENERAL_B, 0, byteList);
         AddNode(OpCode::CMP);        
     
     // conditional jump
@@ -1157,6 +1304,18 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
         exitIndexNode->data = byteList.getCurrentSize();
 
         delete operands[0];
+
+        return 0;
+    }
+
+
+    case OpCodes::PUSH_SCOPE:
+    {
+        SyntaxTree* tree = (SyntaxTree*) token->value;
+        byteList.extend(tree->byteList);
+
+        // after the tree's byte code is extracted, the tree won't be used anymore
+        delete tree;
 
         return 0;
     }

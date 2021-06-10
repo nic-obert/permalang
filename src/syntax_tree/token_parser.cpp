@@ -582,6 +582,10 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
         declarationSatisfy(token, TokenType::BOOL, statement);
         break;
     
+    case OpCodes::DECLARATION_BYTE:
+        declarationSatisfy(token, TokenType::BYTE, statement);
+        break;
+    
     case OpCodes::DECLARATION_VOID:
     {
         // TODO check if it's a pointer declaration
@@ -728,7 +732,21 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
             exit(1);
         }
 
-        // parenthesis' value is it's content's
+        if (globals::doOptimize)
+        {
+            // transform parenthesis into its content
+            copyRelevantData(token, content);
+
+            // to prevent token's destructor from deleting eventual stuff pointed by its value
+            content->opCode = OpCodes::NO_OP;
+
+            statement->remove(content, DELETE),
+            statement->remove(closing, DELETE);
+
+            break;
+        }
+
+        // parenthesis' value is it's content
         token->value = toValue(new Token*[1] { content });
 
         // set parenthesis' type to it's content's
@@ -742,6 +760,63 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
     
     case OpCodes::FLOW_IF:
+    {
+        Token* condition = token->next;
+        assertToken(token, condition, TokenType::BOOL, RIGHT);
+
+        Token* body = condition->next;
+
+        // check if body exists
+        if (body == nullptr)
+        {
+            errors::ExpectedTokenError(*condition, OpCodes::PUSH_SCOPE, sides[RIGHT]);
+        } 
+
+        if (globals::doOptimize)
+        {
+            // remove branch or condition checking if condition's value is known at compile time
+            if (
+                condition->opCode == OpCodes::LITERAL
+                || condition->opCode == OpCodes::REFERENCE
+                )
+            {
+                if (
+                    (condition->opCode == OpCodes::LITERAL && condition->value == 0)
+                    || (condition->opCode == OpCodes::REFERENCE
+                        && SymbolTable::get((std::string*) condition->value)->value == 0)
+                    )
+                {
+                    // remove branch since it's always false
+                    statement->remove(condition, DELETE);
+                    statement->remove(body, DELETE);
+                    statement->remove(token, DELETE);
+
+                    break;
+                }
+                // if it's true transform token into its body (Token holding a SyntaxTree)
+                copyRelevantData(token, body);
+                
+                // set body's opCode to NO_OP to prevent it from deleting its Syntax Tree 
+                // when its destructor is called
+                body->opCode = OpCodes::NO_OP;
+                statement->remove(body, DELETE);
+                statement->remove(condition, DELETE);
+
+                break;
+            }
+        }
+
+        // set if token's value to an array of its boolean condition and its body
+        token->value = toValue((new Token*[2] { condition, body }));
+
+        // remove operands from the statement (this)
+        statement->remove(condition);
+        statement->remove(body);
+
+        break;
+    }
+
+
     case OpCodes::FLOW_WHILE:
     {
         Token* condition = token->next;
@@ -752,9 +827,8 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
         // check if body exists
         if (body == nullptr)
         {
-            std::cerr << "Missing " << token->opCode << " statement's body after condition" << std::endl;
-            exit(EXIT_FAILURE);
-        }
+            errors::ExpectedTokenError(*condition, OpCodes::PUSH_SCOPE, sides[RIGHT]);
+        } 
 
         // set if token's value to an array of its boolean condition and its body
         token->value = toValue((new Token*[2] { condition, body }));

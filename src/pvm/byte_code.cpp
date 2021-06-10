@@ -170,16 +170,43 @@ std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
             stream << '[' << getLong(bytes, i) << "]\n";
             continue;
 
-        case OpCode::LD_CONST_A:
+        case OpCode::LD_CONST_A_8:
             stream << getLong(bytes, i) << '\n';
             continue;
         
-        case OpCode::LD_CONST_B:
-            stream << getLong(bytes, i) << '\n';
+        case OpCode::LD_CONST_A_4:
+            stream << getInt(bytes, i) << '\n';
+            continue;
+        
+        case OpCode::LD_CONST_A_1:
+        case OpCode::LD_CONST_A_BIT:
+            stream << (unsigned int) getByte(bytes, i) << '\n';
             continue;
 
-        case OpCode::LD_CONST_RESULT:
+        case OpCode::LD_CONST_B_8:
             stream << getLong(bytes, i) << '\n';
+            continue;
+        
+        case OpCode::LD_CONST_B_4:
+            stream << getInt(bytes, i) << '\n';
+            continue;
+        
+        case OpCode::LD_CONST_B_1:
+        case OpCode::LD_CONST_B_BIT:
+            stream << (unsigned int) getByte(bytes, i) << '\n';
+            continue;
+
+        case OpCode::LD_CONST_RESULT_8:
+            stream << getLong(bytes, i) << '\n';
+            continue;
+        
+        case OpCode::LD_CONST_RESULT_4:
+            stream << getInt(bytes, i) << '\n';
+            continue;
+        
+        case OpCode::LD_CONST_RESULT_1:
+        case OpCode::LD_CONST_RESULT_BIT:
+            stream << (unsigned int) getByte(bytes, i) << '\n';
             continue;
         
         case OpCode::MEM_MOV_8:
@@ -239,12 +266,12 @@ std::ostream& operator<<(std::ostream& stream, const ByteCode& byteCode)
         
         case OpCode::MEM_SET_1:
             stream << '[' << getLong(bytes, i) << "], "
-                << getByte(bytes, i) << '\n';
+                << (unsigned int) getByte(bytes, i) << '\n';
             continue;
         
         case OpCode::MEM_SET_BIT:
             stream << '[' << getLong(bytes, i) << "], "
-                << getByte(bytes, i) << '\n';
+                << (unsigned int) getByte(bytes, i) << '\n';
             continue;
         
         case OpCode::CALL:
@@ -288,9 +315,18 @@ static const char* opCodeNames[] =
     "div",
     "cmp",
     "cmp reverse",
-    "ld const A",
-    "ld const B",
-    "ld const RESULT",
+    "ld const A 8",
+    "ld const A 4",
+    "ld const A 1",
+    "ld const A bit",
+    "ld const B 8",
+    "ld const B 4",
+    "ld const B 1",
+    "ld const B bit",
+    "ld const RESULT 8",
+    "ld const RESULT 4",
+    "ld const RESULT 1",
+    "ld const RESULT bit",
     "ld A 8",
     "ld A 4",
     "ld A 1",

@@ -52,6 +52,31 @@
           },
 
           {
+            "name": "Debug Compile Optimizations",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/target/pcc",
+            "args": [
+              "impl/script.pf",
+              "-v",
+              "-O"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+              {
+                "description": "Enable pretty-printing for gdb",
+                "text": "-enable-pretty-printing",
+                "ignoreFailures": true
+              }
+            ],
+            "miDebuggerPath": "/usr/bin/gdb"
+          },
+
+          {
             "name": "Debug Execute",
             "type": "cppdbg",
             "request": "launch",

@@ -28,69 +28,80 @@ namespace pvm
     // PVM instruction set, similar to x86 assembly
     typedef enum class OpCode : Byte
     {
-        EXIT,           // end of the program, expects a 1 byte exit code
+        EXIT,               // end of the program, expects a 1 byte exit code
 
-        ADD,            // long integer add from registers A and B
-        SUB,            // long integer subtract from registers A and B
-        MUL,            // long integer multiply from registers A and B
-        DIV,            // long integer divide from registers A and B
+        ADD,                // long integer add from registers A and B
+        SUB,                // long integer subtract from registers A and B
+        MUL,                // long integer multiply from registers A and B
+        DIV,                // long integer divide from registers A and B
 
-        CMP,            // compare registers A and B, set the ZERO FLAG
-        CMP_REVERSE,    // compare registers A and B, set the ZERO FLAG
+        CMP,                // compare registers A and B, set the ZERO FLAG
+        CMP_REVERSE,        // compare registers A and B, set the ZERO FLAG
 
-        LD_CONST_A,     // load long integer constant into register A
-        LD_CONST_B,     // load long integer constant into register A
-        LD_CONST_RESULT,// load long integer constant into register RESULT
+        LD_CONST_A_8,       // load 8 constant bytes into register A
+        LD_CONST_A_4,       // load 4 constant bytes into register A
+        LD_CONST_A_1,       // load 1 constant byte into register A
+        LD_CONST_A_BIT,     // load 1 constant bit into register A
 
-        LD_A_8,         // load 8 bytes from memory into register A
-        LD_A_4,         // load 4 bytes from memory into register A
-        LD_A_1,         // load 1 byte from memory into register A
-        LD_A_BIT,       // load 1 bit from memory into register A
+        LD_CONST_B_8,       // load 8 constant bytes into register B
+        LD_CONST_B_4,       // load 4 constant bytes into register B
+        LD_CONST_B_1,       // load 1 constant byte into register B
+        LD_CONST_B_BIT,     // load 1 constant bit into register B
 
-        LD_B_8,         // load 8 bytes from memory into register B
-        LD_B_4,         // load 4 bytes from memory into register B
-        LD_B_1,         // load 1 byte from memory into register B
-        LD_B_BIT,       // load 1 bit from memory into register B
+        LD_CONST_RESULT_8,  // load 8 constant bytes into register RESULT
+        LD_CONST_RESULT_4,  // load 4 constant bytes into register RESULT
+        LD_CONST_RESULT_1,  // load 1 constant byte into register RESULT
+        LD_CONST_RESULT_BIT,// load 1 constant bit into register RESULT
 
-        LD_RESULT_8,    // load 8 bytes from memory into register RESULT    
-        LD_RESULT_4,    // load 4 bytes from memory into register RESULT
-        LD_RESULT_1,    // load 1 byte from memory into register RESULT
-        LD_RESULT_BIT,  // load 1 bit from memory into register RESULT
+        LD_A_8,             // load 8 bytes from memory into register A
+        LD_A_4,             // load 4 bytes from memory into register A
+        LD_A_1,             // load 1 byte from memory into register A
+        LD_A_BIT,           // load 1 bit from memory into register A
 
-        LD_ZERO_FLAG,   // load 1 bit from memory into register ZERO FLAG
+        LD_B_8,             // load 8 bytes from memory into register B
+        LD_B_4,             // load 4 bytes from memory into register B
+        LD_B_1,             // load 1 byte from memory into register B
+        LD_B_BIT,           // load 1 bit from memory into register B
 
-        MEM_MOV_8,      // copy 8 bytes from a memory address to another
-        MEM_MOV_4,      // copy 4 bytes from a memory address to another
-        MEM_MOV_1,      // copy 1 byte from a memory address to another
-        MEM_MOV_BIT,    // copy 1 bit from a memory address to another
+        LD_RESULT_8,        // load 8 bytes from memory into register RESULT    
+        LD_RESULT_4,        // load 4 bytes from memory into register RESULT
+        LD_RESULT_1,        // load 1 byte from memory into register RESULT
+        LD_RESULT_BIT,      // load 1 bit from memory into register RESULT
 
-        REG_MOV_8,      // copy a 8 bytes from a register into a memory address
-        REG_MOV_4,      // copy an int value from a register into a memory address        
-        REG_MOV_1,      // copy 1 byte from a register into a memory address
-        REG_MOV_BIT,    // copy 1 bit from a register into a memory address
+        LD_ZERO_FLAG,       // load 1 bit from memory into register ZERO FLAG
 
-        REG_TO_REG,     // copy a value from a register to another
+        MEM_MOV_8,          // copy 8 bytes from a memory address to another
+        MEM_MOV_4,          // copy 4 bytes from a memory address to another
+        MEM_MOV_1,          // copy 1 byte from a memory address to another
+        MEM_MOV_BIT,        // copy 1 bit from a memory address to another
 
-        MEM_SET_8,      // sets 8 bytes from a memory address to a value
-        MEM_SET_4,      // sets 4 bytes from a memory address to a value
-        MEM_SET_1,      // sets 1 byte from a memory address to a value
-        MEM_SET_BIT,    // sets 1 bit from a memory address to a value
+        REG_MOV_8,          // copy a 8 bytes from a register into a memory address
+        REG_MOV_4,          // copy an int value from a register into a memory address        
+        REG_MOV_1,          // copy 1 byte from a register into a memory address
+        REG_MOV_BIT,        // copy 1 bit from a register into a memory address
 
-        JMP,            // unconditional jump to index   
-        IF_JUMP,        // conditional jump based on ZERO FLAG register's value (1 = true, 0 = false)
-        IF_NOT_JUMP,    // conditional jump based on ZERO FLAG register's value (0 = true, 1 = false)
+        REG_TO_REG,         // copy a value from a register to another
 
-        PUSH_CONST,     // push a constant long value on the stack
-        PUSH_REG,       // push a value on the stack from a specified register
-        PUSH_BYTES,     // increments the STACK POINTER by a specified amount
+        MEM_SET_8,          // sets 8 bytes from a memory address to a value
+        MEM_SET_4,          // sets 4 bytes from a memory address to a value
+        MEM_SET_1,          // sets 1 byte from a memory address to a value
+        MEM_SET_BIT,        // sets 1 bit from a memory address to a value
 
-        POP,            // pop the STACK POINTER by a specified amount
+        JMP,                // unconditional jump to index   
+        IF_JUMP,            // conditional jump based on ZERO FLAG register's value (1 = true, 0 = false)
+        IF_NOT_JUMP,        // conditional jump based on ZERO FLAG register's value (0 = true, 1 = false)
 
-        CALL,           // calls a function
+        PUSH_CONST,         // push a constant long value on the stack
+        PUSH_REG,           // push a value on the stack from a specified register
+        PUSH_BYTES,         // increments the STACK POINTER by a specified amount
 
-        PRINT,          // prints the content of register A
+        POP,                // pop the STACK POINTER by a specified amount
 
-        NO_OP,          // does nothing
+        CALL,               // calls a function
+
+        PRINT,              // prints the content of register A
+
+        NO_OP,              // does nothing
 
 
     } OpCode;
@@ -140,6 +151,10 @@ namespace pvm
         SIGN_FLAG,
 
     } Registers;
+
+
+    // string representation of register
+    const char* registerName(Registers reg);
 
     
     // Perma Virtual Machine

@@ -16,6 +16,7 @@ const std::unordered_map<std::string, OpCodes> keywords::keywordsMap
     {"float",   OpCodes::DECLARATION_FLOAT},
     {"string",  OpCodes::DECLARATION_STRING},
     {"double",  OpCodes::DECLARATION_DOUBLE},
+    {"byte",    OpCodes::DECLARATION_BYTE},
     {"void",    OpCodes::DECLARATION_VOID},
     {"system",  OpCodes::SYSTEM},
     {"sysload", OpCodes::SYSTEM_LOAD},
@@ -57,6 +58,9 @@ const char* keywords::keywordName(OpCodes keyword)
     
     case OpCodes::DECLARATION_DOUBLE:
         return "double";
+    
+    case OpCodes::DECLARATION_BYTE:
+        return "byte";
     
     case OpCodes::DECLARATION_VOID:
         return "void";
@@ -139,7 +143,8 @@ static const Tokens::TokenType declarationTypes[] =
     Tokens::TokenType::BOOL,
     Tokens::TokenType::DOUBLE,
     Tokens::TokenType::LONG,
-    Tokens::TokenType::NONE
+    Tokens::TokenType::NONE,
+    Tokens::TokenType::BYTE
 };
 
 

@@ -39,6 +39,12 @@ static const char* const registerRepr[] =
 };
 
 
+const char* pvm::registerName(Registers reg)
+{
+    return registerRepr[(unsigned char) reg];
+}
+
+
 std::ostream& operator<<(std::ostream& stream, const Registers& reg)
 {
     return stream << '<' << registerRepr[(unsigned char) reg] << '>';

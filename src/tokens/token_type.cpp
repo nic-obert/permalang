@@ -22,7 +22,9 @@ static const char* const tokenTypeRepr[] =
     "LONG",
     "FUNCTION",
     "COMMA",
-    "NUMERIC"
+    "NUMERIC",
+    "NO TOK",
+    "BYTE"
 };
 
 
@@ -37,6 +39,7 @@ unsigned char Tokens::typeSize(TokenType type)
     switch (type)
     {
     case TokenType::BOOL:
+    case TokenType::BYTE:
         return 1;
         
     case TokenType::INT:
@@ -83,6 +86,7 @@ static const TokenType longCompatible[] = {TokenType::LONG, TokenType::INT, Toke
 static const TokenType functionCompatible[] = {TokenType::FUNCTION, TokenType::NO_TOK};
 static const TokenType commaCompatible[] = {TokenType::COMMA, TokenType::NO_TOK};
 static const TokenType numericCompatible[] = {TokenType::NUMERIC, TokenType::BOOL, TokenType::INT, TokenType::FLOAT, TokenType::DOUBLE, TokenType::LONG, TokenType::NO_TOK};
+static const TokenType byteCompatible[] = {TokenType::BOOL, TokenType::BYTE, TokenType::NO_TOK};
 
 
 static const TokenType* const compatibles[] =
@@ -102,7 +106,8 @@ static const TokenType* const compatibles[] =
     longCompatible,
     functionCompatible,
     commaCompatible,
-    numericCompatible
+    numericCompatible,
+    byteCompatible
 
 };
 

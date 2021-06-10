@@ -89,6 +89,7 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         case TokenType::DOUBLE:
         case TokenType::LONG:
         case TokenType::NUMERIC:
+        case TokenType::BYTE:
             stream << '<' << token.type << "*: " << *(std::string*) token.value
                 << " (" << token.priority << ")>";
             return stream;
@@ -230,5 +231,13 @@ void Token::removeToken(Token* token)
     {
         token->next->prev = token->prev;
     }
+}
+
+
+void Tokens::copyRelevantData(Token* dest, const Token* src)
+{
+    dest->opCode = src->opCode;
+    dest->type = src->type;
+    dest->value = src->value;
 }
 

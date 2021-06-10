@@ -114,18 +114,45 @@ Byte Pvm::execute(const Byte* byteCode)
             break;
 
         
-        case OpCode::LD_CONST_A:
+        case OpCode::LD_CONST_A_8:
             rGeneralA = getLongValue(byteCode, offset);
             break;
-
-
-        case OpCode::LD_CONST_B:
-            rGeneralB = getLongValue(byteCode, offset);
+        case OpCode::LD_CONST_A_4:
+            rGeneralA = getIntValue(byteCode, offset);
+            break;
+        case OpCode::LD_CONST_A_1:
+            rGeneralA = getByteValue(byteCode, offset);
+            break;
+        case OpCode::LD_CONST_A_BIT:
+            rGeneralA = (bool) getByteValue(byteCode, offset);
             break;
 
 
-        case OpCode::LD_CONST_RESULT:
+        case OpCode::LD_CONST_B_8:
+            rGeneralB = getLongValue(byteCode, offset);
+            break;
+        case OpCode::LD_CONST_B_4:
+            rGeneralB = getIntValue(byteCode, offset);
+            break;
+        case OpCode::LD_CONST_B_1:
+            rGeneralB = getByteValue(byteCode, offset);
+            break;
+        case OpCode::LD_CONST_B_BIT:
+            rGeneralB = (bool) getByteValue(byteCode, offset);
+            break;
+
+
+        case OpCode::LD_CONST_RESULT_8:
             rResult = getLongValue(byteCode, offset);
+            break;
+        case OpCode::LD_CONST_RESULT_4:
+            rResult = getIntValue(byteCode, offset);
+            break;
+        case OpCode::LD_CONST_RESULT_1:
+            rResult = getByteValue(byteCode, offset);
+            break;
+        case OpCode::LD_CONST_RESULT_BIT:
+            rResult = (bool) getByteValue(byteCode, offset);
             break;
 
 

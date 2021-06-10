@@ -70,6 +70,7 @@ typedef enum class OpCodes
     DECLARATION_DOUBLE,
     DECLARATION_LONG,
     DECLARATION_VOID,
+    DECLARATION_BYTE,
 
     LITERAL,
 
