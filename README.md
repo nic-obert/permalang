@@ -110,8 +110,9 @@ while (/* condition */)
 ## **Data types**
 
 ```c
-int i = 0;
 bool b = false;
+byte b = 0;
+int i = 0;
 long l = 0;
 float f = 0;  // still work in progress
 double d = 0; // still work in progress

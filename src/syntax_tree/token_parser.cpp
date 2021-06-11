@@ -699,8 +699,8 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
         scopeTree->parseToByteCodePrivate(); 
 
-        // if token is a standalone scope, pop it function
-        // bodies are popped by the function declaration operator
+        // if token is a standalone scope, pop it
+        // function bodies are popped by the function declaration operator
         if (token->opCode == OpCodes::PUSH_SCOPE)
         {     
             SymbolTable::popScope();
@@ -793,7 +793,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
                     break;
                 }
-                // if it's true transform token into its body (Token holding a SyntaxTree)
+                // if condition is true transform token into its body (Token holding a SyntaxTree)
                 copyRelevantData(token, body);
                 
                 // set body's opCode to NO_OP to prevent it from deleting its Syntax Tree 

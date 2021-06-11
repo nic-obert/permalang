@@ -166,8 +166,8 @@ void SyntaxTree::parseTokenOperator(Tokens::Token* token)
     OpType opType = operatorType(token->opCode);
     
     // control flow statements parse themselves their own operands
-    // free scopes do not have operands
-    if (!isFlowOp(token->opCode) || token->opCode == OpCodes::PUSH_SCOPE)
+    // free scopes do not have token operands, but syntax trees
+    if (!isFlowOp(token->opCode) && token->opCode != OpCodes::PUSH_SCOPE)
     {
         /*
             loop over operands and evaluate those first
