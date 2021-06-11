@@ -80,10 +80,14 @@ memtest: $(PCH) $(MEM_TEST_SRC) $(HEADERS) test/memtest.cpp
 	$(CC) -g $(WARNINGS) $(C_FLAGS) test/memtest.cpp $(MEM_TEST_SRC) $(LINKS) -o target/$@
 
 
+tests:
+	test/tester.py
+
+
 clean:
 	rm -f $(PCH)
 	rm -f $(TARGET_DIR)/*
-	rm -f $(IMPL_DIR)/*.pfx
+	find $(IMPL_DIR) -name "*.pfx" -type f -delete
 
 
 

@@ -1,0 +1,5 @@
+bool a = false;
+bool b = true;
+byte c = 24;
+int d = 8998;
+long e = 821;

@@ -1,0 +1,17 @@
+if (true)
+{
+    int i = 0;
+    i ++;
+}
+
+if (false)
+{
+    byte b = 32;
+}
+
+bool b = true;
+
+if (b)
+{
+    b = false;
+}
