@@ -38,6 +38,16 @@ static inline void assertToken(Token* caller, Token* got, TokenType required, Si
     {
         errors::TypeError(*caller, required, *got, sides[side]);
     }
+
+    // check for literal value size compatibility
+    if (got->opCode == OpCodes::LITERAL)
+    {
+        TokenType literalType = typeOfValue(got->value);
+        if (!isCompatible(literalType, required))
+        {
+            errors::IncompatibleSizeError(*caller, required, literalType, typeSize(literalType));    
+        }
+    }
 }
 
 
@@ -147,9 +157,9 @@ static void declarationSatisfy(Token* token, TokenType type, Statement* statemen
     // type is the TokenType that has been declared
     token->type = type;
 
-    // set next Token's value to nullptr no the std::string value
-    // does not get deleted when the Token does
-    token->next->value = toValue(nullptr);
+    // set next Token's opCode to NO_OP so that the std::string value
+    // does not get deleted when the token does
+    token->next->opCode = OpCodes::NO_OP;
 
     // remove and delete the next Token since it won't be used anymore
     statement->remove(token->next, DELETE);
@@ -167,13 +177,13 @@ static void declarationSatisfy(Token* token, TokenType type, Statement* statemen
 static void assignSatisfy(Token* token, Statement* statement)
 {
 
+    TokenType type = tokenTypeOf(token->prev);
+
     assertToken(token, token->prev, OpCodes::REFERENCE, LEFT);
-    assertToken(token, token->next, tokenTypeOf(token->prev), RIGHT);
+    assertToken(token, token->next, type, RIGHT);
 
     // set token's value to an array of its operands
     token->value = toValue((new Token*[2] {token->prev, token->next}));
-
-    TokenType type = tokenTypeOf(token->prev);
 
     // update symbol table
     SymbolTable::assign(
@@ -713,7 +723,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     }
     
 
-    case OpCodes::PARENTHESIS:
+    case OpCodes::OPEN_PARENTHESIS:
     {
         // check if there's anything inside parenthesis
         Token* content = token->next;
@@ -725,11 +735,9 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
 
         // check for closing parenthesis
         Token* closing = content->next;
-        if (closing == nullptr || 
-            (closing->opCode != OpCodes::PARENTHESIS && closing->value != ')'))
+        if (closing == nullptr || closing->opCode != OpCodes::CLOSE_PARENTHESIS)
         {
-            std::cerr << "Missing closing parenthesis" << std::endl;
-            exit(1);
+            errors::MissingClosingParenthesisError(*token, "");
         }
 
         if (globals::doOptimize)
@@ -885,7 +893,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     case OpCodes::FUNC_DECLARARION:
     {
         Token* name = token->prev;
-        assertToken(token, name, TokenType::TEXT, LEFT);
+        assertToken(token, name, OpCodes::REFERENCE, LEFT);
 
         Token* returnType = name->prev;
         assertToken(name, returnType, TokenType::KEYWORD, LEFT);
@@ -904,13 +912,11 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
         for (size_t depth = 1; tok != nullptr; )
         {
             // increase depth for every opening parentheies (except for function definition)
-            if (tok->opCode == OpCodes::CALL
-                || (tok->opCode == OpCodes::PARENTHESIS && tok->value == '('))
+            if (tok->opCode == OpCodes::CALL || tok->opCode == OpCodes::OPEN_PARENTHESIS)
             {
                 depth ++;
             }
-            else if (tok->opCode == OpCodes::PARENTHESIS
-                    && tok->value == ')')
+            else if (tok->opCode == OpCodes::CLOSE_PARENTHESIS)
             {
                 depth --;
 

@@ -33,10 +33,19 @@ void errors::TypeError(const Tokens::Token& caller, OpCodes expected, const Toke
 }
 
 
-void errors::SymbolRedeclarationError(const symbol_table::Symbol& symbol)
+void errors::IncompatibleSizeError(const Tokens::Token& caller, Tokens::TokenType expected, Tokens::TokenType providedType, size_t providedSize)
 {
-    std::cerr << "[Symbol Redeclaration Error] Symbol " << symbol
-        << " has been redeclared in local scope" << std::endl;
+    std::cerr << "[Incompatible Size Error] Token " << caller << " requires an operand of type "
+        << expected << ", but " << providedType << " with an incompatible size of " << providedSize
+        << " was provided" << std::endl;
+    exit(EXIT_FAILURE);
+}
+
+
+void errors::SymbolRedeclarationError(const std::string& name, const symbol_table::Symbol& symbol)
+{
+    std::cerr << "[Symbol Redeclaration Error] Symbol \"" << name << "\" "
+         << symbol << " has been redeclared in local scope" << std::endl;
     exit(EXIT_FAILURE);
 }
 

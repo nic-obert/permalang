@@ -187,8 +187,11 @@ std::ostream& operator<<(std::ostream& stream, Token const& token)
         return stream << "< } (" << token.priority << ")>";
     
 
-    case OpCodes::PARENTHESIS:
-        return stream << "< " << (char) token.value << " (" << token.priority << ")>";
+    case OpCodes::OPEN_PARENTHESIS:
+        return stream << "< ( (" << token.priority << ")>";
+
+    case OpCodes::CLOSE_PARENTHESIS:
+        return stream << "< ) (" << token.priority << ")>";
 
 
     default:

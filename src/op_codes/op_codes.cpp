@@ -52,7 +52,8 @@ static const char* const opCodeRepr[] =
     "FUNC_DECLARATION",
     "FUNC_BODY",
 
-    "PARENTHESIS",
+    "OPEN PARENTHESIS",
+    "CLOSE PARENTHESIS"
 
     "FLOW IF",
     "FLOW ELSE",
@@ -111,7 +112,7 @@ OpType operatorType(OpCodes op)
     case OpCodes::DECLARATION_LONG:
     case OpCodes::DECLARATION_BYTE:
     case OpCodes::DECLARATION_VOID:
-    case OpCodes::PARENTHESIS:
+    case OpCodes::OPEN_PARENTHESIS:
     case OpCodes::PUSH_SCOPE:
     case OpCodes::SYSTEM:
     case OpCodes::SYSTEM_LOAD:

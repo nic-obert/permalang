@@ -18,9 +18,12 @@ namespace errors
 
     void TypeError(const Tokens::Token& caller, Tokens::TokenType expected, const Tokens::Token& provided, const char* side);
     void TypeError(const Tokens::Token& caller, OpCodes expected, const Tokens::Token& provided, const char* side);
+    
+
+    void IncompatibleSizeError(const Tokens::Token& caller, Tokens::TokenType expected, Tokens::TokenType providedType, size_t providedSize);
 
 
-    void SymbolRedeclarationError(const symbol_table::Symbol& symbol);
+    void SymbolRedeclarationError(const std::string& name, const symbol_table::Symbol& symbol);
     
 
     void UndefinedSymbolError(const std::string& name);

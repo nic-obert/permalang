@@ -33,10 +33,13 @@ namespace Tokens
         FUNCTION,
         COMMA,
         NUMERIC,
-        NO_TOK,
         BYTE,
+        NO_TOK, // NO_TOK should always be the last enum value
 
     } TokenType;
+
+    
+    const char* tokenTypeName(TokenType type);
 
 
     // whether the first TokenType is compatible with the second
@@ -45,6 +48,11 @@ namespace Tokens
 
     // returns the size of a TokenType
     unsigned char typeSize(TokenType type);
+
+
+    // returns the TokenType of a given literal value
+    // the TokenType is calculated based on the size of the value
+    TokenType typeOfValue(Value value);
 
 
     // syntactical element of a program

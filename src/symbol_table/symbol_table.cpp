@@ -1,4 +1,5 @@
 #include "symbol_table.hh"
+#include "errors.hh"
 
 
 using namespace symbol_table;
@@ -13,33 +14,37 @@ size_t SymbolTable::stackPointer = 0;
 
 void SymbolTable::assign(std::string* identifier, Symbol* symbol)
 {   
-    // TODO implement type checking
+    // size compatibility is guaranteed by the tree building phase
+
     // search in local scope first    
     if (scopeStack->local.find(*identifier) != scopeStack->local.end())
     {
-        // dereference table since identifier is allocated on the heap
+        Symbol* oldSymbol = scopeStack->local[*identifier];
         scopeStack->local[*identifier] = symbol;
+        delete oldSymbol;
         return;
     }
 
     if (scopeStack->outer.has_value()
         && scopeStack->outer.value().find(*identifier) != scopeStack->outer.value().end())
     {
+        Symbol* oldSymbol = scopeStack->outer.value()[*identifier];
         scopeStack->outer.value()[*identifier] = symbol;
+        delete oldSymbol;
         return;
     }
 
     if (globalScope->local.find(*identifier) != globalScope->local.end())
     {
+        Symbol* oldSymbol = globalScope->local[*identifier];
         globalScope->local[*identifier] = symbol;
+        delete oldSymbol;
         return;
     }
 
     // if symbol has not been found, it wasn't declared in 
     // any reachable scope, thus throw exception
-    // TODO implement error handling
-    std::cerr << "\"" << *identifier << "\" was not declared" << std::endl;
-    exit(1);
+    errors::UndefinedSymbolError(*identifier);
 }
 
 
@@ -48,10 +53,7 @@ void SymbolTable::declare(std::string* identifier, Symbol* symbol)
     // check if token was already declared in local scope
     if (scopeStack->local.find(*identifier) != scopeStack->local.end())
     {
-        // TODO implement error handling
-        // TODO implement scope specific checking
-        std::cerr << "\"" << *identifier << "\" was already declared" << std::endl;
-        exit(1);
+        errors::SymbolRedeclarationError(*identifier, *symbol);
     }
 
     scopeStack->local[*identifier] = symbol;
@@ -93,8 +95,9 @@ Symbol* SymbolTable::get(std::string* identifier)
     
     // if symbol has not been found, it wasn't declared in 
     // any reachable scope, thus throw exception
-    std::cerr << "\"" << *identifier << "\" was not declared" << std::endl;
-    exit(1);
+    errors::UndefinedSymbolError(*identifier);
+    // this line never gets reached
+    return nullptr;
 }
 
 

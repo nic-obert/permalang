@@ -23,9 +23,15 @@ static const char* const tokenTypeRepr[] =
     "FUNCTION",
     "COMMA",
     "NUMERIC",
-    "NO TOK",
-    "BYTE"
+    "BYTE",
+    "NO TOK"    
 };
+
+
+const char* Tokens::tokenTypeName(TokenType type)
+{
+    return tokenTypeRepr[(unsigned char) type];
+}
 
 
 std::ostream& operator<<(std::ostream& stream, TokenType const& type)
@@ -58,6 +64,24 @@ unsigned char Tokens::typeSize(TokenType type)
 }
 
 
+TokenType Tokens::typeOfValue(Value value)
+{
+    if (value < 2)
+    {
+        return TokenType::BOOL;
+    }
+    if (value < 256)
+    {
+        return TokenType::BYTE;
+    }
+    if (value < 4294967295)
+    {
+        return TokenType::INT;
+    }
+    return TokenType::LONG;
+}
+
+
 TokenType Tokens::tokenTypeOf(const Token* token)
 {
     if (token->opCode == OpCodes::REFERENCE)
@@ -69,24 +93,42 @@ TokenType Tokens::tokenTypeOf(const Token* token)
 }
 
 
+TokenType typeOfValue(Value value)
+{
+    if (value < 2)
+    {
+        return TokenType::BOOL;
+    }
+    if (value < 256)
+    {
+        return TokenType::BYTE;
+    }
+    if (value < 4294967296)
+    {
+        return TokenType::INT;
+    }
+    return TokenType::LONG;
+}
+
+
 // arrays of compatible types
 
 static const TokenType noneCompatible[] = {TokenType::NONE, TokenType::NO_TOK};
 static const TokenType textCompatible[] = {TokenType::TEXT, TokenType::NO_TOK};
-static const TokenType intCompatible[] = {TokenType::INT, TokenType::BOOL, TokenType::NO_TOK};
-static const TokenType floatCompatible[] = {TokenType::INT, TokenType::FLOAT, TokenType::BOOL, TokenType::NO_TOK};
+static const TokenType intCompatible[] = {TokenType::NUMERIC, TokenType::INT, TokenType::BOOL, TokenType::NO_TOK};
+static const TokenType floatCompatible[] = {TokenType::NUMERIC, TokenType::INT, TokenType::FLOAT, TokenType::BOOL, TokenType::NO_TOK};
 static const TokenType stringCompatible[] = {TokenType::STRING, TokenType::NO_TOK};
 static const TokenType keywordCompatible[] = {TokenType::KEYWORD, TokenType::NO_TOK};
-static const TokenType boolCompatible[] = {TokenType::INT, TokenType::BOOL, TokenType::FLOAT, TokenType::DOUBLE, TokenType::LONG, TokenType::NO_TOK};
+static const TokenType boolCompatible[] = {TokenType::NUMERIC, TokenType::INT, TokenType::BOOL, TokenType::FLOAT, TokenType::DOUBLE, TokenType::LONG, TokenType::NO_TOK};
 static const TokenType scopeCompatible[] = {TokenType::SCOPE, TokenType::NO_TOK};
 static const TokenType parenthesisCompatible[] = {TokenType::PARENTHESIS, TokenType::NO_TOK};
 static const TokenType endsCompatible[] = {TokenType::ENDS, TokenType::NO_TOK};
-static const TokenType doubleCompatible[] = {TokenType::DOUBLE, TokenType::INT, TokenType::BOOL, TokenType::LONG, TokenType::FLOAT, TokenType::NO_TOK};
-static const TokenType longCompatible[] = {TokenType::LONG, TokenType::INT, TokenType::BOOL, TokenType::NO_TOK};
+static const TokenType doubleCompatible[] = {TokenType::NUMERIC, TokenType::DOUBLE, TokenType::INT, TokenType::BOOL, TokenType::LONG, TokenType::FLOAT, TokenType::NO_TOK};
+static const TokenType longCompatible[] = {TokenType::NUMERIC, TokenType::LONG, TokenType::INT, TokenType::BOOL, TokenType::NO_TOK};
 static const TokenType functionCompatible[] = {TokenType::FUNCTION, TokenType::NO_TOK};
 static const TokenType commaCompatible[] = {TokenType::COMMA, TokenType::NO_TOK};
 static const TokenType numericCompatible[] = {TokenType::NUMERIC, TokenType::BOOL, TokenType::INT, TokenType::FLOAT, TokenType::DOUBLE, TokenType::LONG, TokenType::NO_TOK};
-static const TokenType byteCompatible[] = {TokenType::BOOL, TokenType::BYTE, TokenType::NO_TOK};
+static const TokenType byteCompatible[] = {TokenType::NUMERIC, TokenType::BOOL, TokenType::BYTE, TokenType::NO_TOK};
 
 
 static const TokenType* const compatibles[] =

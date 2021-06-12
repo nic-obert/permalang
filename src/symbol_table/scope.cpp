@@ -36,7 +36,7 @@ Scope::~Scope()
 {   
     // delete only local symbols since they are the only one belonging to the local scope
     for (auto it = local.begin(); it != local.end(); ++it)
-    {
+    {   
         delete it->second;
     }
 }

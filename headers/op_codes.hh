@@ -11,7 +11,7 @@
 
 #define isDeclarationOp(opCode) (OpCodes::ASSIGNMENT_POW < opCode && opCode < OpCodes::LITERAL)
 
-#define isFlowOp(opCode) (OpCodes::PARENTHESIS < opCode && opCode < OpCodes::NO_OP)
+#define isFlowOp(opCode) (OpCodes::CLOSE_PARENTHESIS < opCode && opCode < OpCodes::NO_OP)
 
 #define isValue(opCode) (OpCodes::LITERAL == opCode || OpCodes::REFERENCE == opCode)
 
@@ -85,7 +85,8 @@ typedef enum class OpCodes
     FUNC_DECLARARION,
     FUNC_BODY,
 
-    PARENTHESIS,
+    OPEN_PARENTHESIS,
+    CLOSE_PARENTHESIS,
 
     FLOW_IF,
     FLOW_ELSE,

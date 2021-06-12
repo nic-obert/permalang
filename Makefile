@@ -37,13 +37,11 @@ INSTALL_DIR_LIB=/usr/lib/permalang
 INSTALL_PCC=/usr/bin/pcc
 
 
-all: $(TARGET)
-
+all: builddb
 
 
 $(TARGET_DIR):
 	mkdir -p $@
-
 
 
 $(TARGET): $(PCH) $(SOURCES) $(HEADERS) $(TARGET_DIR)
@@ -51,9 +49,11 @@ $(TARGET): $(PCH) $(SOURCES) $(HEADERS) $(TARGET_DIR)
 	@echo "Build successful"
 
 
+release: $(TARGET)
+
 
 builddb: $(PCH) $(SOURCES) $(HEADERS) $(TARGET_DIR)
-	$(CC) -g $(WARNINGS) $(COMMON_ARGS_TEST) -o $(TARGET)
+	time -f "\nTime elapsed: %E seconds" $(CC) -g $(WARNINGS) $(COMMON_ARGS_TEST) -o $(TARGET)
 
 
 builddb-nw: $(PCH) $(SOURCES) $(HEADERS) $(TARGET_DIR)
@@ -112,4 +112,8 @@ uninstall:
 	@echo "Uninstalling pcc toolchain"
 	sudo rm -f $(INSTALL_PCC)
 	@echo "Uninstalled successfully"
+
+
+count:
+	find . -name '*.cpp' -o -name '*.hh' | xargs wc -l | sort -nr
 

@@ -16,6 +16,7 @@ const std::unordered_map<std::string, OpCodes> keywords::keywordsMap
     {"float",   OpCodes::DECLARATION_FLOAT},
     {"string",  OpCodes::DECLARATION_STRING},
     {"double",  OpCodes::DECLARATION_DOUBLE},
+    {"long",    OpCodes::DECLARATION_LONG},
     {"byte",    OpCodes::DECLARATION_BYTE},
     {"void",    OpCodes::DECLARATION_VOID},
     {"system",  OpCodes::SYSTEM},

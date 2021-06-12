@@ -29,79 +29,97 @@ static inline size_t StackPositionOf(const Token* token)
 static void addConstLoad(Registers reg, Value value, ByteList& byteList)
 {
     // TODO implement also negative values
-    switch (reg)
+    switch (typeOfValue(value))
     {
-    case Registers::GENERAL_A:
-        if (value < 2)
+    case TokenType::BOOL:
+    
+        switch (reg)
         {
-            AddNode(OpCode::LD_CONST_A_BIT);
-            AddNode(value, 1);
-            break;
+            case Registers::GENERAL_A:
+                AddNode(OpCode::LD_CONST_A_BIT);
+                AddNode(value, 1);
+                break;
+            
+            case Registers::GENERAL_B:
+                AddNode(OpCode::LD_CONST_B_BIT);
+                AddNode(value, 1);
+                break;
+            
+            case Registers::RESULT:
+                AddNode(OpCode::LD_CONST_RESULT_BIT);
+                AddNode(value, 1);
+                break;
         }
-        if (value < 256)
+        break;
+    
+    case TokenType::BYTE:
+        switch (reg)
         {
-            AddNode(OpCode::LD_CONST_A_1);
-            AddNode(value, 1);
-            break;
+            case Registers::GENERAL_A:
+                AddNode(OpCode::LD_CONST_A_1);
+                AddNode(value, 1);
+                break;
+            
+            case Registers::GENERAL_B:
+                AddNode(OpCode::LD_CONST_B_1);
+                AddNode(value, 1);
+                break;
+            
+            case Registers::RESULT:
+                AddNode(OpCode::LD_CONST_RESULT_1);
+                AddNode(value, 1);
+                break;
         }
-        if (value < 4294967296)
+        break;
+    
+    case TokenType::INT:
+        switch (reg)
         {
-            AddNode(OpCode::LD_CONST_A_4);
-            AddNode(value, 4);
-            break;
+            case Registers::GENERAL_A:
+                AddNode(OpCode::LD_CONST_A_4);
+                AddNode(value, 4);
+                break;
+            
+            case Registers::GENERAL_B:
+                AddNode(OpCode::LD_CONST_B_4);
+                AddNode(value, 4);
+                break;
+            
+            case Registers::RESULT:
+                 AddNode(OpCode::LD_CONST_RESULT_4);
+                AddNode(value, 4);
+                break;
         }
+        break;
 
-        AddNode(OpCode::LD_CONST_A_8);
-        AddNode(value, 8);
-        break;
-    
-    case Registers::GENERAL_B:
-        if (value < 2)
+    case TokenType::LONG:
+        switch (reg)
         {
-            AddNode(OpCode::LD_CONST_B_BIT);
-            AddNode(value, 1);
+        case Registers::GENERAL_A:
+            AddNode(OpCode::LD_CONST_A_8);
+            AddNode(value, 8);
             break;
-        }
-        if (value < 256)
-        {
-            AddNode(OpCode::LD_CONST_B_1);
-            AddNode(value, 1);
-            break;
-        }
-        if (value < 4294967296)
-        {
-            AddNode(OpCode::LD_CONST_B_4);
-            AddNode(value, 4);
-            break;
-        }
         
-        AddNode(OpCode::LD_CONST_B_8);
-        AddNode(value, 8);
-        break;
-    
-    case Registers::RESULT:
-        if (value < 2)
-        {
-            AddNode(OpCode::LD_CONST_RESULT_BIT);
-            AddNode(value, 1);
+        case Registers::GENERAL_B:
+            AddNode(OpCode::LD_CONST_B_8);
+            AddNode(value, 8);
             break;
-        }
-        if (value < 256)
-        {
-            AddNode(OpCode::LD_CONST_RESULT_1);
-            AddNode(value, 1);
-            break;
-        }
-        if (value < 4294967296)
-        {
-            AddNode(OpCode::LD_CONST_RESULT_4);
-            AddNode(value, 4);
-            break;
-        }
         
-        AddNode(OpCode::LD_CONST_RESULT_8);
-        AddNode(value, 8);
+        case Registers::RESULT:
+             AddNode(OpCode::LD_CONST_RESULT_8);
+            AddNode(value, 8);
+            break;
+        }
         break;
+
+    default:
+    {
+        // there shouldn't be other literal types or registers
+        std::string msg = "Unexpected TokenType or Registers values in function static void addConstLoad(Registers reg, Value value, ByteList& byteList):\n";
+        msg += "reg=" + std::string(registerName(reg)) + ", value=" + std::to_string(value) + ", type=" + tokenTypeName(typeOfValue(value));
+        errors::UnexpectedBehaviourError(msg);
+    }   
+
     }
 }
 
@@ -569,8 +587,10 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
         }
         else // token is a literal
         {
-            // switch raw type because operands[1] is a literal
-            switch (operands[1]->type)
+            // switch TokenType of the variable the value is beign assigned to
+            // because literal values have TokenType::NUMERIC type
+            // size compatibility checks are performed during the SyntaxTree building phase
+            switch (tokenTypeOf(operands[0]))
             {
             case TokenType::LONG:
             case TokenType::DOUBLE:
@@ -592,7 +612,9 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
             }
             AddNode(lValue->stackPosition, 8);
             // pass as second operand the token's literal value
-            AddNode(operands[1]->value, typeSize(operands[1]->type));
+            // the size is that of the variable the value is being assigned to
+            // size compatibility checks have already been performed
+            AddNode(operands[1]->value, typeSize(operands[0]->type));
         }
         
         // these operands won't be accessed anymore after compilation
@@ -1039,7 +1061,7 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
     }
 
 
-    case OpCodes::PARENTHESIS:
+    case OpCodes::OPEN_PARENTHESIS:
     {
         // save operand's properties to avoid accessing freed memory
         const TokenType contentType = tokenTypeOf(operands[0]);

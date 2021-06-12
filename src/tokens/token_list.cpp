@@ -108,7 +108,7 @@ TokenList::TokenList(std::string& script)
             {
                 switch (token->type)
                 {
-                    case TokenType::INT: 
+                    case TokenType::NUMERIC: 
                     {
                         if (isDigit(c))
                         {
@@ -169,7 +169,8 @@ TokenList::TokenList(std::string& script)
                         OpCodes opCode = keywords::isKeyword(*(std::string*) token->value);
                         if (opCode == OpCodes::NO_OP)
                         {   
-                            // check if keyword has a predefined value
+                            // text is not an operator keyword
+                            // check if it has a predefined value
 
                             // temporary variables
                             Value _value; 
@@ -478,7 +479,7 @@ TokenList::TokenList(std::string& script)
             else
             {
                 // ordinary parenthesis
-                token = new Token(TokenType::PARENTHESIS, currentPriority, OpCodes::PARENTHESIS, '(');
+                token = new Token(TokenType::PARENTHESIS, currentPriority, OpCodes::OPEN_PARENTHESIS, '(');
             }
 
             AddToken();
@@ -491,7 +492,7 @@ TokenList::TokenList(std::string& script)
             currentPriority -= PARENTHESIS_P;
 
             // use a closing parentheis token for both ordinary parenthesis and function calls
-            token = new Token(TokenType::PARENTHESIS, 0, OpCodes::PARENTHESIS, ')');
+            token = new Token(TokenType::PARENTHESIS, 0, OpCodes::CLOSE_PARENTHESIS, ')');
             
             AddToken();
             continue;
@@ -510,7 +511,7 @@ TokenList::TokenList(std::string& script)
         {
             if (isDigit(c))
             {
-                token = new Token(TokenType::INT, LITERAL_P, OpCodes::LITERAL, toDigit(c));
+                token = new Token(TokenType::NUMERIC, LITERAL_P, OpCodes::LITERAL, toDigit(c));
                 continue;
             }
 

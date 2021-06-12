@@ -3,6 +3,7 @@
 import subprocess
 import os
 import pathlib
+import time
 
 
 IMPL_TEST_DIR = pathlib.Path('impl/test')
@@ -51,7 +52,13 @@ def compile_test():
 
 
 if __name__ == '__main__':
+
+    start_time = time.time()
+
     compile_test()
 
+    end_time = time.time()
+
     print(f'\nTest report:\nTotal tests: {test_count}\nPassed tests: {passed_count}\nFailed tests: {failed_count}')
+    print(f'Time elapsed: {round(end_time - start_time)} seconds')
 

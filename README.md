@@ -32,7 +32,7 @@ Inspired by the C programming language
 
 Build toolchain
 ```bash
-make
+make release
 ```
 Install toolchain
 ```bash
