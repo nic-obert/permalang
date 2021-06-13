@@ -30,7 +30,7 @@ def compile_file(script_path: str, optimize: bool):
     global test_count
     test_count += 1
 
-    cmd = f'{COMPILER} "{script_path}"'
+    cmd = f'{COMPILER} "{script_path}" -v'
     
     if optimize:
         cmd += ' -O'

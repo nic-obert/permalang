@@ -21,6 +21,12 @@ Token::Token(TokenType type, size_t priority, OpCodes opCode)
 
 Token::~Token()
 {
+    // NO OP tokens do not own any value
+    if (opCode == OpCodes::NO_OP)
+    {
+        return;
+    }
+
     if (type == TokenType::TEXT || opCode == OpCodes::REFERENCE)
     {
         // text or reference tokens have a string as their value

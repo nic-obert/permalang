@@ -28,7 +28,7 @@ namespace symbol_table
 
 
     // an unordered map mapping a string (symbol name) to a Symbol
-    typedef std::unordered_map<std::string, Symbol*> Table;
+    typedef std::unordered_map<std::string, Symbol* const> Table;
 
 
     // keeps track of the symbols in scope
@@ -77,7 +77,7 @@ namespace symbol_table
 
     public:
 
-        static void assign(std::string* identifier, Symbol* symbol);
+        static void assign(std::string* identifier, Value newValue);
 
 
         static void declare(std::string* identifier, Symbol* symbol);

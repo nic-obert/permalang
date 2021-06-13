@@ -7,6 +7,7 @@ using namespace symbol_table;
 
 
 SyntaxTree::SyntaxTree()
+: byteList(), statements()
 {
 	
 }
@@ -72,13 +73,16 @@ Tokens::Token* SyntaxTree::getHighestPriority(Tokens::Token* root)
 
 	for (Tokens::Token* token = root; token != nullptr; token = token->next)
 	{   
-		// evaluate scope operators first since they are required as operands by certain operators
+
+		// don't permorm further checks or operations, 0 priority will never be executed
+		if (token->priority == 0)
+		{
+			continue;
+		}
+
 		// evaluate function declaration operators first since they must have higher priority
 		// than their parameters
-		if (
-			(isScope(token->opCode) || token->opCode == OpCodes::FUNC_DECLARARION)
-			&& token->priority != 0
-			)
+		if (token->opCode == OpCodes::FUNC_DECLARARION)
 		{
 			return token;
 		}
@@ -86,6 +90,14 @@ Tokens::Token* SyntaxTree::getHighestPriority(Tokens::Token* root)
 		if (token->priority > root->priority)
 		{
 			root = token;
+		}
+
+		// do not search for tokens to evaluate past the scope
+		// so to prevent a scope's content from being evaluated before
+		// the scope operator
+		if (token->opCode == OpCodes::PUSH_SCOPE)
+		{
+			break;
 		}
 	}
 

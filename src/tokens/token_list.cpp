@@ -439,16 +439,16 @@ TokenList::TokenList(std::string& script)
         case '{':
         {   
             // increment token priority to evaluate stuff in scope first
-            currentPriority += PARENTHESIS_P;
+            currentPriority += SCOPE_P;
 
-            token = new Token(TokenType::SCOPE, SCOPE_P + currentPriority, OpCodes::PUSH_SCOPE);
+            token = new Token(TokenType::SCOPE, currentPriority, OpCodes::PUSH_SCOPE);
             AddToken();
             continue;
         }
         
         case '}':
         {   
-            token = new Token(TokenType::SCOPE, SCOPE_P + currentPriority, OpCodes::POP_SCOPE);
+            token = new Token(TokenType::SCOPE, currentPriority, OpCodes::POP_SCOPE);
 
             currentPriority -= PARENTHESIS_P;
 

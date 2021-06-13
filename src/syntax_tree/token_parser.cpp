@@ -142,15 +142,7 @@ static void unarySatisfy(Token* token, TokenType type, Side side, Statement* sta
 
 static void declarationSatisfy(Token* token, TokenType type, Statement* statement)
 {
-
-    if (token->next == nullptr)
-    {
-        errors::ExpectedTokenError(*token, type, sides[RIGHT]);
-    }
-    if (token->next->opCode != OpCodes::REFERENCE)
-    {
-        errors::TypeError(*token, type, *token->next, sides[RIGHT]);
-    }
+    assertToken(token, token->next, OpCodes::REFERENCE, RIGHT);
 
     // inherit value form next Token (variable's name)
     token->value = token->next->value;
@@ -185,10 +177,22 @@ static void assignSatisfy(Token* token, Statement* statement)
     // set token's value to an array of its operands
     token->value = toValue((new Token*[2] {token->prev, token->next}));
 
+    Value newValue;
+
+    // check if other token is also a reference and consequently get its value from the symbol table
+    if (token->next->opCode == OpCodes::REFERENCE)
+    {
+        newValue = SymbolTable::get((std::string*) token->next->value)->value;
+    }
+    else
+    {
+        newValue = token->next->value;
+    }
+
     // update symbol table
     SymbolTable::assign(
         (std::string*) token->prev->value,
-        new Symbol(token->next->value, type)
+        newValue
     );
 
     // type of assignment operator is the type of the variable it has assigned a value to
@@ -610,6 +614,20 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
     case OpCodes::PUSH_SCOPE:
     case OpCodes::FUNC_BODY:
     {
+        // check for empty scopes before performing any further operation
+        // there is no need to search for the scope end and parse it to byte code
+        // if would have no effect on the program
+        if (token->next->opCode == OpCodes::POP_SCOPE)
+        {
+            statement->remove(token->next, DELETE);
+            // set the token's value to an empty SyntaxTree
+            // no need to parse it to byte code since its byte list is empty
+            // don't just remove it since it may be needed by other operators to work
+            token->value = toValue(new SyntaxTree());
+            break;
+        }
+
+
         // push a new scope only if it's a standalone scope
         // function bodies' scopes are pushed and popped by the function
         // declaration operator
@@ -618,6 +636,7 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
             // first push the scope to the SymbolTable
             SymbolTable::pushScope(DO_INHERIT);
         }
+
 
         // transfer the part of the statement which is in the new scope
         // to another statement
@@ -775,10 +794,8 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
         Token* body = condition->next;
 
         // check if body exists
-        if (body == nullptr)
-        {
-            errors::ExpectedTokenError(*condition, OpCodes::PUSH_SCOPE, sides[RIGHT]);
-        } 
+        assertToken(condition, body, OpCodes::PUSH_SCOPE, RIGHT);
+        
 
         if (globals::doOptimize)
         {
@@ -796,11 +813,18 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
                 {
                     // remove branch since it's always false
                     statement->remove(condition, DELETE);
+
+                    // group all statements inside the body to delete them
+                    satisfyToken(statement, body);
+
                     statement->remove(body, DELETE);
                     statement->remove(token, DELETE);
 
                     break;
                 }
+
+                satisfyToken(statement, body);
+
                 // if condition is true transform token into its body (Token holding a SyntaxTree)
                 copyRelevantData(token, body);
                 
@@ -813,6 +837,9 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
                 break;
             }
         }
+
+        // evaluate the body only after condition since it can have side effects on it
+        satisfyToken(statement, body);
 
         // set if token's value to an array of its boolean condition and its body
         token->value = toValue((new Token*[2] { condition, body }));
@@ -1033,7 +1060,7 @@ void SyntaxTree::parseStatement(Statement* statement)
     for (
         Tokens::Token* root = getHighestPriority(statement->root);
         // 0 priority or less means the statement has finished evaluating
-        root != nullptr && root->priority > 1;
+        root != nullptr && root->priority > 0;
         root = getHighestPriority(statement->root)
         )
     {          

@@ -12,33 +12,27 @@ Scope* SymbolTable::globalScope = nullptr;
 size_t SymbolTable::stackPointer = 0;
 
 
-void SymbolTable::assign(std::string* identifier, Symbol* symbol)
+void SymbolTable::assign(std::string* identifier, Value newValue)
 {   
     // size compatibility is guaranteed by the tree building phase
 
     // search in local scope first    
     if (scopeStack->local.find(*identifier) != scopeStack->local.end())
     {
-        Symbol* oldSymbol = scopeStack->local[*identifier];
-        scopeStack->local[*identifier] = symbol;
-        delete oldSymbol;
+        scopeStack->local[*identifier]->value = newValue;
         return;
     }
 
     if (scopeStack->outer.has_value()
         && scopeStack->outer.value().find(*identifier) != scopeStack->outer.value().end())
     {
-        Symbol* oldSymbol = scopeStack->outer.value()[*identifier];
-        scopeStack->outer.value()[*identifier] = symbol;
-        delete oldSymbol;
+        scopeStack->outer.value()[*identifier]->value = newValue;
         return;
     }
 
     if (globalScope->local.find(*identifier) != globalScope->local.end())
     {
-        Symbol* oldSymbol = globalScope->local[*identifier];
-        globalScope->local[*identifier] = symbol;
-        delete oldSymbol;
+        globalScope->local[*identifier]->value = newValue;
         return;
     }
 
@@ -56,7 +50,7 @@ void SymbolTable::declare(std::string* identifier, Symbol* symbol)
         errors::SymbolRedeclarationError(*identifier, *symbol);
     }
 
-    scopeStack->local[*identifier] = symbol;
+    scopeStack->local.emplace(std::make_pair(*identifier, symbol));
 
     symbol->stackPosition = stackPointer;
     

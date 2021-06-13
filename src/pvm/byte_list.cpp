@@ -55,7 +55,10 @@ void ByteList::extend(ByteList& other)
         end->next = other.start;
     }
 
-    end = other.end;
+    if (other.end != nullptr)
+    {
+        end = other.end;
+    }
 
     nodeCount += other.nodeCount;
     byteSize += other.byteSize;

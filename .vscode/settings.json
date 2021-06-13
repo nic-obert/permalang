@@ -43,6 +43,7 @@
         "chrono": "cpp",
         "ctime": "cpp",
         "list": "cpp",
-        "ratio": "cpp"
+        "ratio": "cpp",
+        "functional": "cpp"
     }
 }

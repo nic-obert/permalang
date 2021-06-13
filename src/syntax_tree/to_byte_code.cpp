@@ -590,7 +590,7 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
             // switch TokenType of the variable the value is beign assigned to
             // because literal values have TokenType::NUMERIC type
             // size compatibility checks are performed during the SyntaxTree building phase
-            switch (tokenTypeOf(operands[0]))
+            switch (lValue->type)
             {
             case TokenType::LONG:
             case TokenType::DOUBLE:
@@ -614,7 +614,7 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
             // pass as second operand the token's literal value
             // the size is that of the variable the value is being assigned to
             // size compatibility checks have already been performed
-            AddNode(operands[1]->value, typeSize(operands[0]->type));
+            AddNode(operands[1]->value, typeSize(lValue->type));
         }
         
         // these operands won't be accessed anymore after compilation

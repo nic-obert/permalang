@@ -1,3 +1,6 @@
+if (true) {
+    int b = 0;
+}
 
 bool b = true;
 
