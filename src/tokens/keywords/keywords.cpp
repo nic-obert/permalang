@@ -108,6 +108,7 @@ int keywords::keywordPriority(OpCodes keyword)
         return DECLARATION_P;
     }
     
+    errors::UnexpectedBehaviourError("Invalid keyword in keywordPriority(OpCodes keyword): " + (unsigned int) keyword);
     return 0;
 }
 

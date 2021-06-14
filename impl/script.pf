@@ -1,10 +1,4 @@
-if (true) {
-    int b = 0;
-}
 
-bool b = true;
+if (true) {}
 
-if (b)
-{
-    b = false;
-}
+int i = 0;

@@ -43,7 +43,7 @@ static inline void assertToken(Token* caller, Token* got, TokenType required, Si
     if (got->opCode == OpCodes::LITERAL)
     {
         TokenType literalType = typeOfValue(got->value);
-        if (!isCompatible(literalType, required))
+        if (typeSize(literalType) > typeSize(required))
         {
             errors::IncompatibleSizeError(*caller, required, literalType, typeSize(literalType));    
         }

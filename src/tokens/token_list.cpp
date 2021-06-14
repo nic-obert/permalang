@@ -450,7 +450,7 @@ TokenList::TokenList(std::string& script)
         {   
             token = new Token(TokenType::SCOPE, currentPriority, OpCodes::POP_SCOPE);
 
-            currentPriority -= PARENTHESIS_P;
+            currentPriority -= SCOPE_P;
 
             AddToken();
             continue;
