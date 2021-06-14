@@ -865,6 +865,8 @@ void SyntaxTree::satisfyToken(Statement* statement, Token* token)
             errors::ExpectedTokenError(*condition, OpCodes::PUSH_SCOPE, sides[RIGHT]);
         } 
 
+        satisfyToken(statement, body);
+
         // set if token's value to an array of its boolean condition and its body
         token->value = toValue((new Token*[2] { condition, body }));
 

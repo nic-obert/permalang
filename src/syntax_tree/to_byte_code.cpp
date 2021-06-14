@@ -1149,8 +1149,11 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
     
     // compile boolean condition
 
-        parseTokenOperator(operands[0]);
-
+        if (isOperator(operands[0]->opCode))
+        {
+            parseTokenOperator(operands[0]);
+        }
+        
     // invert the boolean condition
 
         // load condition
@@ -1251,8 +1254,10 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
         // save the boolean condition's instruction index
         const size_t conditionInstructionIndex = byteList.getCurrentSize();
 
-        parseTokenOperator(operands[0]);
-
+        if (isOperator(operands[0]->opCode))
+        {
+            parseTokenOperator(operands[0]);
+        }
 
     // invert the boolean condition
 

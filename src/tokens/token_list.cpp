@@ -86,10 +86,15 @@ TokenList::TokenList(std::string& script)
                 if (c == '=')
                 {
                     token->opCode = OpCodes::LOGICAL_LESS_EQ;
-                    token->priority = COMPARISON_P;
+                    token->priority = currentPriority + COMPARISON_P;
                     AddToken();
                     continue;
                 }
+
+                // if operator is not a <= then it is just a <
+                // thus add the operator to the token list
+                AddToken();
+                break;
             }
 
             case OpCodes::LOGICAL_GREATER:
@@ -97,10 +102,13 @@ TokenList::TokenList(std::string& script)
                 if (c == '=')
                 {
                     token->opCode = OpCodes::LOGICAL_GREATER_EQ;
-                    token->priority = COMPARISON_P;
+                    token->priority = currentPriority + COMPARISON_P;
                     AddToken();
                     continue;
                 }
+
+                AddToken();
+                break;
             }
 
 
@@ -426,13 +434,13 @@ TokenList::TokenList(std::string& script)
 
         case '<':
         {
-            token = new Token(TokenType::NONE, COMPARISON_P, OpCodes::LOGICAL_LESS);
+            token = new Token(TokenType::NONE, COMPARISON_P + currentPriority, OpCodes::LOGICAL_LESS);
             continue;
         }
 
         case '>':
         {
-            token = new Token(TokenType::NONE, COMPARISON_P, OpCodes::LOGICAL_GREATER);
+            token = new Token(TokenType::NONE, COMPARISON_P + currentPriority, OpCodes::LOGICAL_GREATER);
             continue;
         }
         
