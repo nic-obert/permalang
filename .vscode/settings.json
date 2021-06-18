@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.pde": "pde",
         "typeinfo": "cpp",
         "type_traits": "cpp",
         "iostream": "cpp",
@@ -44,6 +45,23 @@
         "ctime": "cpp",
         "list": "cpp",
         "ratio": "cpp",
-        "functional": "cpp"
+        "functional": "cpp",
+        "hash_map": "cpp",
+        "bit": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "condition_variable": "cpp",
+        "cstring": "cpp",
+        "set": "cpp",
+        "unordered_set": "cpp",
+        "iterator": "cpp",
+        "numeric": "cpp",
+        "random": "cpp",
+        "mutex": "cpp",
+        "numbers": "cpp",
+        "semaphore": "cpp",
+        "stop_token": "cpp",
+        "thread": "cpp",
+        "cinttypes": "cpp"
     }
 }

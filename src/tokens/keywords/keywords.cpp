@@ -21,6 +21,8 @@ const std::unordered_map<std::string, OpCodes> keywords::keywordsMap
     {"void",    OpCodes::DECLARATION_VOID},
     {"system",  OpCodes::SYSTEM},
     {"sysload", OpCodes::SYSTEM_LOAD},
+    {"break",   OpCodes::BREAK},
+    {"continue",OpCodes::CONTINUE}
 });
 
 
@@ -72,6 +74,12 @@ const char* keywords::keywordName(OpCodes keyword)
     case OpCodes::SYSTEM_LOAD:
         return "sysload";
     
+    case OpCodes::BREAK:
+        return "break";
+
+    case OpCodes::CONTINUE:
+        return "continue";
+    
     }
     
     std::string error("Undefined keyword: ");
@@ -85,21 +93,21 @@ int keywords::keywordPriority(OpCodes keyword)
 {
     switch (keyword)
     {
-    case OpCodes::FLOW_IF:
-        return IF_P;
-    
     case OpCodes::FLOW_ELSE:
         return ELSE_P;
-    
+
+    case OpCodes::FLOW_IF:
     case OpCodes::FLOW_FOR:
-        return FOR_P;
-    
     case OpCodes::FLOW_WHILE:
-        return WHILE_P;
+        return FLOW_P;
     
     case OpCodes::SYSTEM:
     case OpCodes::SYSTEM_LOAD:
         return SYSTEM_P;
+
+    case OpCodes::BREAK:
+    case OpCodes::CONTINUE:
+        return STANDALONE_FLOW_P;
 
     }
 

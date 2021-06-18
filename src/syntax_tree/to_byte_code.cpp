@@ -26,6 +26,22 @@ static inline size_t StackPositionOf(const Token* token)
 }
 
 
+static void fillFlowControlPlaceholders(const std::vector<ControlFlowNode>& nodes, size_t conditionIndex, size_t exitIndex)
+{
+    for (const ControlFlowNode& node : nodes)
+    {
+        if (node.opCode == OpCodes::CONTINUE)
+        {
+            node.byteNode->data = conditionIndex;
+        }
+        else // the case of OpCodes::BREAK
+        {
+            node.byteNode->data = exitIndex;
+        }
+    }
+}
+
+
 static void addConstLoad(Registers reg, Value value, ByteList& byteList)
 {
     // TODO implement also negative values
@@ -236,7 +252,7 @@ void SyntaxTree::parseTokenOperator(Tokens::Token* token)
 
     // scope tokens do not have a Token** as value, they have a SyntaxTree* instead
     // it will be deleted in the byteCodeFor() function
-    if (token->opCode != OpCodes::PUSH_SCOPE)
+    if (token->opCode != OpCodes::PUSH_SCOPE && (unsigned char) opType != 0)
     {
         // delete operands since they won't be accessed anymore after their compilation
         delete[] operands;
@@ -1315,17 +1331,24 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
         {
             SyntaxTree* body = (SyntaxTree*) operands[1]->value;
             byteList.extend(body->byteList);
+
+            // add unconditional jump to condition evaluation
+            AddNode(OpCode::JMP);
+            AddNode(conditionInstructionIndex, 8);
+
+            fillFlowControlPlaceholders(body->controlFlowNodes, conditionInstructionIndex, byteList.getCurrentSize());
+
             delete body;
         }
         else
         {
             parseTokenOperator(operands[1]);
             delete operands[1];
-        }
 
-        // add unconditional jump to condition evaluation
-        AddNode(OpCode::JMP);
-        AddNode(conditionInstructionIndex, 8);
+            // add unconditional jump to condition evaluation
+            AddNode(OpCode::JMP);
+            AddNode(conditionInstructionIndex, 8);
+        }
 
         // set exit index to the byte next to the unconditional jump instruction
         exitIndexNode->data = byteList.getCurrentSize();
@@ -1343,6 +1366,22 @@ size_t SyntaxTree::byteCodeFor(Tokens::Token* token, Tokens::Token** operands, b
 
         // after the tree's byte code is extracted, the tree won't be used anymore
         delete tree;
+
+        return 0;
+    }
+
+
+    case OpCodes::CONTINUE:
+    case OpCodes::BREAK:
+    {
+        // uncontitional jump to condition evaluation or end of loop
+
+        AddNode(OpCode::JMP);
+        
+        ByteNode* jumpIndexNode = new ByteNode(0, 8);
+        byteList.add(jumpIndexNode);
+
+        controlFlowNodes.emplace_back(jumpIndexNode, token->opCode);
 
         return 0;
     }

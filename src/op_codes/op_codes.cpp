@@ -64,6 +64,9 @@ static const char* const opCodeRepr[] =
 
     "SYSTEM",
     "SYSTEM LOAD",
+
+    "BREAK",
+    "CONTINUE"
 };
 
 

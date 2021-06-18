@@ -4,6 +4,13 @@
 #include "token.hh"
 
 
+// PREDECLARATIONS
+
+namespace syntax_tree { class SyntaxTree; };
+
+std::ostream& operator<<(std::ostream& stream, const syntax_tree::SyntaxTree& tree);
+
+
 namespace syntax_tree
 {   
 
@@ -55,11 +62,27 @@ namespace syntax_tree
     };
 
 
+    typedef struct ControlFlowNode
+    {
+        pvm::ByteNode* byteNode;
+        OpCodes opCode;
+
+        ControlFlowNode(pvm::ByteNode* byteNode, OpCodes opCode);
+
+    } ControlFlowNode;
+
+
     class SyntaxTree
     {
     private:
 
         pvm::ByteList byteList;
+
+        Statements statements;
+
+        // stores pointers to the ByteNodes of flow control operators such as
+        // "break" and "continue"
+        std::vector<ControlFlowNode> controlFlowNodes;
 
 
         // constructs the SyntaxTree of the given Statement
@@ -89,9 +112,10 @@ namespace syntax_tree
         void parseToByteCodePrivate();
 
 
+        friend std::ostream& ::operator<<(std::ostream& stream, const SyntaxTree&);
+
+
     public:
-        
-        Statements statements;
         
         SyntaxTree();
         SyntaxTree(Tokens::TokenList& tokens);
@@ -108,9 +132,6 @@ namespace syntax_tree
 
 };
 
-
-
-std::ostream& operator<<(std::ostream& stream, const syntax_tree::SyntaxTree& tree);
 
 std::ostream& operator<<(std::ostream& stream, const syntax_tree::Statement& statement);
 

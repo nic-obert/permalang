@@ -98,6 +98,9 @@ typedef enum class OpCodes
     SYSTEM,
     SYSTEM_LOAD,
 
+    BREAK,
+    CONTINUE
+
 } OpCodes;
 
 

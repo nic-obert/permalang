@@ -83,6 +83,15 @@ memtest: $(PCH) $(MEM_TEST_SRC) $(HEADERS) test/memtest.cpp
 tests:
 	test/tester.py
 
+run:
+	$(TARGET) $(IMPL_DIR)/script.pf -v
+
+runo:
+	$(TARGET) $(IMPL_DIR)/script.pf -v -O
+
+exe:
+	$(TARGET) $(IMPL_DIR)/script.pf.pfx -x
+
 
 clean:
 	rm -f $(PCH)

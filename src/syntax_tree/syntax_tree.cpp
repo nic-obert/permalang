@@ -7,14 +7,14 @@ using namespace symbol_table;
 
 
 SyntaxTree::SyntaxTree()
-: byteList(), statements()
+: byteList(), statements(), controlFlowNodes()
 {
 	
 }
 
 
 SyntaxTree::SyntaxTree(Statements&& statements)
-: statements(std::move(statements))
+: statements(std::move(statements)), byteList(), controlFlowNodes()
 {
 	
 }
@@ -22,6 +22,7 @@ SyntaxTree::SyntaxTree(Statements&& statements)
 
 
 SyntaxTree::SyntaxTree(Tokens::TokenList& tokens)
+: byteList(), controlFlowNodes()
 {
 	if (tokens.first == nullptr)
 	{

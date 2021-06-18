@@ -16,3 +16,13 @@ while (i > 1)
     i--;
 }
 bool b = false;
+
+while (true)
+{
+    break;
+}
+
+while (b == true)
+{
+    continue;
+}
