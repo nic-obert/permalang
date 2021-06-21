@@ -1,12 +1,12 @@
-# **Permalang**
-
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+# **Permalang**
 
 A **toolchain** for the Permalang language including:
 - **permalang compiler**
 - **permalang virtual machine**
 
-Inspired by the C programming language
+Inspired by the C programming language.
 
 <br>
 
@@ -125,4 +125,4 @@ double d = 0; // still work in progress
 
 ## **License**
 
-[**GNU GPLv3**](LICENSE)
+This software is licensed under the [**GNU GPLv3**](LICENSE) license.
